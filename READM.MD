@@ -1,1 +1,1 @@
-Hello, this is a Readme Japan Branch.
+Hello, this is a Readme Japan Branch Bra Bra Bra.
