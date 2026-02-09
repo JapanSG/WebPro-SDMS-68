@@ -1,1 +1,1 @@
-Hello, this is a Readme.
+Hello, this is a Readme Japan Branch.
