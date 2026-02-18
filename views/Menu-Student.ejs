@@ -1,0 +1,68 @@
+<header>
+    <nav class="nav_container">
+
+
+        <p class="nav_logo " id="nav-logo">
+            <img src="/images/icons/SchoolLogo.svg" alt="Logo School">
+            <span>SCHOOL NAME</span>
+        </p>
+
+
+        <div class="nav_menu" id="nav-menu">
+            <div class="menu_header">
+                <div class="close_button" id="close-button">
+                    <img src="/images/icons/Close.svg" alt="close icon">
+                </div>
+            </div>
+            <ul class="nav_list">
+                <li class="nav_item">
+                    <a href="/student/home">
+                        <img src="/images/icons/Home.svg" alt="home icon">
+                        <span>หน้าแรก</span>
+                    </a>
+                </li>
+                <li class="nav_item">
+                    <a href="/student/class-schedule">
+                        <img src="/images/icons/HorizontalSchedule.svg" alt="Schedule icon">
+                        <span>ตารางเรียน</span>
+                    </a>
+                </li>
+                <li class="nav_item">
+                    <a href="/student/exam-schedule">
+                        <img src="/images/icons/VerticalSchedule.svg" alt="ExamSchedule icon">
+                        <span>ตารางสอบ</span>
+                    </a>
+                </li>
+                <li class="nav_item">
+                    <a href="/student/transcript-grade">
+                        <img src="/images/icons/File.svg" alt="TranscriptGrade icon">
+                        <span>ผลการเรียน</span>
+                    </a>
+                </li>
+                <li class="nav_item">
+                    <a href="/student/attendance">
+                        <img src="/images/icons/Clock.svg" alt="Attendance icon">
+                        <span>การเข้าชั้นเรียน</span>
+                    </a>
+                </li>
+                <li class="nav_item">
+                    <a href="/">
+                        <img src="/images/icons/Logout.svg" alt="Logout icon">
+                        <span class="logout_text">ออกจากระบบ</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="toggle_button" id="toggle-button">
+            <img src="/images/icons/Menu.svg" alt="menu icon">
+        </div>
+        
+
+
+
+    </nav>
+</header>
+
+<%- include('showMenu') %>
