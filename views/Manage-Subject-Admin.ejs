@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>จัดการรายวิชา</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/Manage-Subject-Admin.css">
+</head>
+<body>
+    <header>
+        <div class="nav_container">
+            <div class="nav_logo"><div class="logo_circle"></div><span>ระบบจัดการรายวิชา - ผู้ดูแลระบบ</span></div>
+            <div class="toggle_button">&#9776;</div>
+        </div>
+    </header>
+
+    <main class="main_content">
+        <div class="top_action_bar">
+            <form class="search_box" action="/admin/subject" method="GET">
+                <span class="search_icon">🔍</span>
+                <input type="text" name="search" placeholder="ค้นหารายวิชา..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
+            </form>
+
+            <a href="/admin/subject/add" class="add_btn">+ เพิ่มรายวิชาใหม่</a>
+        </div>
+
+        <div class="table_container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสวิชา</th>
+                        <th>ชื่อวิชา</th>
+                        <th>หน่วยกิต</th>
+                        <th>จัดการ</th>
+                        <th></th> </tr>
+                </thead>
+                <tbody>
+                    <% if (subjects.length > 0) { %>
+                        <% subjects.forEach(subject => { %>
+                        <tr>
+                            <td><%= subject.subject_id %></td>
+                            <td><%= subject.subject_name %></td>
+                            <td><%= subject.credit %></td>
+                            <td>
+                                <a href="/admin/subject/edit/<%= subject.subject_id %>" class="edit_link">แก้ไข</a>
+                            </td>
+                            <td class="delete_cell">
+                                <a href="/admin/subject/delete/<%= subject.subject_id %>" class="delete_icon" onclick="return confirm('คุณต้องการลบรายวิชานี้ใช่หรือไม่?');">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="5" style="text-align: center; padding: 20px;">ไม่พบข้อมูลรายวิชา</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bottom_action_bar">
+            <button class="back_btn" onclick="window.history.back()">ย้อนกลับ</button>
+            
+            <div class="pagination">
+                <a href="?search=<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>&page=<%= currentPage > 1 ? currentPage - 1 : 1 %>" class="page_btn">&lt;</a>
+                
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <a href="?search=<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>&page=<%= i %>" class="page_btn <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+
+                <a href="?search=<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>&page=<%= currentPage < totalPages ? currentPage + 1 : totalPages %>" class="page_btn">&gt;</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
