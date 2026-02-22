@@ -19,10 +19,16 @@
   },
   "homepage": "https://github.com/JapanSG/WebPro-SDMS-68#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "connect-sqlite3": "^0.9.16",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "express-flash": "^0.0.2",
+    "express-session": "^1.19.0",
     "mysql2": "^3.16.3",
     "nodemon": "^3.1.11",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
     "sqlite3": "^5.1.7"
   }
 }
