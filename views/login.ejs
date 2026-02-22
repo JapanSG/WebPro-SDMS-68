@@ -22,16 +22,18 @@
                     <p>Verify your identity with Google or your school account.</p>
                 </div>
                 <div class="login-body">
-                    <form action="/student/home" method="get" class="login-form">
+                    <form action="/login" method="post" class="login-form">
                         <h2>Username</h2>
                         <input type="text" name="username" placeholder="Username" class="input-field">
                         <div class="input-label">
                             <h2>Password</h2>
-                            <p class="forgot-password">forgot your password?</p>
+                            <!-- <p class="forgot-password">forgot your password?</p> -->
                         </div>
                         <div class="password-wrapper">
-                            <input type="password" name="password" placeholder="Password" class="input-field">
-                            <span class="toggle-icon"><img src="/images/icons/PasswordToggle.png" alt="Password Toggle"></span>
+                            <input type="password" name="password" placeholder="Password" class="input-field" id="passwordField">
+                            <span class="toggle-icon" onclick="togglePassword()" id="toggleicon">
+                                <img src="/images/icons/PasswordToggle.png" alt="Password Toggle">
+                            </span>
                         </div>
                         
                         <button type="submit" class="login-btn">
@@ -39,12 +41,30 @@
                             Login
                         </button>
                     </form>
+                    <% if (messages.error){ %>
+                        <p><%= messages.error %></p>
+                    <% }%>
                 </div>
             </div>
 
         </div>
     </div>
+    <script>
+        function togglePassword(){
+            const passwordfield = document.getElementById('passwordField');
+            const toggleicon = document.getElementById('toggleicon');
 
+            if(passwordfield.type === 'password'){
+                passwordfield.type = 'text';
+                toggleicon.style.opacity = 1
+            }else{
+                passwordfield.type = 'password';
+                toggleicon.style.opacity = 0.5
+            }
+            
+
+        }
+    </script>
 
 
 
