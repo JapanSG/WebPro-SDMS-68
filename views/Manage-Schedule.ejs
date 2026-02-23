@@ -20,14 +20,14 @@
                 <label>ปีการศึกษา</label>
                 <select name="year" onchange="document.getElementById('filterForm').submit();">
                     <% years.forEach(y => { %>
-                        <option value = "<%= y %>" <%= y === slectedYear ? 'seleted' : '' %>><%= y %></option>
+                        <option value = "<%= y %>" <%= y === selectedYear ? 'selected' : '' %>><%= y %></option>
                     <% }) %>
                 </select> 
 
                 <label>เทอม</label>
-                <select name="semester" onchange="document.getElementById('filterForm').submit()">
+                <select name="semester" onchange="document.getElementById('filterForm').submit();">
                     <% semesters.forEach(s => { %>
-                        <option value = "<%= s %>" <%= s === selectedSemester ? 'seleted' : '' %>><%= s %></option>
+                        <option value = "<%= s %>" <%= s === selectedSemester ? 'selected' : '' %>><%= s %></option>
                     <% }) %>
                 </select>
             </form>
@@ -37,23 +37,21 @@
             <%
                 let currentGrade = '';
                 const MAX_PERIODS = 35;
-                
+
                 rooms.forEach(room =>{
-                    <!-- ถ้าเปลี่ยนระดับ ให้สร้างsectionใหม่ -->
                     if (room.grade_level !== currentGrade){
-                        if (currenyGrade !== ''){
+                        if (currentGrade !== ''){
             %>
                             </div></div> <%
                         }
                         currentGrade = room.grade_level;
             %>
-                        <div class ="grade-scetion" data-grade="ประถมศึกษาปีที่ <%= currentGrade %>">
+                        <div class ="grade-section" data-grade="ประถมศึกษาปีที่ <%= currentGrade %>">
                             <div class = "grade-title">ระดับชั้นประถมศึกษาปีที่ <%= currentGrade %></div>
                             <div class = "card-grid">
             <%
                     }
-                    
-                    <!-- คำนวณหลอด Progress Bar และ สถานะ -->
+
                     let scheduleCount = room.schedule_count || 0;
                     let percentage = (scheduleCount/ MAX_PERIODS) * 100;
                     let statusText = 'ว่าง';
@@ -69,30 +67,28 @@
                     }
             %>
                             <div class ="card room-card">
-                                <h3 class="room-name">ห้อง <$= room.room_name $></h3>
+                                <h3 class="room-name">ห้อง <%= room.room_name %></h3>
                                 <p class="teacher-name">
                                     คุณครู: <%= room.first_name ? room.first_name + ' ' + room.last_name : 'ยังไม่มีในระบบ' %>
                                 </p>
                                 <p>สถานะ: <strong><%= statusText %></strong></p>
 
                                 <div class="progress-container">
-                                    <div class="progress-bar <%= barColorClass %>" style="width: <%= percentage %>;"></div>
+                                    <div class="progress-bar <%= barColorClass %>" style="width: <%= percentage %>%;"></div>
                                 </div>
 
                                 <strong><%= scheduleCount %>/<%= MAX_PERIODS %> คาบ</strong>
                                 <br>
 
-                                <% if (room.room_id !== 0) <% { %>
+                                <% if (room.room_id !== 0) { %>
                                     <a href="/manage-schedule/inside/<%=room.room_id %>?year=<%= selectedYear %>&semester=<%= selectedSemester %>" class = "btn-edit">✎ แก้ไขตาราง</a>
-                                <% } %> 
-                                <% else { %>
-                                    <a href="/manage-schedule/inside/new?grade=<%= room.grade_level $>&room=<%= encodeURIComponent(room.room_name)%>&year=<%= selectedYear %>&semester= <%= selectedSemester %>" class="btn-edit">✎ สร้างและจัดตาราง</a>
+                                <% } else { %>
+                                    <a href="/manage-schedule/inside/new?grade=<%= room.grade_level %>&room=<%= encodeURIComponent(room.room_name)%>&year=<%= selectedYear %>&semester=<%= selectedSemester %>" class="btn-edit">✎ สร้างและจัดตาราง</a>
                                 <% } %>
                             </div>
             <%
                 });
-                <!-- ปิด tag สุดท้ายเมื่อลูปเสร็จ -->
-                if (rooms.lenght >0){
+                if (rooms.length > 0){
             %>
                 </div></div> <% } %>
         </div>
