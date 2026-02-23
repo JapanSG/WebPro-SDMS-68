@@ -19,7 +19,7 @@
             <div class="login">
                 <div class="login-header">
                     <h1>login</h1>
-                    <p>Verify your identity with Google or your school account.</p>
+                    <p>โปรดยืนยันตัวตนผ่านการระบุชื่อผู้ใช้งานของโรงเรียน</p>
                 </div>
                 <div class="login-body">
                     <form action="/login" method="post" class="login-form">
@@ -27,7 +27,7 @@
                         <input type="text" name="username" placeholder="Username" class="input-field">
                         <div class="input-label">
                             <h2>Password</h2>
-                            <!-- <p class="forgot-password">forgot your password?</p> -->
+                            <p class="forgot-password">forgot your password?</p>
                         </div>
                         <div class="password-wrapper">
                             <input type="password" name="password" placeholder="Password" class="input-field" id="passwordField">
@@ -42,7 +42,7 @@
                         </button>
                     </form>
                     <% if (messages.error){ %>
-                        <p><%= messages.error %></p>
+                        <p class="error-messages"><%= messages.error %></p>
                     <% }%>
                 </div>
             </div>

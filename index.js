@@ -10,7 +10,7 @@ const flash = require('express-flash')
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 
-let db = new sqlite3.Database('schoolTest.db', (err) => {
+let db = new sqlite3.Database('school.db', (err) => {
     if (err) {
         return console.error(err.message);
     }
@@ -42,7 +42,10 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 app.get('/', checkAuthenticated, (req, res) => {
+    
+
     const userRole = req.user.role;
 
     if (userRole === 'admin') {
@@ -61,6 +64,8 @@ app.get('/', checkAuthenticated, (req, res) => {
         return res.status(403).send('คุณไม่มีสิทธิ์เข้าถึงระบบ');
     }
 })
+
+
 app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login');
 });
@@ -87,34 +92,47 @@ app.get('/logout', (req, res, next) => {
         });
     });
 });
-app.get('/student/home', checkAuthenticated, checkRole('student'), (req, res) => {
-    res.render('Home-Student',{ user: req.user });
+
+app.use('/admin', checkAuthenticated, checkRole('admin'));
+app.use('/student', checkAuthenticated, checkRole('student'));
+app.use('/teacher', checkAuthenticated, checkRole('teacher'));
+app.use('/ao', checkAuthenticated, checkRole('ao'));
+
+app.get('/student/home',(req, res) => {
+    res.render('Home-Student', { user: req.user });
 });
-app.get('/teacher/home', checkAuthenticated, checkRole('teacher'), (req, res) => {
-    res.render('Home-Teacher',{ user: req.user });
+app.get('/teacher/home',(req, res) => {
+    res.render('Home-Teacher', { user: req.user });
 });
-app.get('/admin/home', checkAuthenticated, checkRole('admin'), (req, res) => {
-    res.render('Home-Admin',{ user: req.user });
+app.get('/admin/home',(req, res) => {
+    res.render('Home-Admin', { user: req.user });
 });
-app.get('/ao/submit', checkAuthenticated, checkRole('ao'), (req, res) => {
-    res.render('Submit-Attendance',{ user: req.user });
+app.get('/ao/submit',(req, res) => {
+    res.render('Submit-Attendance', { user: req.user });
 });
 
-const DEFAULT_PASSWORD = 'webPro2026';
+
 
 function createAccount(role) {
     return new Promise(async (resolve, reject) => {
         try {
+            const DEFAULT_PASSWORD = 'webPro2026';
             const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
 
-            db.get(`SELECT MAX(user_id) as maxId FROM Users`, (err, row) => {
+            db.get(`SELECT username FROM Users WHERE role = ? ORDER BY user_id DESC LIMIT 1`,[role], (err, row) => {
                 if (err) {
                     console.error('Database Error:', err.message);
                     return resolve({ success: false, error: err.message });
                 }
-                let nextId = (row.maxId || 0) + 1;
-
-
+                let nextId = 1;
+                
+                if (row && row.username) {
+                    const numberPart = row.username.match(/\d+/); 
+                    if (numberPart) {
+                        nextId = parseInt(numberPart[0], 10) + 1;
+                    }
+                }
+                
                 let prefix = 'u';
                 if (role === 'student') prefix = 's';
                 if (role === 'teacher') prefix = 't';
@@ -147,9 +165,9 @@ function createAccount(role) {
     });
 };
 
-app.post('/admin/add-users/:role', checkAuthenticated, checkRole('admin'), async (req, res) => {
+app.get('/admin/add-users/:role',async (req, res) => {
     const requestedRole = req.params.role;
-    console.log('requestedRole: ',requestedRole);
+    console.log('requestedRole: ', requestedRole);
 
     const allowedRoles = ['student', 'teacher', 'admin', 'ao'];
 
@@ -174,6 +192,37 @@ app.post('/admin/add-users/:role', checkAuthenticated, checkRole('admin'), async
         });
     }
 });
+async function initializeUsers() {
+    db.get(`SELECT * FROM Users WHERE role = 'admin'`, async (err, row) => {
+        if (err) return console.error('DB Error:', err.message);
+
+        if (!row) {
+            console.log('System: Admin account not found. Creating initial Admin account...');
+            const result = await createAccount('admin');
+
+            if (result.success) {
+                console.log(`System: Admin created successfully. Username: ${result.user.username}`);
+            } else {
+                console.log(`System: Failed to create Admin account. Error: ${result.error}`);
+            }
+        }
+    })
+    db.get(`SELECT * FROM Users WHERE role = 'ao'`, async (err, row) => {
+        if (err) return console.error('DB Error:', err.message);
+
+        if (!row) {
+            console.log('System: AO account not found. Creating initial AO account...');
+            const result = await createAccount('ao');
+
+            if (result.success) {
+                console.log(`System: AO created successfully. Username: ${result.user.username}`);
+            } else {
+                console.log(`System: Failed to create AO account. Error: ${result.error}`);
+            }
+        }
+    })
+
+}
 
 
 function checkRole(role) {
@@ -202,4 +251,6 @@ function checkNotAuthenticated(req, res, next) {
 
 app.listen(port, () => {
     console.log("Server started.");
+
+    initializeUsers();
 });
