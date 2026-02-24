@@ -201,6 +201,20 @@ app.put('/admin/exam-schedule/editEntry', (req, res) => {
     });
 });
 
+app.delete('/admin/exam-schedule/deleteEntry', (req, res) => {
+    console.log(req.body);
+    const sql = 'DELETE FROM Exam_Schedule_Entries WHERE entry_id = ?';
+    db.run(sql, [req.body.entry_id], err => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error deleting exam entry");
+        } else {
+            console.log("Exam Entry Deleted");
+            res.status(200).send("Exam entry deleted successfully");
+        }
+    });
+});
+
 app.listen(port, () => {
    console.log("Server started.");
 });
