@@ -42,8 +42,26 @@ app.get('/teacher/grade', (req, res) => {
     res.render('Submit-grades');
 });
 
+app.get('/admin/exam-schedule/get-subjects-entry', (req, res) => {
+    const subquery = `SELECT grade_level 
+    FROM exam_schedule 
+    JOIN exam_schedule_entries 
+    USING (exam_id)
+    WHERE entry_id = ?`;
+    const sql = `SELECT subject_id, subject_name FROM Subjects WHERE grade_level = (${subquery})`;
+    db.all(sql, [req.query.entry_id], (err, subjects) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error retrieving subjects");
+            return;
+        }
+        res.json(subjects);
+    });
+});
+
 app.get('/admin/exam-schedule/get-subjects', (req, res) => {
-    const sql = 'SELECT subject_id, subject_name FROM Subjects WHERE grade_level = ?';
+    const subquery = 'SELECT grade_level FROM exam_schedule WHERE exam_id = ?';
+    const sql = `SELECT subject_id, subject_name FROM Subjects WHERE grade_level = (${subquery})`;
     db.all(sql, [req.query.grade], (err, subjects) => {
         if (err) {
             console.error(err.message);
@@ -164,6 +182,21 @@ app.post('/admin/exam-schedule/addEntry', (req, res) => {
         } else {
             console.log("Exam Entry Added");
             res.status(200).send("Exam entry added successfully");
+        }
+    });
+});
+
+app.put('/admin/exam-schedule/editEntry', (req, res) => {
+    console.log(req.body);
+    const sql = 'UPDATE Exam_Schedule_Entries SET start = ?, end = ?, subject_id = ? WHERE entry_id = ?';
+    let params = [req.body.start, req.body.end, req.body.subject_id, req.body.entry_id];
+    db.run(sql, params, err => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error editing exam entry");
+        } else {
+            console.log("Exam Entry Edited");
+            res.status(200).send("Exam entry edited successfully");
         }
     });
 });

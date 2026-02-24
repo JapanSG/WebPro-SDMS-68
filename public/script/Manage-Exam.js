@@ -157,7 +157,7 @@ function createAddEntryHandlerPopup(event) {
         layer.appendChild(popup);
     }
 
-    fetch("/admin/exam-schedule/get-subjects?grade=" + document.getElementById("grade").value)
+    fetch("/admin/exam-schedule/get-subjects?grade=" + event.target.value)
     .then(response => response.json())
     .then(subjects => {
         createPopup(subjects);
@@ -204,6 +204,113 @@ function addEntryHandler(exam_id) {
     closeAddEntryPopup();
 }
 
+function createEditEntryHandlerPopup(event) {
+
+    function createPopup(subjects) {
+        const entry_id = event.target.value;
+
+        let popup = document.createElement("div");
+        popup.setAttribute("class", "editEntryPopup");
+
+        // Create start field
+        let startLabel = document.createElement("label");
+        startLabel.textContent = "Start Time: ";
+        popup.appendChild(startLabel);
+        let startInput = document.createElement("input");
+        startInput.setAttribute("type", "time");
+        startInput.setAttribute("class", "startTime");
+        popup.appendChild(startInput);
+
+        // Create end field
+        let endLabel = document.createElement("label");
+        endLabel.textContent = "End Time: ";
+        popup.appendChild(endLabel);
+        let endInput = document.createElement("input");
+        endInput.setAttribute("type", "time");
+        endInput.setAttribute("class", "endTime");
+        popup.appendChild(endInput);
+
+        // Create subject dropdown
+        let subjectLabel = document.createElement("label");
+        subjectLabel.textContent = "Subject: ";
+        popup.appendChild(subjectLabel);
+        let subjectSelect = document.createElement("select");
+        subjectSelect.setAttribute("class", "subjectSelect");
+        subjectSelect.setAttribute("name", "subject");
+        subjects.forEach(subject => {
+            let option = document.createElement("option");
+            option.value = subject.subject_id;
+            option.textContent = subject.subject_name;
+            subjectSelect.appendChild(option);
+        });
+        popup.appendChild(subjectSelect);
+
+        // Create Confirm button
+        let confirmBtn = document.createElement("button");
+        confirmBtn.textContent = "Confirm";
+        confirmBtn.setAttribute("class", "confirmBtn");
+        confirmBtn.addEventListener("click", () => editEntryHandler(entry_id));
+        popup.appendChild(confirmBtn);
+
+        // Create Cancel button
+        let cancelBtn = document.createElement("button");
+        cancelBtn.textContent = "Cancel";
+        cancelBtn.setAttribute("class", "cancelBtn");
+        cancelBtn.addEventListener("click", closeEditEntryPopup);
+        popup.appendChild(cancelBtn);
+
+        let layer = document.getElementById("popupLayer");
+        layer.style.display = "flex";
+        layer.appendChild(popup);
+    }
+
+    fetch("/admin/exam-schedule/get-subjects-entry?entry_id=" + event.target.value)
+    .then(response => response.json())
+    .then(subjects => {
+        createPopup(subjects);
+    })
+    .catch(error => {
+        console.error("Error fetching subjects:", error);
+    });
+}
+
+function closeEditEntryPopup() {
+    let popup = document.querySelector(".editEntryPopup");
+    if (popup) {
+        popup.remove();
+    }
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "none";
+}
+
+function editEntryHandler(entry_id) {
+    let startTime = document.querySelector(".startTime").value;
+    let endTime = document.querySelector(".endTime").value;
+    let subject = document.querySelector(".subjectSelect").value;
+    
+    if (startTime && endTime && subject) {
+        console.log("Entry being edited - Entry_id:", entry_id, "Start:", startTime, "End:", endTime, "Subject:", subject);
+        fetch("/admin/exam-schedule/editEntry", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                entry_id: entry_id,
+                start: startTime,
+                end: endTime,
+                subject_id: subject
+            })
+        })
+        .then(() => {
+            window.location.reload();
+        }).catch(error => {
+            console.error("Error editing exam entry:", error);
+        });
+    }
+    closeEditEntryPopup();
+}
+
 function init(){
     let addExam = document.getElementById("addExam");
     addExam.addEventListener("click", createAddExamPopup);
@@ -211,6 +318,10 @@ function init(){
     viewExam.addEventListener("click", viewExamHandler);
     document.querySelectorAll(".addEntry").forEach(button => {
         button.addEventListener("click", createAddEntryHandlerPopup);
+    });
+    let editEntryButtons = document.querySelectorAll(".editEntry");
+    editEntryButtons.forEach(button => {
+        button.addEventListener("click", createEditEntryHandlerPopup); 
     });
 }
 
