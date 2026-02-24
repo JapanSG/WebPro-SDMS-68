@@ -3,6 +3,10 @@ function createAddExamPopup() {
     let popup = document.createElement("div");
     popup.setAttribute("class", "addExamPopup");
 
+    let title = document.createElement("h2");
+    title.textContent = "Add Exam Schedule";
+    popup.appendChild(title);
+
     // Create date input field
     let input = document.createElement("input");
     input.setAttribute("type", "date");
@@ -21,20 +25,24 @@ function createAddExamPopup() {
     }
     popup.appendChild(gradeSelect);
 
-    // Create Add button
-    let addBtn = document.createElement("button");
-    addBtn.textContent = "Add";
-    addBtn.setAttribute("class", "addBtn");
-    addBtn.addEventListener("click", addExamHandler);
-    popup.appendChild(addBtn);
+    let btnsDiv = document.createElement("div");
+    btnsDiv.setAttribute("class", "popupBtns");
+    popup.appendChild(btnsDiv);
 
     // Create Cancel button
     let cancelBtn = document.createElement("button");
     cancelBtn.textContent = "Cancel";
     cancelBtn.setAttribute("class", "cancelBtn");
     cancelBtn.addEventListener("click", closeAddExamPopup);
-    popup.appendChild(cancelBtn);
+    btnsDiv.appendChild(cancelBtn);
 
+    // Create Add button
+    let addBtn = document.createElement("button");
+    addBtn.textContent = "Add";
+    addBtn.setAttribute("class", "confirmBtn");
+    addBtn.addEventListener("click", addExamHandler);
+    btnsDiv.appendChild(addBtn);
+    
     let layer = document.getElementById("popupLayer");
     layer.style.display = "flex";
     layer.appendChild(popup);
@@ -66,6 +74,10 @@ function addExamHandler() {
                 type: document.getElementById("type").value,
                 grade: document.getElementById("grade").value
             })
+        }).then(() => {
+            window.location.reload();
+        }).catch(error => {
+            console.error("Error adding exam:", error);
         });
     }
     closeAddExamPopup();
@@ -142,19 +154,23 @@ function createAddEntryHandlerPopup(event) {
         });
         popup.appendChild(subjectSelect);
 
-        // Create Confirm button
-        let confirmBtn = document.createElement("button");
-        confirmBtn.textContent = "Confirm";
-        confirmBtn.setAttribute("class", "confirmBtn");
-        confirmBtn.addEventListener("click", () => addEntryHandler(exam_id));
-        popup.appendChild(confirmBtn);
-
+        let btnsDiv = document.createElement("div");
+        btnsDiv.setAttribute("class", "popupBtns");
+        popup.appendChild(btnsDiv);
+        
         // Create Cancel button
         let cancelBtn = document.createElement("button");
         cancelBtn.textContent = "Cancel";
         cancelBtn.setAttribute("class", "cancelBtn");
         cancelBtn.addEventListener("click", closeAddEntryPopup);
-        popup.appendChild(cancelBtn);
+        btnsDiv.appendChild(cancelBtn);
+
+        // Create Confirm button
+        let confirmBtn = document.createElement("button");
+        confirmBtn.textContent = "Add";
+        confirmBtn.setAttribute("class", "confirmBtn");
+        confirmBtn.addEventListener("click", () => addEntryHandler(exam_id));
+        btnsDiv.appendChild(confirmBtn);
 
         let layer = document.getElementById("popupLayer");
         layer.style.display = "flex";
@@ -253,19 +269,23 @@ function createEditEntryHandlerPopup(event) {
         });
         popup.appendChild(subjectSelect);
 
-        // Create Confirm button
-        let confirmBtn = document.createElement("button");
-        confirmBtn.textContent = "Confirm";
-        confirmBtn.setAttribute("class", "confirmBtn");
-        confirmBtn.addEventListener("click", () => editEntryHandler(entry_id));
-        popup.appendChild(confirmBtn);
-
+        let btnsDiv = document.createElement("div");
+        btnsDiv.setAttribute("class", "popupBtns");
+        popup.appendChild(btnsDiv);
+        
         // Create Cancel button
         let cancelBtn = document.createElement("button");
         cancelBtn.textContent = "Cancel";
         cancelBtn.setAttribute("class", "cancelBtn");
         cancelBtn.addEventListener("click", closeEditEntryPopup);
-        popup.appendChild(cancelBtn);
+        btnsDiv.appendChild(cancelBtn);
+
+        // Create Confirm button
+        let confirmBtn = document.createElement("button");
+        confirmBtn.textContent = "Edit";
+        confirmBtn.setAttribute("class", "confirmBtn");
+        confirmBtn.addEventListener("click", () => editEntryHandler(entry_id));
+        btnsDiv.appendChild(confirmBtn);
 
         let layer = document.getElementById("popupLayer");
         layer.style.display = "flex";
@@ -319,7 +339,7 @@ function editEntryHandler(entry_id) {
     closeEditEntryPopup();
 }
 
-function createDeleteWarningPopup(event) {
+function createDeleteEntryWarningPopup(event) {
     const entry_id = event.target.value;
 
     let popup = document.createElement("div");
@@ -329,24 +349,28 @@ function createDeleteWarningPopup(event) {
     message.textContent = "Are you sure you want to delete this entry?";
     popup.appendChild(message);
 
+    let btnsDiv = document.createElement("div");
+    btnsDiv.setAttribute("class", "popupBtns");
+    popup.appendChild(btnsDiv);
+
     let cancelBtn = document.createElement("button");
     cancelBtn.textContent = "Cancel";
     cancelBtn.setAttribute("class", "cancelBtn");
-    cancelBtn.addEventListener("click", closeDeleteWarningPopup);
-    popup.appendChild(cancelBtn);
+    cancelBtn.addEventListener("click", closeDeleteEntryWarningPopup);
+    btnsDiv.appendChild(cancelBtn);
 
     let confirmBtn = document.createElement("button");
     confirmBtn.textContent = "DELETE";
-    confirmBtn.setAttribute("class", "confirmBtn");
+    confirmBtn.setAttribute("class", "deleteBtn");
     confirmBtn.addEventListener("click", () => deleteEntryHandler(entry_id));
-    popup.appendChild(confirmBtn);
+    btnsDiv.appendChild(confirmBtn);
 
     let layer = document.getElementById("popupLayer");
     layer.style.display = "flex";
     layer.appendChild(popup);
 }
 
-function closeDeleteWarningPopup() {
+function closeDeleteEntryWarningPopup() {
     let popup = document.querySelector(".deleteWarningPopup");
     if (popup) {
         popup.remove();
@@ -373,11 +397,124 @@ function deleteEntryHandler(entry_id) {
     });
 }
 
+function createDeleteExamWarningPopup(event) {
+    const exam_id = event.target.value;
+
+    let popup = document.createElement("div");
+    popup.setAttribute("class", "deleteWarningPopup");
+
+    let message = document.createElement("p");
+    message.textContent = "Are you sure you want to delete this exam schedule?";
+    popup.appendChild(message);
+
+    let btnsDiv = document.createElement("div");
+    btnsDiv.setAttribute("class", "popupBtns");
+    popup.appendChild(btnsDiv);
+
+    let cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.setAttribute("class", "cancelBtn");
+    cancelBtn.addEventListener("click", closeDeleteExamWarningPopup);
+    btnsDiv.appendChild(cancelBtn);
+
+    let confirmBtn = document.createElement("button");
+    confirmBtn.textContent = "DELETE";
+    confirmBtn.setAttribute("class", "deleteBtn");
+    confirmBtn.addEventListener("click", () => deleteExamHandler(exam_id));
+    btnsDiv.appendChild(confirmBtn);
+
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "flex";
+    layer.appendChild(popup);
+}
+
+function closeDeleteExamWarningPopup() {
+    let popup = document.querySelector(".deleteWarningPopup");
+    if (popup) {
+        popup.remove();
+    }
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "none";
+}
+
+function deleteExamHandler(exam_id) {
+    fetch("/admin/exam-schedule/deleteExam", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            exam_id: exam_id
+        })
+    })
+    .then(() => {
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error("Error deleting exam schedule:", error);
+    });
+}
+
+function createDeleteAllWarningPopup() {
+    let popup = document.createElement("div");
+    popup.setAttribute("class", "deleteWarningPopup");
+
+    let message = document.createElement("p");
+    message.textContent = "Are you sure you want to delete all exam schedules?";
+    popup.appendChild(message);
+
+    let btnsDiv = document.createElement("div");
+    btnsDiv.setAttribute("class", "popupBtns");
+    popup.appendChild(btnsDiv);
+
+    let cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.setAttribute("class", "cancelBtn");
+    cancelBtn.addEventListener("click", closeDeleteAllWarningPopup);
+    btnsDiv.appendChild(cancelBtn);
+
+    let confirmBtn = document.createElement("button");
+    confirmBtn.textContent = "DELETE";
+    confirmBtn.setAttribute("class", "deleteBtn");
+    confirmBtn.addEventListener("click", deleteAllHandler);
+    btnsDiv.appendChild(confirmBtn);
+
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "flex";
+    layer.appendChild(popup);
+}
+
+function closeDeleteAllWarningPopup() {
+    let popup = document.querySelector(".deleteWarningPopup");
+    if (popup) {
+        popup.remove();
+    }
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "none";
+}
+
+function deleteAllHandler() {
+  fetch("/admin/exam-schedule/deleteAll", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        }
+  })
+  .then(() => {
+      window.location.reload();
+  })
+  .catch(error => {
+      console.error("Error deleting all exam schedules:", error);
+  });
+}
+
 function init(){
     let addExam = document.getElementById("addExam");
     addExam.addEventListener("click", createAddExamPopup);
     let viewExam = document.getElementById("viewExam");
     viewExam.addEventListener("click", viewExamHandler);
+    let deleteAll = document.getElementById("deleteAll");
+    deleteAll.addEventListener("click", createDeleteAllWarningPopup);
     document.querySelectorAll(".addEntry").forEach(button => {
         button.addEventListener("click", createAddEntryHandlerPopup);
     });
@@ -387,7 +524,11 @@ function init(){
     });
     let deleteEntryButtons = document.querySelectorAll(".deleteEntry");
     deleteEntryButtons.forEach(button => {
-        button.addEventListener("click", createDeleteWarningPopup);
+        button.addEventListener("click", createDeleteEntryWarningPopup);
+    });
+    let deleteExamButtons = document.querySelectorAll(".deleteExam");
+    deleteExamButtons.forEach(button => {
+        button.addEventListener("click", createDeleteExamWarningPopup);
     });
 }
 

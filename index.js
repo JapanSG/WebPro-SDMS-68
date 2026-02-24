@@ -73,7 +73,7 @@ app.get('/admin/exam-schedule/get-subjects', (req, res) => {
 });
 
 app.get('/admin/exam-schedule', (req, res) => {
-    const sql1 = 'SELECT * FROM Exam_Schedule DESC WHERE year = ? AND semester = ? AND grade_level = ? AND type = ? ORDER BY year;';
+    const sql1 = 'SELECT * FROM Exam_Schedule DESC WHERE year = ? AND semester = ? AND grade_level = ? AND type = ? ORDER BY date;';
     const sql2 = 'SELECT year FROM Year ORDER BY year DESC';
     const sql3 = `
         SELECT entry_id, start, end, subject_id, exam_id
@@ -211,6 +211,51 @@ app.delete('/admin/exam-schedule/deleteEntry', (req, res) => {
         } else {
             console.log("Exam Entry Deleted");
             res.status(200).send("Exam entry deleted successfully");
+        }
+    });
+});
+
+app.delete('/admin/exam-schedule/deleteExam', (req, res) => {
+    console.log(req.body);
+    const sql1 = 'DELETE FROM Exam_Schedule_Entries WHERE exam_id = ?';
+    const sql2 = 'DELETE FROM Exam_Schedule WHERE exam_id = ?';
+    db.run(sql1, [req.body.exam_id], err => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error deleting exam entries");
+        }
+        else {
+            db.run(sql2, [req.body.exam_id], err => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error deleting exam schedule");
+                } 
+                else {
+                    console.log("Exam Schedule Deleted");
+                    res.status(200).send("Exam schedule deleted successfully");
+                }
+            });
+        }
+    });
+});
+
+app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
+    const sql1 = 'DELETE FROM Exam_Schedule_Entries';
+    const sql2 = 'DELETE FROM Exam_Schedule';
+    db.run(sql1, err => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error deleting exam entries");
+        } else {
+            db.run(sql2, err => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error deleting exam schedules");
+                } else {
+                    console.log("All Exam Schedules Deleted");
+                    res.status(200).send("All exam schedules deleted successfully");
+                }
+            });
         }
     });
 });

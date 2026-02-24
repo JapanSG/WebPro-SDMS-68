@@ -12,31 +12,35 @@
     <div id="popupLayer"></div>
     <div id="normalLayer">
         <form id="topForm">
-            <label for="year">ปีการศึกษา</label>
-            <select id="year" name="year">
-                <% year.forEach( val => {%>
-                    <option value="<%= val.year %>"><%= val.year %></option>
-                <% }); %>
-            </select>
-            <label for="semester">ภาคเรียนที่</label>
-            <select id="semester" name="semester">
-                <option value="1">1</option>
-                <option value="2">2</option>
-            </select>
-            <label for="grade">ระดับชั้น</label>
-            <select id="grade" name="grade">
-                <% for (let i = 0; i < year.length; i++){ %>
-                    <option value="<%= year[0].year - year[i].year + 1 %>"><%= year[0].year - year[i].year + 1 %></option>
-                <% }; %>
-            </select>
-            <label for="type">ประเภท</label>
-            <select id="type" name="type">
-                <option value="กลางภาค">กลางภาค</option>
-                <option value="ปลายภาค">ปลายภาค</option>
-            </select>
-            <button type="button" id="addExam">เพิ่มวันสอบ</button>
-            <button type="button" id="viewExam">ดูตารางสอบ</button>
-            <button type="button" id="deleteAll">ล้างข้อมูล</button>
+            <div class="top-box">
+                <label for="year">ปีการศึกษา</label>
+                <select id="year" name="year">
+                    <% year.forEach( val => {%>
+                        <option value="<%= val.year %>"><%= val.year %></option>
+                    <% }); %>
+                </select>
+                <label for="semester">ภาคเรียนที่</label>
+                <select id="semester" name="semester">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
+                <label for="grade">ระดับชั้น</label>
+                <select id="grade" name="grade">
+                    <% for (let i = 0; i < year.length; i++){ %>
+                        <option value="<%= year[0].year - year[i].year + 1 %>"><%= year[0].year - year[i].year + 1 %></option>
+                    <% }; %>
+                </select>
+                <label for="type">ประเภท</label>
+                <select id="type" name="type">
+                    <option value="กลางภาค">กลางภาค</option>
+                    <option value="ปลายภาค">ปลายภาค</option>
+                </select>
+            </div>
+            <div class="top-box">
+                <button type="button" id="addExam"><img src="/images/icons/add_2.svg">เพิ่มวันสอบ</button>
+                <button type="button" id="viewExam">ดูตารางสอบ</button>
+                <button type="button" id="deleteAll">ล้างข้อมูล</button>
+            </div>
         </form>
         <% exam_ids.forEach( (exam_id, index) => { %>
             <%- include('Manage-Exam-Form', {exam_id: exam_id, entries: entries[exam_id], date: dates[index] }) %>
