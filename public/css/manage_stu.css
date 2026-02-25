@@ -95,6 +95,9 @@ td {
     width: 51.3px;
     height: 51.3px;
     cursor: pointer;
+    background-color: #093B7E;
+    color: white;
+    border-radius: 10px;
 }
 a {
     text-decoration: none;
