@@ -172,6 +172,43 @@ app.post('/add', (req, res) => {
         
         res.redirect('/');
     });
+})
+app.get('/students', function (req, res) {
+        res.render('Add-Student');
+});
+app.post('/add', (req, res) => {
+    const data = req.body;
+
+    const sql = `
+        INSERT INTO Students 
+        (first_name, last_name, dob, citizen_id, sex, nationality, phone, student_id, email, room_id, year, semester, enroll_year) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `;
+
+    const values = [
+        data.firstname, 
+        data.lastname,
+        data.dob,
+        data.citizen_id,
+        data.gender, 
+        data.nationality,
+        data.phone, 
+        data.student_id,
+        data.email,
+        data.room_id,
+        data.year,
+        data.semester,
+        data.enroll_year
+    ];
+
+    db.run(sql, values, (err, result) => {
+        if (err) {
+            console.error('Insert error:', err);
+            return res.send("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        }
+        
+        res.redirect('/');
+    });
 });
 
 app.get('/delete/:id', function (req, res) {
