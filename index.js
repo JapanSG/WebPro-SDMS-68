@@ -73,72 +73,49 @@ app.get('/admin/exam-schedule/get-subjects', (req, res) => {
 });
 
 app.get('/admin/exam-schedule', (req, res) => {
-    const sql1 = 'SELECT * FROM Exam_Schedule DESC WHERE year = ? AND semester = ? AND grade_level = ? AND type = ? ORDER BY date;';
-    const sql2 = 'SELECT year FROM Year ORDER BY year DESC';
-    const sql3 = `
-        SELECT entry_id, start, end, subject_id, exam_id
-        FROM Exam_Schedule_Entries 
-        RIGHT JOIN EXAM_Schedule
-        USING (exam_id)
-        WHERE year = ? AND semester = ? AND grade_level = ? AND type = ?
-        ORDER BY date;`;
-    let list;
-    let sql;
-    if (req.query.year && req.query.semester && req.query.grade && req.query.type) {
-        list = [req.query.year, req.query.semester, req.query.grade, req.query.type];
-        sql = sql1;
-    }
-    else{
-        list = [];
-        sql = 'SELECT * FROM Exam_Schedule ORDER BY year DESC;'
-    }
-
-    db.all(sql, list, (err, result1) => {
+    const sql1 = 'SELECT year FROM Year ORDER BY year DESC';
+    const sql2 = 'SELECT * FROM Exam_Schedule WHERE year = ? AND semester = ? AND grade_level = ? AND type = ? ORDER BY date;';
+    db.all(sql1, (err, year) => {
         if (err) {
             handleError(err, res);
             return;
         }
-        db.all(sql2, (err, year) => {
+        let list;
+        if (req.query.year && req.query.semester && req.query.grade && req.query.type) {
+            list = [req.query.year, req.query.semester, req.query.grade, req.query.type];
+        }
+        else{
+            list = [year[0].year, 1, 1, "กลางภาค"];
+        }
+        db.all(sql2, list, (err, result1) => {
             if (err) {
                 handleError(err, res);
                 return;
             }
-            // if (result1.length === 0) {
-            //     res.render('Manage-Exam', {year: year, exam_ids: exam_ids, entries: entries, dates: dates});
-            //     return;
-            // }
-            let list;
-            if (req.query.year && req.query.semester && req.query.grade && req.query.type) {
-                console.log("Query parameters provided:", req.query);
-                list = [req.query.year, req.query.semester, req.query.grade, req.query.type];
-            }
-            else{
-                list = [result1[0].year, result1[0].semester, result1[0].grade_level, result1[0].type];
-            }
-            db.all(sql3, list, (err, result2) => {
+            let exam_ids = [];
+            let dates = [];
+            let entries = {};
+            result1.forEach(exam => {
+                exam_ids.push(exam.exam_id);
+                entries[`${exam.exam_id}`] = [];
+                dates.push(exam.date);
+            });
+            const sql3 = `
+            SELECT entry_id, start, end, subject_id, exam_id
+            FROM Exam_Schedule_Entries 
+            JOIN EXAM_Schedule
+            USING (exam_id)
+            WHERE exam_id IN (${exam_ids.map(() => '?').join(',')})
+            ORDER BY date;`;
+            db.all(sql3, exam_ids, (err, result2) => {
                 if (err) {
                     handleError(err, res);
                     return;
                 }
-                let exam_ids = [];
-                let dates = [];
-                let entries = {};
                 result2.forEach(entry => {
-                    if (!exam_ids.includes(entry.exam_id)) {
-                        exam_ids.push(entry.exam_id);
-                        entries[entry.exam_id] = [];
-                    }
-                    if (entry.entry_id !== null) {
-                        entries[entry.exam_id].push(entry);
-                    }
+                    entries[`${entry.exam_id}`].push(entry);
                 });
-                result1.forEach(exam => {
-                    if (!dates.includes(exam.date)) {
-                        dates.push(exam.date);
-                    }
-                });
-                console.log("Exam IDs:", exam_ids);
-                res.render('Manage-Exam', {year: year, exam_ids: exam_ids, entries: entries, dates: dates});
+                res.render('Manage-Exam', {year: year, exam_ids: exam_ids, entries: entries, dates: dates, query: req.query});
             });
         });
     });

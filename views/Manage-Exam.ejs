@@ -21,19 +21,20 @@
                 </select>
                 <label for="semester">ภาคเรียนที่</label>
                 <select id="semester" name="semester">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
+                    <option value="1" <% if (query.semester == 1) { %>selected<% } %>>1</option>
+                    <option value="2" <% if (query.semester == 2) { %>selected<% } %>>2</option>
                 </select>
                 <label for="grade">ระดับชั้น</label>
                 <select id="grade" name="grade">
                     <% for (let i = 0; i < year.length; i++){ %>
-                        <option value="<%= year[0].year - year[i].year + 1 %>"><%= year[0].year - year[i].year + 1 %></option>
+                        <% let grade = year[0].year - year[i].year + 1; %>
+                        <option value="<%= grade %>" <% if (query.grade == grade) { %>selected<% } %>> <%= grade %> </option>
                     <% }; %>
                 </select>
                 <label for="type">ประเภท</label>
                 <select id="type" name="type">
-                    <option value="กลางภาค">กลางภาค</option>
-                    <option value="ปลายภาค">ปลายภาค</option>
+                    <option value="กลางภาค" <% if (query.type == "กลางภาค") { %>selected<% } %>>กลางภาค</option>
+                    <option value="ปลายภาค" <% if (query.type == "ปลายภาค") { %>selected<% } %>>ปลายภาค</option>
                 </select>
             </div>
             <div class="top-box">

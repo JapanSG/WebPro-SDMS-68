@@ -227,7 +227,8 @@ function addEntryHandler(exam_id) {
 function createEditEntryHandlerPopup(event) {
 
     function createPopup(subjects) {
-        const entry_id = event.target.value;
+        const entry_id = event.target.parentNode.value;
+        console.log("Editing entry with ID:", entry_id);
 
         let popup = document.createElement("div");
         popup.setAttribute("class", "editEntryPopup");
@@ -291,8 +292,7 @@ function createEditEntryHandlerPopup(event) {
         layer.style.display = "flex";
         layer.appendChild(popup);
     }
-
-    fetch("/admin/exam-schedule/get-subjects-entry?entry_id=" + event.target.value)
+    fetch("/admin/exam-schedule/get-subjects-entry?entry_id=" + event.target.parentNode.value)
     .then(response => response.json())
     .then(subjects => {
         createPopup(subjects);
