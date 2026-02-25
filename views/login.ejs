@@ -29,6 +29,7 @@
                             <h2>Password</h2>
                             <p class="forgot-password">forgot your password?</p>
                         </div>
+                        </div>
                         <div class="password-wrapper">
                             <input type="password" name="password" placeholder="Password" class="input-field" id="passwordField">
                             <span class="toggle-icon" onclick="togglePassword()" id="toggleicon">
@@ -42,7 +43,7 @@
                         </button>
                     </form>
                     <% if (messages.error){ %>
-                        <p class="error-messages"><%= messages.error %></p>
+                         <p class="error-messages"><%= messages.error %></p>
                     <% }%>
                 </div>
             </div>
