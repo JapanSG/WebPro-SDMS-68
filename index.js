@@ -17,6 +17,8 @@ let db = new sqlite3.Database('school.db', (err) => {
 
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 //หน้า Student Record
 app.get('/', function (req, res) {
     const page = parseInt(req.query.page) || 1;
@@ -39,7 +41,7 @@ app.get('/', function (req, res) {
             if (err) {
                 console.log(err.message);
             }
-            res.render('Manage_Student_Records', { totalStudents: totals, students: rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
+            res.render('Manage_Student_Records', { totalStudents: totals, students : rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
         });
     });
 });
@@ -54,14 +56,52 @@ app.get('/edit/:id', function (req, res) {
         res.render('studentdetails', { data: rows });
     });
 })
-pp.get('/delete/:id', function (req, res) {
-    const query = `DELETE * FROM Students WHERE id = ${req.params.id}`;
-    db.all(query, (err, rows) => {
+app.get('/students', function (req, res) {
+        res.render('Add-Student');
+});
+app.post('/add', (req, res) => {
+    const data = req.body;
+
+    const sql = `
+        INSERT INTO Students 
+        (first_name, last_name, dob, citizen_id, sex, nationality, phone, student_id, email, room_id, year, semester, enroll_year) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `;
+
+    const values = [
+        data.firstname, 
+        data.lastname,
+        data.dob,
+        data.citizen_id,
+        data.gender, 
+        data.nationality,
+        data.phone, 
+        data.student_id,
+        data.email,
+        data.room_id,
+        data.year,
+        data.semester,
+        data.enroll_year
+    ];
+
+    db.run(sql, values, (err, result) => {
+        if (err) {
+            console.error('Insert error:', err);
+            return res.send("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        }
+        
+        res.redirect('/');
+    });
+});
+
+app.get('/delete/:id', function (req, res) {
+    const query = `DELETE FROM Students WHERE student_id = ${req.params.id}`;
+    db.run(query, (err, rows) => {
         if (err) {
             console.log(err.message);
         }
         console.log(rows);
-        res.redirect('Manage_Student_Records');
+        res.redirect('/');
     });
 })
 

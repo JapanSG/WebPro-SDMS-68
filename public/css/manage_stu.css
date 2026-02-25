@@ -38,22 +38,23 @@ body {
 
 #add_btn {
     display: flex;
-    align-items: center;
+    justify-content: center;
     background-color: #093B7E;
     color: white;
-    padding: 5px 15px;
     border-radius: 4px;
-    cursor: pointer;
     width: 200px;
     height: 60px;
-    justify-content: center;
 }
 
-#add_btn input {
+#add_btn a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: none;
     border: none;
     color: white;
     cursor: pointer;
+    gap: 8px;
 }
 #student_records {
     border-collapse: collapse;

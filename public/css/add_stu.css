@@ -1,0 +1,90 @@
+#add_container {
+    display: flex;
+    padding: 30px;
+    gap: 20px;
+    background-color: #f5f6f8;
+    margin-top: 100px;
+    justify-content: center;
+    align-items: center;
+}
+
+#page_header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 50px;
+    width: 500px;
+}
+
+#add_form {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+#profile_img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 2px solid #ccc;
+    margin-bottom: 10px;
+    text-align: center;
+}
+#profile_upload {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#profile_upload label:hover img {
+    opacity: 0.8;
+}
+
+#section_title {
+    text-align: center;
+    font-weight: bold;
+}
+
+#form_layout {
+    display: flex;
+    gap: 40px;
+}
+
+#left_col, #right_col {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+#add_form label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-top: 15px;
+}
+
+#add_form input, #add_form select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+#submit_area {
+    text-align: right;
+    margin-top: 30px;
+}
+
+#save_btn {
+    background-color: #093B7E;
+    color: white;
+    padding: 10px 40px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
