@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap');
+
+body {
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    padding-top: 100px;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+select, button, input {
+    font-family: "Noto Sans Thai", sans-serif;
+}
+
+label {
+    font-weight: bold;
+}
+
+table {
+    border-collapse: collapse;
+    justify-content: space-around;
+}
+
+th {
+    background-color: #1062D0;
+    color: white;
+
+}
+
+td {
+    text-align: center;
+}
+
+td, th {
+    border: 1px solid #ddd;
+    padding: 0.5em 1em;
+    white-space: nowrap;
+    width: 33%;
+}
+
+button {
+    width: fit-content;
+    padding: 0.5em 1em;
+    cursor: pointer;
+}
+
+select {
+    padding: 0.25em 0.7em;
+    cursor: pointer;
+}
+
+th:nth-last-child(1), td:nth-last-child(1) {
+    width: 1%;
+    white-space:nowrap;
+}
+
+.addExamPopup {
+    display: flex;
+}
+
+.exam-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.25);
+    width: 100%;
+}
+
+.date {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px solid #000;
+    background: #FFF;
+    padding: 0.2em 0.5em;
+    height: 100%;
+}
+
+#popupLayer {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+}
+
+#normalLayer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 85%;
+}
+
+#topForm {
+    display: flex;
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px 20px;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.25);
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.top-box {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+#addExam, #viewExam {
+    display: flex;
+    border-radius: 10px;
+    border: 1px solid #0D4FA8;
+    background-color: white;
+    font-weight: bold;
+    color: #0D4FA8;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.exam-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#deleteAll {
+    border-radius: 10px;
+    border: 1px solid #FF0000;
+    background-color: white;
+    font-weight: bold;
+    color: #FF0000;
+}
+
+.deleteExam {
+    border-radius: 10px;
+    border: none;
+    background-color: #FF0000;
+    font-weight: bold;
+    color: white;
+    width: 100%;
+    max-width: 5em;
+    padding: 0.52em 0.75em;
+}
+
+.addExamPopup, .editEntryPopup {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.addEntryPopup, .editEntryPopup, .deleteWarningPopup {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.addEntry {
+    border-radius: 10px;
+    border: none;
+    background-color: #1062D0;
+    font-weight: bold;
+    color: white;
+    width: fit-content;
+    padding:  1em;
+}
+
+.deleteEntry, .editEntry {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+.addExamPopup, .addEntryPopup, .editEntryPopup, .deleteWarningPopup {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: white;
+    padding: 1.5em;
+    border-radius: 5px;
+    width: 100%;
+    min-width: 400px;
+    max-width: fit-content;
+}
+
+.popupBtns {
+    display: flex;
+    gap: 20px;
+    justify-content: space-evenly;
+}
+
+.cancelBtn {
+    border-radius: 10px;
+    border: none;
+    background-color: #ddd;
+    padding: 0.5em 1em;
+    cursor: pointer;
+}
+
+.deleteBtn {
+    border-radius: 10px;
+    max-width: 6em;
+    border: none;
+    background-color: #FF0000;
+    color: white;
+    padding: 0.5em 1em;
+    cursor: pointer;
+}
+
+.confirmBtn {
+    border-radius: 10px;
+    max-width: 6em;
+    border: none;
+    background-color: #1062D0;
+    color: white;
+    padding: 0.5em 1em;
+    cursor: pointer;
+}

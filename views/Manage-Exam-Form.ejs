@@ -1,0 +1,35 @@
+<% let dateValues = date.split('-'); %>
+<% let monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]; %>
+<div class="exam-form">
+    <div class="exam-header">
+        <div class="date">
+            <p>วันที่ <%= dateValues[2] %> <%= monthNames[dateValues[1] - 1] %> <%= dateValues[0] %></p>
+        </div>
+        <button type="button" class="deleteExam" value="<%= exam_id %>">ลบ</button>
+    </div>
+    <table>
+        <tr>
+            <th>เวลาเริ่ม</th>
+            <th>วิชา</th>
+            <th>นาที</th>
+            <th></th>
+        </tr>
+            <% entries.forEach( entry => { %>
+                <% console.log(entry.entry_id); %>
+                <% let start = entry.start.split(':'); let end = entry.end.split(':');%>
+                <% let minutes = (parseInt(end[0]) * 60 + parseInt(end[1])) - (parseInt(start[0]) * 60 + parseInt(start[1])); %>
+                <tr>
+                    <td><%= entry.start %> - <%= entry.end %></td>
+                    <td><%= entry.subject_id %></td>
+                    <td><%= minutes %></td>
+                    <td>
+                        <div>
+                            <button type="button" class="deleteEntry" value="<%= entry.entry_id %>"><img src="/images/icons/Delete.svg"></button>
+                            <button type="button" class="editEntry" value="<%= entry.entry_id %>"><img src="/images/icons/ModeEdit.svg"></button>
+                        </div>
+                    </td>
+                </tr>
+            <% }); %>
+    </table>
+    <button type="button" class="addEntry" value="<%= exam_id %>">เพิ่มรายการสอบ</button>
+</div>
