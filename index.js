@@ -4,7 +4,11 @@ const port = 3000;
 const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
-
+const bcrypt = require('bcrypt')
+const passport = require('passport')
+const flash = require('express-flash')
+const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 
 let db = new sqlite3.Database('school.db', (err) => {    
     if (err) {
@@ -15,18 +19,188 @@ let db = new sqlite3.Database('school.db', (err) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const initializePassport = require('./passport-config');
+initializePassport(passport, db);
+
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
+// app.use(express.urlencoded({ extended: false })); @WarakonTangcharoenarri Hey why is this false shouldn't it be turned on
 
-app.get('/',function(req,res){
+app.use(session({
+    store: new SQLiteStore({
+        db: 'sessions.db',
+        dir: '.',
+        concurrentDB: true
+    }),
+    secret: 'webPro2026_super_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 5
+    }
+}));
+
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('/', checkAuthenticated, (req, res) => {
+    const userRole = req.user.role;
+
+    if (userRole === 'admin') {
+        return res.redirect('/admin/home')
+    }
+    else if (userRole === 'ao') {
+        return res.redirect('/ao/submit')
+    }
+    else if (userRole === 'teacher') {
+        return res.redirect('/teacher/home')
+    }
+    else if (userRole === 'student') {
+        return res.redirect('/student/home')
+    }
+    else {
+        return res.status(403).send('คุณไม่มีสิทธิ์เข้าถึงระบบ');
+    }
+})
+app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login');
 });
-app.get('/student/home',function(req,res){
-    res.render('Home-Student');
+app.post('/login', checkNotAuthenticated, (req, res, next) => {
+
+    console.log("User:", req.body);
+
+    next();
+}, passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true
+}));
+app.get('/logout', (req, res, next) => {
+    req.logout(function (err) {
+        if (err) {
+            return next(err);
+        }
+        req.session.destroy(function (err) {
+
+            res.clearCookie('connect.sid');
+
+            res.redirect('/login');
+        });
+    });
+});
+app.get('/student/home', checkAuthenticated, checkRole('student'), (req, res) => {
+    res.render('Home-Student',{ user: req.user });
 });
 app.get('/teacher/home',function(req,res){
     res.render('Home-Teacher');
 });
+app.get('/admin/home', checkAuthenticated, checkRole('admin'), (req, res) => {
+    res.render('Home-Admin',{ user: req.user });
+});
+app.get('/ao/submit', checkAuthenticated, checkRole('ao'), (req, res) => {
+    res.render('Submit-Attendance',{ user: req.user });
+});
+
+const DEFAULT_PASSWORD = 'webPro2026';
+
+function createAccount(role) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+
+            db.get(`SELECT MAX(user_id) as maxId FROM Users`, (err, row) => {
+                if (err) {
+                    console.error('Database Error:', err.message);
+                    return resolve({ success: false, error: err.message });
+                }
+                let nextId = (row.maxId || 0) + 1;
+
+
+                let prefix = 'u';
+                if (role === 'student') prefix = 's';
+                if (role === 'teacher') prefix = 't';
+                if (role === 'admin') prefix = 'a';
+                if (role === 'ao') prefix = 'ao';
+
+                const generatedUsername = `${prefix}${String(nextId).padStart(4, '0')}`;
+
+                const sql = `INSERT INTO Users (username, password, role) VALUES (?,?,?)`;
+
+                db.run(sql, [generatedUsername, hashedPassword, role], function (err) {
+                    if (err) {
+                        console.error('INSERT Error:', err.message);
+                        return resolve({ success: false, error: err.message });
+                    }
+                    resolve({
+                        success: true,
+                        user: {
+                            id: this.lastID,
+                            username: generatedUsername,
+                            role: role
+                        }
+                    });
+                });
+            })
+        } catch (error) {
+            console.error('Hash Error:', error);
+            resolve({ success: false, error: error.message });
+        }
+    });
+};
+
+app.post('/admin/add-users/:role', checkAuthenticated, checkRole('admin'), async (req, res) => {
+    const requestedRole = req.params.role;
+    console.log('requestedRole: ',requestedRole);
+
+    const allowedRoles = ['student', 'teacher', 'admin', 'ao'];
+
+    if (!allowedRoles.includes(requestedRole)) {
+        return res.status(400).json({
+            message: 'ไม่สามารถสร้างบัญชีได้',
+            error: 'รูปแบบ Role ไม่ถูกต้อง (รับเฉพาะ student, teacher, admin, ao เท่านั้น)'
+        });
+    }
+
+    const result = await createAccount(requestedRole);
+
+    if (result.success) {
+        res.status(201).json({
+            message: 'สร้างบัญชีเรียบร้อย',
+            details: result.user
+        })
+    } else {
+        res.status(500).json({
+            message: 'ไม่สามารถสร้างบัญชีได้',
+            error: result.error
+        });
+    }
+});
+
+
+function checkRole(role) {
+    return function (req, res, next) {
+        if (req.user && req.user.role === role) {
+            return next();
+        }
+        console.log(`user: ${req.user.username} พยายามเข้าถึงหน้าที่ไม่มีสิทธิ์`);
+        res.redirect('/');
+    }
+}
+function checkAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next()
+    }
+
+    res.redirect('/login')
+}
+
+function checkNotAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return res.redirect('/')
+    }
+    next()
+}
 app.get('/admin/home',function(req,res){
     res.render('Home-Admin');
 });
@@ -238,5 +412,5 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
 });
 
 app.listen(port, () => {
-   console.log("Server started.");
+    console.log("Server started.");
 });
