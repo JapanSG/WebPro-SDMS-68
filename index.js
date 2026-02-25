@@ -37,6 +37,14 @@ app.get('/', function (req, res) {
     const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
     const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
     db.get(count, (err, count_all) => {
+    let whereSQL = '';
+    const search = req.query.search || '';
+    if (search !== '') { // ดูว่ามีคำค้นหา
+        whereSQL = `WHERE student_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
+    }
+    const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
+    const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
+    db.get(count, (err, count_all) => {
         if (err) {
             console.log(err.message);
         }
