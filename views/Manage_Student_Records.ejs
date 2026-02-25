@@ -15,11 +15,13 @@
             <div id="search">
                 <img src="/images/icons/Search.svg" alt="glass" id="search-button">
                 <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อนักเรียน"
-                    value="<%= searchKeyword %>">
+                    value="<%= locals.searchKeyword || '' %>">
             </div>
             <div id="add_btn">
-                <img src="/images/icons/Add_circle.svg" alt="รูปบวก">
-                <input type="button" value="เพิ่มข้อมูลนักเรียน">
+                <a href="/students">
+                    <img src="/images/icons/Add_circle.svg" alt="รูปบวก">
+                    <span>เพิ่มข้อมูลนักเรียน</span>
+                </a>
             </div>
         </div>
         <table id="student_records">
@@ -57,10 +59,10 @@
                         <%=student.enroll_date%>
                     </td>
                     <td id="S<%=student.rowid%>">
-                        <a href="/edit/<%=student.student_id%>">
+                        <a href="/delete/<%=student.student_id%>">
                             <img src="/images/icons/Delete.svg" alt="ปุ่มลบ">
                         </a>
-                        <a href="/delete/<%=student.student_id%>">
+                        <a href="/edit/<%=student.student_id%>">
                             <img src="/images/icons/Edit.svg" alt="ปุ่มแก้ไข">
                         </a>
                     </td>
@@ -73,7 +75,7 @@
                 // ดึงค่าหน้าที่กำลังเปิดอยู่ และหน้าทั้งหมดจาก EJS มาให้ JavaScript รู้จัก
                 const currentPage = parseInt("<%= currentPage %>") || 1;
                 const totalPages = parseInt("<%= totalPages %>") || 1;
-                const searchKeyword = "<%= searchKeyword %>";
+                const searchKeyword = "<%= locals.searchKeyword || '' %>";
                 const searchParam = searchKeyword ? `&search=${searchKeyword}` : "";
 
                 const img = document.getElementById('search-button');

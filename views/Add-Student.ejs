@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Student</title>
+    <link rel="stylesheet" href="/css/add_stu.css">
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body>
+    <%- include('Menu-AS') %>
+
+        <div id="add_container">
+            <form action="/add" method="POST" id="add_form">
+                <div id="form_layout">
+                    <div id="left_col">
+
+                        <div id="page_header">
+                            <a href="/">
+                                <img src="/images/icons/Back.svg" alt="ย้อนกลับ">
+                            </a>
+                            <h2>Add New Student</h2>
+                        </div>
+
+                        <div id="profile_upload">
+                            <label for="file_input" style="cursor: pointer;">
+                                <img src="/images/icons/imgProfile.svg" alt="รูปโปรไฟล์" id="profile_img">
+                                <br>
+                                <div id="upload">
+                                    <img src="/images/icons/Upload.svg" alt="ก้อนเมฆ">
+                                    <span>คลิกเพื่ออัปโหลดรูปภาพ</span>
+                                </div>
+                            </label>
+
+                            <input type="file" name="profile_image" id="file_input" accept="images/*"
+                                style="display: none;">
+                        </div>
+                        <p id="section_title">Student Information</p>
+
+                        <label>Firstname</label>
+                        <input type="text" name="firstname" required>
+
+                        <label>Lastname</label>
+                        <input type="text" name="lastname" required>
+
+                        <label>Date of Birth</label>
+                        <input type="date" name="dob">
+
+                        <label>Citizen-id</label>
+                        <input type="text" name="citizen_id">
+                    </div>
+
+                    <div id="right_col">
+                        <label>Gender</label>
+                        <select name="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+
+                        <label>Nationality</label>
+                        <input type="text" name="nationality">
+
+                        <label>Phone</label>
+                        <input type="text" name="phone">
+
+                        <label>Student-id</label>
+                        <input type="text" name="student_id" required>
+
+                        <label>Email</label>
+                        <input type="email" name="email">
+
+                        <label>Enrollment Date</label>
+                        <input type="date" name="enroll_date">
+
+                        <label>Room-id</label>
+                        <input type="text" name="room_id">
+
+                        <label>Year</label>
+                        <input type="text" name="year">
+
+                        <label>Semester</label>
+                        <input type="text" name="semester">
+
+                        <label>Enroll year</label>
+                        <input type="date" name="enroll_year">
+                    </div>
+                </div>
+
+                <div id="submit_area">
+                    <button type="submit" id="save_btn">Save</button>
+                </div>
+            </form>
+        </div>
+        <script>
+            const fileInput = document.getElementById('file_input');
+            const profileImg = document.getElementById('profile_img');
+
+            // เมื่อมีการเลือกไฟล์ใหม่
+            fileInput.addEventListener('change', function (event) {
+                // ดึงไฟล์ที่ผู้ใช้เลือกมา
+                const file = event.target.files[0];
+
+                if (file) {
+                    // สร้าง URL จำลองของรูปภาพนั้น แล้วเอาไปใส่เป็น src ของ <img>
+                    const imageUrl = URL.createObjectURL(file);
+                    profileImg.src = imageUrl;
+                }
+            });
+        </script>
+</body>
+
+</html>
