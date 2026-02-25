@@ -88,7 +88,7 @@
                 const pageButtons = document.querySelectorAll('.page');
                 pageButtons.forEach(button => {
                     button.addEventListener('click', function () {
-                        window.location.href = `/${searchParam}page=${this.id}`;
+                        window.location.href = `/?${searchParam}page=${this.id}`;
                     });
                 });
 
