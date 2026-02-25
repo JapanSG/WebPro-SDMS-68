@@ -1,0 +1,15 @@
+<footer>
+    <% const rowsPerPage = 10; %>
+    <% const totalPages=Math.ceil(totalStudents / rowsPerPage); %>
+        <div id="next_page_and_back">
+            <button id="back">กลับ</button>
+            <button id="page-back">&lt;</button>
+
+            <% for(let i=1; i <=totalPages; i++) { %>
+                <button class="page" id="<%= i %>"><%= i %></button>
+            <% } %>
+
+            <button id="page-next">&gt;</button>
+
+        </div>
+</footer>
