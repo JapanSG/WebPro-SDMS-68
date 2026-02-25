@@ -13,8 +13,9 @@
     <%- include('Menu-AS') %>
         <div id="search_add">
             <div id="search">
-                <img src="/images/icons/Search.svg" alt="glass">
-                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อนักเรียน">
+                <img src="/images/icons/Search.svg" alt="glass" id="search-button">
+                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อนักเรียน"
+                    value="<%= searchKeyword %>">
             </div>
             <div id="add_btn">
                 <img src="/images/icons/Add_circle.svg" alt="รูปบวก">
@@ -68,34 +69,58 @@
                 <% }); %>
         </table>
         <%- include('slide_next') %>
-        <script>
-            // ดึงค่าหน้าที่กำลังเปิดอยู่ และหน้าทั้งหมดจาก EJS มาให้ JavaScript รู้จัก
-            const currentPage = parseInt("<%= currentPage %>") || 1;
-            const totalPages = parseInt("<%= totalPages %>") || 1;
+            <script>
+                // ดึงค่าหน้าที่กำลังเปิดอยู่ และหน้าทั้งหมดจาก EJS มาให้ JavaScript รู้จัก
+                const currentPage = parseInt("<%= currentPage %>") || 1;
+                const totalPages = parseInt("<%= totalPages %>") || 1;
+                const searchKeyword = "<%= searchKeyword %>";
+                const searchParam = searchKeyword ? `&search=${searchKeyword}` : "";
 
-            // 1. กดเลขหน้า
-            const pageButtons = document.querySelectorAll('.page');
-            pageButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    window.location.href = `/?page=${this.id}`;
+                const img = document.getElementById('search-button');
+                img.addEventListener('click', function () {
+                    const keyword = document.getElementById('search_bar').value;
+                    window.location.href = `/?search=${keyword}&page=1`;
                 });
-            });
 
-            // 2. กดปุ่มลูกศรซ้าย (ย้อนกลับ)
-            document.getElementById('prev-btn').addEventListener('click', function () {
-                if (currentPage > 1) { // ถ้าไม่ใช่หน้า 1 ให้ถอยไปได้
-                    window.location.href = `/?page=${currentPage - 1}`;
-                }
-            });
+                // 1. กดเลขหน้า
+                const pageButtons = document.querySelectorAll('.page');
+                pageButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        window.location.href = `/${searchParam}page=${this.id}`;
+                    });
+                });
 
-            // 3. กดปุ่มลูกศรขวา (ถัดไป)
-            document.getElementById('next-btn').addEventListener('click', function () {
-                if (currentPage < totalPages) { // ถ้ายังไม่ถึงหน้าสุดท้าย ให้เดินหน้าได้
-                    window.location.href = `/?page=${currentPage + 1}`;
+                // 2. กดปุ่มลูกศรซ้าย (ย้อนกลับ)
+                const prevBtn = document.getElementById('prev-btn');
+                if (prevBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
+                    prevBtn.addEventListener('click', function () {
+                        if (currentPage > 1) {
+                            window.location.href = `/?page=${currentPage - 1}${searchParam}`;
+                        }
+                    });
                 }
-            });
-            
-        </script>
+
+                // 3. กดปุ่มลูกศรขวา (ถัดไป)
+                const nextBtn = document.getElementById('next-btn');
+                if (nextBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
+                    nextBtn.addEventListener('click', function () {
+                        if (currentPage < totalPages) {
+                            window.location.href = `/?page=${currentPage + 1}${searchParam}`;
+                        }
+                    });
+                }
+
+                const searchBar = document.getElementById('search_bar');
+                searchBar.addEventListener('keypress', function (e) {
+                    // ถ้าผู้ใช้พิมพ์เสร็จแล้วกดปุ่ม Enter (บนคีย์บอร์ด)
+                    if (e.key === 'Enter') {
+                        const keyword = this.value;
+                        // บังคับเปลี่ยน URL และให้กลับไปเริ่มที่หน้า 1 เสมอ
+                        window.location.href = `/?search=${keyword}&page=1`;
+                    }
+                });
+
+            </script>
 </body>
 
 </html>
