@@ -1,194 +1,194 @@
-    /* ========== IMPORTS & VARIABLES (การตั้งค่าพื้นฐาน) ========== */
+/* ========== IMPORTS & VARIABLES (การตั้งค่าพื้นฐาน) ========== */
 
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap');
-
-
-    :root {
-        /* --- Typography Sizes (ขนาดตัวอักษร) --- */
-        --h1-size: 37.01px;
-        --h2-size: 32.18px;
-        --h3-size: 27.98px;
-        --h4-size: 24.33px;
-        --h5-size: 21.16px;
-        --h6-size: 18.40px;
-        --body-size: 16.00px;
-        --caption1-size: 13.91px;
-        --caption2-size: 12.10px;
-
-        /* --- Font Weights (ความหนา) --- */
-        --weight-bold: 700;
-        --weight-medium: 500;
-        --weight-regular: 400;
-
-        /* --- Colors (ชุดสี) --- */
-        --text-color: #000000;
-        --black-color: #000000;
-        --white-color: #ffffff;
-        --primary-color: #002C66;
-        --danger-color: #ff0000;
-
-        /* --- Gradients (สีไล่ระดับ) --- */
-        --primary-gradient: linear-gradient(270deg, rgba(0, 44, 102, 0.97), #1062d0);
-        --secondary-gradient: linear-gradient(90deg, rgba(6, 62, 135, 0.97), rgba(0, 44, 102, 0.97));
-
-    }
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap');
 
 
-    /* ========== GLOBAL RESET (ล้างค่าเริ่มต้น) ========== */
-    * {
-        box-sizing: border-box;
-        padding: 0;
-        margin: 0;
+:root {
+    /* --- Typography Sizes (ขนาดตัวอักษร) --- */
+    --h1-size: 37.01px;
+    --h2-size: 32.18px;
+    --h3-size: 27.98px;
+    --h4-size: 24.33px;
+    --h5-size: 21.16px;
+    --h6-size: 18.40px;
+    --body-size: 16.00px;
+    --caption1-size: 13.91px;
+    --caption2-size: 12.10px;
 
-    }
+    /* --- Font Weights (ความหนา) --- */
+    --weight-bold: 700;
+    --weight-medium: 500;
+    --weight-regular: 400;
 
-    body {
-        font-family: "Noto Sans Thai", sans-serif;
-        background-color: var(--white-color);
+    /* --- Colors (ชุดสี) --- */
+    --text-color: #000000;
+    --black-color: #000000;
+    --white-color: #ffffff;
+    --primary-color: #002C66;
+    --danger-color: #ff0000;
 
-        /* ป้องกันการเลือก Text โดยไม่ตั้งใจ (Optional) */
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
+    /* --- Gradients (สีไล่ระดับ) --- */
+    --primary-gradient: linear-gradient(270deg, rgba(0, 44, 102, 0.97), #1062d0);
+    --secondary-gradient: linear-gradient(90deg, rgba(6, 62, 135, 0.97), rgba(0, 44, 102, 0.97));
 
-    }
-
-
-    /* ========== HEADER LAYOUT (ส่วนหัวเว็บที่ติดด้านบน) ========== */
-    header {
-        width: 100%;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1;
-
-    }
-
-
-    .nav_container {
-        height: 100px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
-        background: var(--primary-gradient);
-    }
-
-    .nav_logo {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        color: var(--white-color);
-        text-decoration: none;
-        font-weight: var(--weight-medium);
-        font-size: 37.01px;
-
-    }
+}
 
 
-    .toggle_button,
-    .close_button {
-        cursor: pointer;
-    }
+/* ========== GLOBAL RESET (ล้างค่าเริ่มต้น) ========== */
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
 
-    /* ========== NAVIGATION DRAWER (ตัวเมนูที่สไลด์ออกมา) ========== */
-    .nav_menu {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        /* เริ่มต้นซ่อนไว้นอกจอด้านขวา */
-        width: 60%;
-        max-width: 486px;
-        height: 100vh;
+}
 
-        background-color: var(--white-color);
-        box-shadow: 0px 4px 10px 5px rgba(0, 0, 0, 0.25);
-        z-index: 100;
-        /* เอฟเฟกต์ตอนเลื่อนเข้า-ออก */
-        transition: right .4s ;
-        
-    }
+body {
+    font-family: "Noto Sans Thai", sans-serif;
+    background-color: var(--white-color);
 
-    /* Class นี้จะถูกใส่ด้วย JS เพื่อแสดงเมนู */
-    .show_menu {
-        right: 0;
-    }
+    /* ป้องกันการเลือก Text โดยไม่ตั้งใจ (Optional) */
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
-    /* ส่วนหัวของเมนู (ที่มีปุ่มปิด) */
-    .menu_header {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 100px;
-        padding: 10px;
-        background: var(--secondary-gradient);
-    }
+}
 
 
-    /* ========== MENU ITEMS (รายการในเมนู) ========== */
-    .nav_list {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        padding: 1rem;
-        list-style: none;
-    }
+/* ========== HEADER LAYOUT (ส่วนหัวเว็บที่ติดด้านบน) ========== */
+header {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
 
-    .nav_item a {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        color: var(--text-color);
-        font-size: var(--h1-size);
-        font-weight: var(--weight-bold);
-        text-decoration: none;
-
-        /* Animation: เตรียมไว้สำหรับการขยับและจาง */
-        transition: margin .4s, opacity .4s;
-
-    }
-
-    .nav_item .logout_text {
-        color: var(--danger-color);
-
-    }
-
-    /* ========== INTERACTIONS & ANIMATIONS ========== */
+}
 
 
-    /* ขยับข้อความเมื่อ Hover */
-    .nav_item:hover a {
-        margin-left: 2.5rem;
-    }
+.nav_container {
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: var(--primary-gradient);
+}
 
-    /* Spotlight Effect (ทำให้ตัวที่ไม่เลือกจางลง) */
-    .nav_list:has(.nav_item a:hover) .nav_item a:not(:hover) {
-        opacity: .4;
-    }
+.nav_logo {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: var(--white-color);
+    text-decoration: none;
+    font-weight: var(--weight-medium);
+    font-size: 37.01px;
 
-    /*  Animated Underline (เส้นขีดเส้นใต้) */
-    .nav_item span {
-        position: relative;
-        /* เป็นจุดอ้างอิงให้เส้น */
-    }
+}
 
-    /* สร้างเส้นที่ซ่อนอยู่ */
-    .nav_item span::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: -6px;
 
-        width: 0;
-        /* เริ่มต้นมองไม่เห็น */
-        height: 2px;
-        background-color: var(--black-color);
+.toggle_button,
+.close_button {
+    cursor: pointer;
+}
 
-        transition: width .4s ease-out;
-    }
+/* ========== NAVIGATION DRAWER (ตัวเมนูที่สไลด์ออกมา) ========== */
+.nav_menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    /* เริ่มต้นซ่อนไว้นอกจอด้านขวา */
+    width: 60%;
+    max-width: 486px;
+    height: 100vh;
 
-    /* สั่งให้เส้นยาวออกมาเมื่อ Hover */
-    .nav_item:hover span::after {
-        width: 100%;
-    }
+    background-color: var(--white-color);
+    box-shadow: 0px 4px 10px 5px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+    /* เอฟเฟกต์ตอนเลื่อนเข้า-ออก */
+    transition: right .4s ;
+    
+}
+
+/* Class นี้จะถูกใส่ด้วย JS เพื่อแสดงเมนู */
+.show_menu {
+    right: 0;
+}
+
+/* ส่วนหัวของเมนู (ที่มีปุ่มปิด) */
+.menu_header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100px;
+    padding: 10px;
+    background: var(--secondary-gradient);
+}
+
+
+/* ========== MENU ITEMS (รายการในเมนู) ========== */
+.nav_list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    list-style: none;
+}
+
+.nav_item a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--text-color);
+    font-size: var(--h1-size);
+    font-weight: var(--weight-bold);
+    text-decoration: none;
+
+    /* Animation: เตรียมไว้สำหรับการขยับและจาง */
+    transition: margin .4s, opacity .4s;
+
+}
+
+.nav_item .logout_text {
+    color: var(--danger-color);
+
+}
+
+/* ========== INTERACTIONS & ANIMATIONS ========== */
+
+
+/* ขยับข้อความเมื่อ Hover */
+.nav_item:hover a {
+    margin-left: 2.5rem;
+}
+
+/* Spotlight Effect (ทำให้ตัวที่ไม่เลือกจางลง) */
+.nav_list:has(.nav_item a:hover) .nav_item a:not(:hover) {
+    opacity: .4;
+}
+
+/*  Animated Underline (เส้นขีดเส้นใต้) */
+.nav_item span {
+    position: relative;
+    /* เป็นจุดอ้างอิงให้เส้น */
+}
+
+/* สร้างเส้นที่ซ่อนอยู่ */
+.nav_item span::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+
+    width: 0;
+    /* เริ่มต้นมองไม่เห็น */
+    height: 2px;
+    background-color: var(--black-color);
+
+    transition: width .4s ease-out;
+}
+
+/* สั่งให้เส้นยาวออกมาเมื่อ Hover */
+.nav_item:hover span::after {
+    width: 100%;
+}

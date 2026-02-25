@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Schedule</title>
-    <link rel="stylesheets" href="/css/global.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/manage-schedule.css">
+    
 </head>
 <body>
 
-    <%- include('header') %>
+    <%- include('Menu-AS') %>
     <%- include('showMenu') %>
 
     <div class="container">
@@ -16,7 +18,7 @@
         <div class="toolbar">
             <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหาห้องเรียน หรือ ชื่อครู">
 
-            <form action="/manage-schedule" method="GET" class="filters" id="filterForm">
+            <form action="/admin/manage-schedule" method="GET" class="filters" id="filterForm">
                 <label>ปีการศึกษา</label>
                 <select name="year" onchange="document.getElementById('filterForm').submit();">
                     <% years.forEach(y => { %>
@@ -81,9 +83,9 @@
                                 <br>
 
                                 <% if (room.room_id !== 0) { %>
-                                    <a href="/manage-schedule/inside/<%=room.room_id %>?year=<%= selectedYear %>&semester=<%= selectedSemester %>" class = "btn-edit">✎ แก้ไขตาราง</a>
+                                    <a href="/admin/manage-schedule/inside/<%=room.room_id %>?year=<%= selectedYear %>&semester=<%= selectedSemester %>" class = "btn-edit">✎ แก้ไขตาราง</a>
                                 <% } else { %>
-                                    <a href="/manage-schedule/inside/new?grade=<%= room.grade_level %>&room=<%= encodeURIComponent(room.room_name)%>&year=<%= selectedYear %>&semester=<%= selectedSemester %>" class="btn-edit">✎ สร้างและจัดตาราง</a>
+                                    <a href="/admin/manage-schedule/inside/new?grade=<%= room.grade_level %>&room=<%= encodeURIComponent(room.room_name)%>&year=<%= selectedYear %>&semester=<%= selectedSemester %>" class="btn-edit">✎ สร้างและจัดตาราง</a>
                                 <% } %>
                             </div>
             <%
@@ -93,5 +95,41 @@
                 </div></div> <% } %>
         </div>
     </div>
+
+    <script>
+        // search
+
+        //รับเหตุการณ์ด้วย addeventlistener id = input พวกคำพิ้มคือ e
+        document.getElementById('searchInput').addEventListener('input',function(e){
+            const seacrhTerm = e.target.value.toLowerCase().trim(); // text in input
+            const gradeSections = document.querySelectorAll('.grade-section'); //เอาส่วนgrade levelมาหมด
+
+            gradeSections.forEach(section=>{
+                let hasVisibleCard = false; //เป็นตัวกำหนด grade level จะให้โชว์
+                const cards = section.querySelectorAll('.room-card'); // เอาส่วนห้องแต่ละ grade level มาหมด
+
+                cards.forEach(card=>{
+                    const roomName = card.querySelector('.room-name').textContent.toLocaleLowerCase();
+                    const teacherName = card.querySelector('.teacher-name').textContent.toLocaleLowerCase();
+
+                    //ข้อความที่เรา serach ตรงกับห้องไหน กับ ชื่อครูคนไหนมั้ย
+                    if (roomName.includes(seacrhTerm) || teacherName.includes(seacrhTerm)){
+                        card.style.display = 'block';
+                        hasVisibleCard = true;
+                    }
+                    else{
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (hasVisibleCard){
+                    section.style.display = 'block';
+                }
+                else{
+                    section.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
