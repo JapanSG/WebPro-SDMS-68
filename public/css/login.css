@@ -1,8 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap');
 
+
+
 html,
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Noto Sans Thai", sans-serif;
     box-sizing: border-box;
     height: 100%;
     margin: 0;
@@ -150,6 +152,7 @@ body {
 .password-wrapper .input-field {
     padding-right: 60px;
 }
+
 .error-messages{
     width: 100%;
     font-weight: 500;
