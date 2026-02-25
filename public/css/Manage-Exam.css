@@ -191,6 +191,9 @@ th:nth-last-child(1), td:nth-last-child(1) {
     background-color: white;
     padding: 1.5em;
     border-radius: 5px;
+    width: 100%;
+    min-width: 400px;
+    max-width: fit-content;
 }
 
 .popupBtns {
