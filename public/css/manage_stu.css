@@ -24,6 +24,9 @@ body {
     padding: 20px;
     margin-left: 20px;
 }
+#search-button {
+    cursor: pointer;
+}
 
 #search_bar {
     display: block; 
@@ -75,11 +78,17 @@ td {
     height: 51.3px;
     margin-left: 20px;
     cursor: pointer;
+    background-color: #093B7E;
+    color: white;
+    border-radius: 10px;
 }
 #page-back , #page-next {
     width: 51.3px;
     height: 51.3px;
     cursor: pointer;
+    background-color: #093B7E;
+    color: white;
+    border-radius: 10px;
 }
 .page {
     width: 51.3px;

@@ -12,12 +12,6 @@ let db = new sqlite3.Database('school.db', (err) => {
     console.log('Connected to the SQlite database.');
 });
 
-let dbad = new sqlite3.Database('student.db', (err) => {
-    if (err) {
-        return console.error(err.message);
-    }
-    console.log('Connected to the SQlite Student database.');
-});
 
 
 
@@ -28,19 +22,24 @@ app.get('/', function (req, res) {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const offset = (page - 1) * limit; // ต้องข้ามกี่คน
-    const query = `SELECT rowid, * FROM Students LIMIT ${limit} OFFSET ${offset}`;
-    const count = 'SELECT COUNT(*) AS total FROM Students';
-    dbad.get(count, (err, count_all) => {
+    let whereSQL = '';
+    const search = req.query.search || '';
+    if (search !== '') { // ดูว่ามีคำค้นหา
+        whereSQL = `WHERE student_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
+    }
+    const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
+    const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
+    db.get(count, (err, count_all) => {
         if (err) {
             console.log(err.message);
         }
         const totals = count_all ? count_all.total : 0;
         const totalPages = Math.ceil(totals / limit);
-        dbad.all(query, (err, rows) => {
+        db.all(query, (err, rows) => {
             if (err) {
                 console.log(err.message);
             }
-            res.render('Manage_Student_Records', { totalStudents: totals, students: rows, currentPage: page, totalPages: totalPages});
+            res.render('Manage_Student_Records', { totalStudents: totals, students: rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
         });
     });
 });
@@ -52,7 +51,17 @@ app.get('/edit/:id', function (req, res) {
             console.log(err.message);
         }
         console.log(rows);
-        res.render('srudentdetails', { data: rows });
+        res.render('studentdetails', { data: rows });
+    });
+})
+pp.get('/delete/:id', function (req, res) {
+    const query = `DELETE * FROM Students WHERE id = ${req.params.id}`;
+    db.all(query, (err, rows) => {
+        if (err) {
+            console.log(err.message);
+        }
+        console.log(rows);
+        res.redirect('Manage_Student_Records');
     });
 })
 
