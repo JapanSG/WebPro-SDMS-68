@@ -26,7 +26,7 @@
 
                     <div id="profile_upload">
                         <label for="file_input" style="cursor: pointer;">
-                            <img src="<%= profileImg || '/images/icons/imgProfile.svg' %>" alt="รูปโปรไฟล์" id="profile_img" width="150" height="150" style="object-fit: cover; border-radius: 50%;">
+                            <img src="<%= data.profileImg || '/images/icons/imgProfile.svg' %>" alt="รูปโปรไฟล์" id="profile_img" width="150" height="150" style="object-fit: cover; border-radius: 50%;">
                             <br>
                             <div id="upload">
                                 <img src="/images/icons/Upload.svg" alt="ก้อนเมฆ">
@@ -68,6 +68,9 @@
                     <input type="text" name="student_id" value="<%= data.student_id %>" readonly style="background-color: #eee;">
                     <label>Email</label>
                     <input type="email" name="email" value="<%= data.email %>">
+
+                    <label>Enrollment Date</label>
+                    <input type="date" name="enroll_date" value="<%= data.enroll_date %>">
 
                     <label>Room-id</label>
                     <input type="text" name="room_id" value="<%= data.room_id %>">
