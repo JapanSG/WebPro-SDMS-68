@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/JapanSG/WebPro-SDMS-68#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "multer": "^2.0.2",

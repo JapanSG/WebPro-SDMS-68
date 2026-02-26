@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const bcrypt = require('bcrypt')
 const port = 3000;
 const sqlite3 = require('sqlite3').verbose();
 
@@ -53,12 +54,29 @@ app.get('/', function (req, res) {
 //กด edit
 app.get('/edit/:id', function (req, res) {
     const query = `SELECT rowid, * FROM Students WHERE rowid = ${req.params.id}`;
-    db.get(query, (err, rows) => {
-            if (err) {
-                console.log(err.message);
-            }
-            res.render('Edit-Student', { data : rows});
-        });
+    db.get(query, (err, row) => {
+        if (err) {
+            console.log(err.message);
+            return res.send("เกิดข้อผิดพลาด");
+        }
+
+        if (!row) {
+            return res.send("ไม่พบข้อมูลนักเรียน");
+        }
+
+        let imageBase64 = null;
+        // ตรวจสอบว่ามีข้อมูลในคอลัมน์ profile_image หรือไม่
+        if (row.profile_image) {
+            // แปลง Buffer (BLOB) ให้เป็น Base64 string
+            const base64Data = row.profile_image.toString('base64');
+            // สร้างเป็น Data URL ที่ถูกต้องสำหรับใส่ใน src ของ <img>
+            imageBase64 = `data:image/jpeg;base64,${base64Data}`;
+        }
+
+        // 3. ส่งข้อมูลไปที่ไฟล์ EJS
+        // ส่ง 'data' เป็นข้อมูลนักเรียน และ 'profileImg' เป็นรูป Base64
+        res.render('Edit-Student', { data: row, profileImg : imageBase64 });
+    });
 });
 app.post('/update/:id', upload.single('profile_image'), (req, res) => {
     const student_id = req.params.id;
@@ -72,14 +90,14 @@ app.post('/update/:id', upload.single('profile_image'), (req, res) => {
         const sql = `
             UPDATE Students SET 
             first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
-            nationality = ?, phone = ?, email = ?, enroll_date = ?, room_id = ?, 
+            nationality = ?, phone = ?, email = ?, room_id = ?, 
             year = ?, semester = ?, enroll_year = ?, profile_image = ?
             WHERE student_id = ?
         `;
 
         const values = [
             data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
-            data.nationality, data.phone, data.email, data.enroll_date, data.room_id,
+            data.nationality, data.phone, data.email, data.room_id,
             data.year, data.semester, data.enroll_year, imageBuffer, student_id
         ];
 
@@ -93,14 +111,14 @@ app.post('/update/:id', upload.single('profile_image'), (req, res) => {
         const sql = `
             UPDATE Students SET 
             first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
-            nationality = ?, phone = ?, email = ?, enroll_date = ?, room_id = ?, 
+            nationality = ?, phone = ?, email = ?, room_id = ?, 
             year = ?, semester = ?, enroll_year = ?
             WHERE student_id = ?
         `;
 
         const values = [
             data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
-            data.nationality, data.phone, data.email, data.enroll_date, data.room_id,
+            data.nationality, data.phone, data.email, data.room_id,
             data.year, data.semester, data.enroll_year, student_id
         ];
 
@@ -137,7 +155,7 @@ app.post('/add', (req, res) => {
         data.semester,
         data.enroll_year
     ];
-
+    createAccount("student");
     db.run(sql, values, (err, result) => {
         if (err) {
             console.error('Insert error:', err);
@@ -177,3 +195,47 @@ app.get('/admin/home', function (req, res) {
 app.listen(port, () => {
     console.log("Server started.");
 });
+function createAccount(role) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+
+                db.get(`SELECT MAX(user_id) as maxId FROM Users`, (err, row) => {
+                    if (err) {
+                        console.error('Database Error:', err.message);
+                        return resolve({ success: false, error: err.message });
+                    }
+                    let nextId = (row.maxId || 0) + 1;
+
+
+                    let prefix = 'u';
+                    if (role === 'student') prefix = 's';
+                    if (role === 'teacher') prefix = 't';
+                    if (role === 'admin') prefix = 'a';
+                    if (role === 'ao') prefix = 'ao';
+
+                    const generatedUsername = `${prefix}${String(nextId).padStart(4, '0')}`;
+
+                    const sql = `INSERT INTO Users (username, password, role) VALUES (?,?,?)`;
+
+                    db.run(sql, [generatedUsername, hashedPassword, role], function (err) {
+                        if (err) {
+                            console.error('INSERT Error:', err.message);
+                            return resolve({ success: false, error: err.message });
+                        }
+                        resolve({
+                            success: true,
+                            user: {
+                                id: this.lastID,
+                                username: generatedUsername,
+                                role: role
+                            }
+                        });
+                    });
+                })
+            } catch (error) {
+                console.error('Hash Error:', error);
+                resolve({ success: false, error: error.message });
+            }
+        });
+    };
