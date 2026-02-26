@@ -12,7 +12,11 @@ let db = new sqlite3.Database('school.db', (err) => {
     console.log('Connected to the SQlite database.');
 });
 
+const multer = require('multer');
 
+const storage = multer.memoryStorage();
+
+const upload = multer({ storage: storage });
 
 
 app.use(express.static('public'));
@@ -45,17 +49,67 @@ app.get('/', function (req, res) {
         });
     });
 });
+
 //กด edit
 app.get('/edit/:id', function (req, res) {
-    const query = `SELECT * FROM users WHERE id = ${req.params.id}`;
-    db.all(query, (err, rows) => {
-        if (err) {
-            console.log(err.message);
-        }
-        console.log(rows);
-        res.render('studentdetails', { data: rows });
-    });
-})
+    const query = `SELECT rowid, * FROM Students WHERE rowid = ${req.params.id}`;
+    db.get(query, (err, rows) => {
+            if (err) {
+                console.log(err.message);
+            }
+            res.render('Edit-Student', { data : rows});
+        });
+});
+app.post('/update/:id', upload.single('profile_image'), (req, res) => {
+    const student_id = req.params.id;
+    const data = req.body;
+
+    // เช็คว่ามีการส่งไฟล์รูปใหม่มาหรือไม่
+    if (req.file) {
+        // กรณีมีรูปภาพใหม่ อัปเดตข้อมูลทั้งหมดพร้อมรูปลง DB (BLOB)
+        const imageBuffer = req.file.buffer;
+        
+        const sql = `
+            UPDATE Students SET 
+            first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
+            nationality = ?, phone = ?, email = ?, enroll_date = ?, room_id = ?, 
+            year = ?, semester = ?, enroll_year = ?, profile_image = ?
+            WHERE student_id = ?
+        `;
+
+        const values = [
+            data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
+            data.nationality, data.phone, data.email, data.enroll_date, data.room_id,
+            data.year, data.semester, data.enroll_year, imageBuffer, student_id
+        ];
+
+        db.run(sql, values, (err) => {
+            if (err) return console.error(err.message);
+            res.redirect('/');
+        });
+
+    } else {
+        // กรณีไม่มีรูปภาพใหม่ อัปเดตเฉพาะข้อมูลตัวหนังสือ ไม่ยุ่งกับคอลัมน์ profile_image
+        const sql = `
+            UPDATE Students SET 
+            first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
+            nationality = ?, phone = ?, email = ?, enroll_date = ?, room_id = ?, 
+            year = ?, semester = ?, enroll_year = ?
+            WHERE student_id = ?
+        `;
+
+        const values = [
+            data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
+            data.nationality, data.phone, data.email, data.enroll_date, data.room_id,
+            data.year, data.semester, data.enroll_year, student_id
+        ];
+
+        db.run(sql, values, (err) => {
+            if (err) return console.error(err.message);
+            res.redirect('/');
+        });
+    }
+});
 app.get('/students', function (req, res) {
         res.render('Add-Student');
 });
