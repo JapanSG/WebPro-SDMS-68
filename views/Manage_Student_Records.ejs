@@ -56,7 +56,7 @@
                         <%=student.email%>
                     </td>
                     <td>
-                        <%=student.enroll_date%>
+                        <%=student.enroll_year%>
                     </td>
                     <td id="S<%=student.rowid%>">
                         <a href="/delete/<%=student.student_id%>">
@@ -93,7 +93,7 @@
                 });
 
                 // 2. กดปุ่มลูกศรซ้าย (ย้อนกลับ)
-                const prevBtn = document.getElementById('prev-btn');
+                const prevBtn = document.getElementById('page-back');
                 if (prevBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
                     prevBtn.addEventListener('click', function () {
                         if (currentPage > 1) {
@@ -103,7 +103,7 @@
                 }
 
                 // 3. กดปุ่มลูกศรขวา (ถัดไป)
-                const nextBtn = document.getElementById('next-btn');
+                const nextBtn = document.getElementById('page-next');
                 if (nextBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
                     nextBtn.addEventListener('click', function () {
                         if (currentPage < totalPages) {
