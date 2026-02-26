@@ -73,7 +73,9 @@
                             <% const matchedSchedule = schedules.find(s => s.day == day && s.period == actualPeriod); %>
                             <td>
                                 <% if (matchedSchedule) { %>
-                                    <div class = "subject-card"><%= matchedSchedule.subject_name %></div>
+                                    <button class = "subject-card delete-btn" data-day="<%= day %>" data-period = "<%= actualPeriod %>" data-subject="<%= matchedSchedule.subject_name %>" title="คลิกเพื่อลบ/เปลี่ยนวิชา">
+                                        <%= matchedSchedule.subject_name %>
+                                    </button>
                                 <% } else { %>
                                     <button class = "add-btn" data-day="<%= day %>" data-period = "<%= actualPeriod %>">+</button>
                                 <% }; %>
@@ -122,8 +124,34 @@
         </div>
     </div>
 
+    <div id ="deleteModal" class = "modal-overlay">
+        <div class = "modal-box" style="text-align: center;">
+            <h3 style="color: #ef4444; border-bottom: none;">⚠️ ยืนยันการยกเลิกวิชา</h3>
+
+            <p style="margin: 10px 0 20px 0; font-size: var(--body-size);">
+                คุณต้องการยกเลิกวิชา<br>
+                <strong id="deleteSubjectName" style="color: var(--primary-color); font-size: 20px;"></strong><br>
+                ออกจาก <span id="deleteTimeText"></span> ใช่หรือไม่?
+            </p>
+
+            <form action="/admin/manage-schedule/inside/delete" method="POST">
+                <input type="hidden" name="room_id" value="<%= room.room_id %>">
+                <input type="hidden" name="year" value="<%= year %>">
+                <input type="hidden" name="semester" value="<%= semester %>">
+                <input type="hidden" name="day" id="deleteInputDay">
+                <input type="hidden" name="period" id="deleteInputPeriod">
+
+                <div class="modal-actions" style="justify-content: center; gap: 15px;">
+                    <button type="button" class="btn-cancel" onclick="closeDeleteModal()">ปิด</button>
+                    <button type="submit" class="btn-save" style="background: #ef4444;">ลบวิชานี้</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script>
+        //Modal Add
         const modal = document.getElementById('subjectModal');
         const inputDay = document.getElementById('inputDay');
         const inputPeriod = document.getElementById('inputPeriod');
@@ -144,11 +172,41 @@
             modal.style.display = "none";
         }
 
-        window.onclick = function(e){
-            if (e.target === modal){
+        //Modal Delete
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteInputDay = document.getElementById('deleteInputDay');
+        const deleteInputPeriod = document.getElementById('deleteInputPeriod');
+        const deleteSubjectName = document.getElementById('deleteSubjectName');
+        const deleteTimeText = document.getElementById('deleteTimeText');
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const day = this.dataset.day;
+                const period = this.dataset.period;
+                const subject = this.dataset.subject;
+
+                deleteInputDay.value = day;
+                deleteInputPeriod.value = period;
+
+                deleteSubjectName.textContent = subject;
+                deleteTimeText.textContent = `${day} คาบที่ ${period}`;
+
+                deleteModal.style.display = 'flex';
+            });
+        });
+
+        function closeDeleteModal() {
+            deleteModal.style.display = "none";
+        }
+
+        window.onclick = function(e) {
+            if (e.target === modal) {
                 closeModal();
+            } else if (e.target === deleteModal) {
+                closeDeleteModal();
             }
         }
+
     </script>
 </body>
 </html>
