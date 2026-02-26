@@ -95,8 +95,25 @@ app.use('/student', checkAuthenticated, checkRole('student'));
 app.use('/teacher', checkAuthenticated, checkRole('teacher'));
 app.use('/ao', checkAuthenticated, checkRole('ao'));
 
-app.get('/student/home', checkAuthenticated, checkRole('student'), (req, res) => {
-    res.render('Home-Student',{ user: req.user });
+app.get('/student/home', checkAuthenticated, (req, res) => {
+    const userId = req.user.user_id; 
+
+    const sql = `SELECT * FROM Users
+                 JOIN Students ON Students.user_id = Users.user_id
+                 JOIN Rooms ON Students.room_id = Rooms.room_id
+                 WHERE Students.user_id = ?`;
+
+    db.get(sql, [userId], (err, studentData) => {
+        if (err) {
+            console.error(err.message);
+            return res.render('Home-Student', { user: req.user, student: {} });
+        }
+
+        res.render('Home-Student', { 
+            user: req.user,
+            student: studentData || {} 
+        });
+    });
 });
 app.get('/teacher/home',function(req,res){
     res.render('Home-Teacher');
