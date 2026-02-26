@@ -237,6 +237,13 @@ function createEditEntryHandlerPopup(event) {
         title.textContent = "Edit Exam Entry";
         popup.appendChild(title);
 
+        console.log(event.target.parentNode.parentNode.parentNode.parentNode.children);
+        let time = event.target.parentNode.parentNode.parentNode.parentNode.children[0].textContent.split("-");
+        let start = time[0].trim();
+        let end = time[1].trim();
+        let subject_id = event.target.parentNode.parentNode.parentNode.parentNode.children[1].textContent.trim();
+        console.log(subject_id);
+
         // Create start field
         let startLabel = document.createElement("label");
         startLabel.textContent = "Start Time: ";
@@ -244,6 +251,7 @@ function createEditEntryHandlerPopup(event) {
         let startInput = document.createElement("input");
         startInput.setAttribute("type", "time");
         startInput.setAttribute("class", "startTime");
+        startInput.value = start;
         popup.appendChild(startInput);
 
         // Create end field
@@ -253,6 +261,7 @@ function createEditEntryHandlerPopup(event) {
         let endInput = document.createElement("input");
         endInput.setAttribute("type", "time");
         endInput.setAttribute("class", "endTime");
+        endInput.value = end;
         popup.appendChild(endInput);
 
         // Create subject dropdown
@@ -267,6 +276,9 @@ function createEditEntryHandlerPopup(event) {
             option.value = subject.subject_id;
             option.textContent = subject.subject_name;
             subjectSelect.appendChild(option);
+            if (subject.subject_id == subject_id) {
+                option.selected = true;
+            }
         });
         popup.appendChild(subjectSelect);
 
