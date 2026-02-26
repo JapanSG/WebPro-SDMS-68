@@ -5,7 +5,10 @@ const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 
-let db = new sqlite3.Database('school.db', (err) => {    
+//เพื่อรับค่าจาก Form
+app.use(express.urlencoded({ extended: true }));
+
+let db = new sqlite3.Database('school.db', (err) => {
 if (err) {
     return console.error(err.message);
 }
@@ -113,9 +116,69 @@ app.get('/admin/manage-schedule',function(req,res){
     });
 });
 
+app.get('/admin/manage-schedule/inside/new',function(req,res){
+    //รับค่าจาก URL ที่ยังไม่มีข้อมูล room ก็เลย ใช้ข้อมูลชั่วคราวไปก่อน
+    const {grade , room, year , semester} = req.query;
 
+    const sqlInsertRoom = `INSERT INTO Rooms (room_name, grade_level) VALUES(?, ?)`;
 
+    db.run(sqlInsertRoom, [room, grade], function(err){
+        if (err){
+            console.error("Error creating new room:", err.message);
+            return res.status(500).send("เกิดข้อผิดพลาดในการสร้างห้อง");
+        }
+        //ไปเอามาจากตอนinsert ทำได้เพราะ sqlite3
+        const newRoomId = this.lastID;
+        res.redirect(`/admin/manage-schedule/inside/${newRoomId}?year=${year}&semester=${semester}`);
+    });
+});
 
+app.get('/admin/manage-schedule/inside/:id',(req,res)=>{
+    const roomId = req.params.id;
+    const {year, semester} = req.query;
+
+    db.get(`SELECT * FROM Rooms WHERE room_id = ?`,[roomId], (err,room)=>{
+        if (err || !room){
+            return res.status(404).send("ไม่พบข้อมูลห้องเรียน");
+        }
+
+        db.all(`SELECT * FROM Subjects WHERE grade_level = ?`,[room.grade_level], (err,subjects)=>{
+            if(err) subjects = []; //เพื่อยังไม่มีข้อมูล subject
+
+            const sqlSchedule = `SELECT s.day, s.period, sub.subject_name
+                                FROM Schedule s
+                                JOIN Subjects sub ON s.subject_id = sub.subject_id
+                                WHERE s.room_id = ? AND s.year = ? AND s.semester = ?`;
+            
+            db.all(sqlSchedule,[roomId,year,semester],(err, schedules)=>{
+                if (err) schedules = [];
+
+                res.render('Manage-Schedule-Inside',{
+                    room: room,
+                    subjects: subjects,
+                    schedules: schedules,
+                    year:year,
+                    semester: semester
+                });
+            });
+        });
+    });
+});
+
+app.post('/admin/manage-schedule/inside/add',(req,res)=>{
+    const {room_id, day, period, subject_id, year, semester} = req.body;
+
+    const sqlInsertSchedule = `INSERT INTO Schedule(room_id,day,period, subject_id,year,semester)
+                                VALUES(?,?,?,?,?,?)`;
+
+    db.run(sqlInsertSchedule,[room_id, day, period, subject_id, year, semester],(err)=>{
+        if (err){
+            console.error("Error adding schedule:",err.message);
+            return res.status(500).send("เกิดข้อผิดพลาดในการเพิ่มวิชา");
+        }
+        res.redirect(`/admin/manage-schedule/inside/${room_id}?year=${year}&semester=${semester}`);
+    });
+});
 
 app.listen(port, () => {
 console.log("Server started.");
