@@ -116,20 +116,32 @@ app.get('/admin/manage-schedule',function(req,res){
     });
 });
 
-app.get('/admin/manage-schedule/inside/new',function(req,res){
-    //รับค่าจาก URL ที่ยังไม่มีข้อมูล room ก็เลย ใช้ข้อมูลชั่วคราวไปก่อน
-    const {grade , room, year , semester} = req.query;
+app.get('/admin/manage-schedule/inside/new', function(req, res){
+    const { grade, room, year, semester } = req.query;
 
-    const sqlInsertRoom = `INSERT INTO Rooms (room_name, grade_level) VALUES(?, ?)`;
-
-    db.run(sqlInsertRoom, [room, grade], function(err){
-        if (err){
-            console.error("Error creating new room:", err.message);
-            return res.status(500).send("เกิดข้อผิดพลาดในการสร้างห้อง");
+    const sqlCheck = `SELECT room_id FROM Rooms WHERE room_name = ? AND grade_level = ?`;
+    
+    db.get(sqlCheck, [room, grade], (err, existingRoom) => {
+        if (err) {
+            console.error("Error checking room:", err.message);
+            return res.status(500).send("เกิดข้อผิดพลาดในการตรวจสอบห้องเรียน");
         }
-        //ไปเอามาจากตอนinsert ทำได้เพราะ sqlite3
-        const newRoomId = this.lastID;
-        res.redirect(`/admin/manage-schedule/inside/${newRoomId}?year=${year}&semester=${semester}`);
+
+        if (existingRoom) {
+            return res.redirect(`/admin/manage-schedule/inside/${existingRoom.room_id}?year=${year}&semester=${semester}`);
+        }
+
+        const sqlInsertRoom = `INSERT INTO Rooms (room_name, grade_level) VALUES(?, ?)`;
+        
+        db.run(sqlInsertRoom, [room, grade], function(err) {
+            if (err) {
+                console.error("Error creating new room:", err.message);
+                return res.status(500).send("เกิดข้อผิดพลาดในการสร้างห้อง");
+            }
+            
+            const newRoomId = this.lastID;
+            res.redirect(`/admin/manage-schedule/inside/${newRoomId}?year=${year}&semester=${semester}`);
+        });
     });
 });
 
