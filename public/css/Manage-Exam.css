@@ -79,6 +79,7 @@ th:nth-last-child(1), td:nth-last-child(1) {
     background: #FFF;
     padding: 0.2em 0.5em;
     height: 100%;
+    gap: 1em;
 }
 
 #popupLayer {
@@ -179,12 +180,12 @@ th:nth-last-child(1), td:nth-last-child(1) {
     padding:  1em;
 }
 
-.deleteEntry, .editEntry {
+.deleteEntry, .editEntry, .editDate{
     background-color: transparent;
     border: none;
     padding: 0;
 }
-.addExamPopup, .addEntryPopup, .editEntryPopup, .deleteWarningPopup {
+.addExamPopup, .addEntryPopup, .editEntryPopup, .deleteWarningPopup, .editDatePopup {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -228,4 +229,16 @@ th:nth-last-child(1), td:nth-last-child(1) {
     color: white;
     padding: 0.5em 1em;
     cursor: pointer;
+}
+
+.editDate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dateIcon {
+    max-height: 24px;
+    height: 100%;
+    aspect-ratio: 1 / 1;
 }

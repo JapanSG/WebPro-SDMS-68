@@ -418,6 +418,21 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
     });
 });
 
+app.put('/admin/exam-schedule/editDate', (req, res) => {
+    console.log(req.body);
+    const sql = 'UPDATE Exam_Schedule SET date = ? WHERE exam_id = ?';
+    db.run(sql, [req.body.date, req.body.exam_id], err => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error editing exam date");
+        } 
+        else {
+            console.log("Exam Date Edited");
+            res.status(200).send("Exam date edited successfully");
+        }
+    });
+});
+
 // Student view exam schedule
 app.get('/student/exam-schedule', (req, res) => {
     const sqlGetStudent = 'SELECT *  FROM Users JOIN Students USING(user_id) JOIN Rooms USING(room_id) WHERE user_id = ?';
