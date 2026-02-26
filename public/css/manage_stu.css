@@ -73,6 +73,7 @@ td {
 #next_page_and_back {
     display: flex;
     gap: 20px;
+    justify-content: space-between;
 }
 #back {
     width: 200px;
