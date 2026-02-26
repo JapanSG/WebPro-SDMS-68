@@ -89,6 +89,12 @@ app.get('/logout', (req, res, next) => {
         });
     });
 });
+
+app.use('/admin', checkAuthenticated, checkRole('admin'));
+app.use('/student', checkAuthenticated, checkRole('student'));
+app.use('/teacher', checkAuthenticated, checkRole('teacher'));
+app.use('/ao', checkAuthenticated, checkRole('ao'));
+
 app.get('/student/home', checkAuthenticated, checkRole('student'), (req, res) => {
     res.render('Home-Student',{ user: req.user });
 });
@@ -212,6 +218,7 @@ function handleError(err, res) {
     return;
 }
 
+// Manage Exam Schedule Page
 app.get('/teacher/grade', (req, res) => {
     res.render('Submit-grades');
 });
@@ -411,6 +418,56 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
     });
 });
 
+// Student view exam schedule
+app.get('/student/exam-schedule', (req, res) => {
+    const sqlGetStudent = 'SELECT *  FROM Users JOIN Students USING(user_id) JOIN Rooms USING(room_id) WHERE user_id = ?';
+    const sqlGetExamSchedule = 'SELECT * FROM Exam_Schedule WHERE grade_level = ? AND semester = ? AND year = ? AND type = ?';
+    db.get(sqlGetStudent, [req.user.user_id], (err, student) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error retrieving student information");
+            return;
+        }
+        let type;
+        if (req.query.type) {
+            type = req.query.type;
+        }
+        else {
+            type = "กลางภาค";
+        }
+        db.all(sqlGetExamSchedule, [student.year-student.enroll_year+1, student.semester, student.year, type], (err, examSchedule) => {
+            if (err) {
+                console.error(err.message);
+                res.status(500).send("Error retrieving exam schedule");
+            }
+            let entries = {};
+            examSchedule.forEach(exam => {
+                entries[`${exam.exam_id}`] = [];
+            });
+            const sqlGetEntries = `SELECT * FROM Exam_Schedule_Entries JOIN Subjects USING(subject_id) WHERE exam_id IN (${examSchedule.map(exam => exam.exam_id).join(',')});`;
+            db.all(sqlGetEntries, (err, result) => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error retrieving exam entries");
+                }
+                result.forEach(entry => {
+                    entries[`${entry.exam_id}`].push(entry);
+                });
+                // console.log(entries);
+                console.log(student);
+                res.render('View-Exam.ejs', {examSchedule: examSchedule, entries: entries, student: student, type: type});
+            });
+        });
+    });
+});
+
 app.listen(port, () => {
     console.log("Server started.");
+    // createAccount('student').then(result => {
+    //     if (result.success) {
+    //         console.log('Admin account created:', result.user);
+    //     } else {
+    //         console.error('Error creating admin account:', result.error);
+    //     }
+    // });
 });
