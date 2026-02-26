@@ -13,15 +13,15 @@
     <%- include('Menu-AS') %>
 
         <div id="add_container">
-            <form action="/add" method="POST" id="add_form">
+            <form action="/add" method="POST" id="add_form" enctype="multipart/form-data">
                 <div id="form_layout">
                     <div id="left_col">
 
                         <div id="page_header">
-                            <a href="/">
+                            <a href="/admin/record-stu">
                                 <img src="/images/icons/Back.svg" alt="ย้อนกลับ">
                             </a>
-                            <h2>Add New Student</h2>
+                            <h2>เพิ่มข้อมูลนักเรียน</h2>
                         </div>
 
                         <div id="profile_upload">
@@ -37,59 +37,56 @@
                             <input type="file" name="profile_image" id="file_input" accept="images/*"
                                 style="display: none;">
                         </div>
-                        <p id="section_title">Student Information</p>
+                        <p id="section_title">ข้อมูลนักเรียน</p>
 
-                        <label>Firstname</label>
+                        <label>ชื่อจริง</label>
                         <input type="text" name="firstname" required>
 
-                        <label>Lastname</label>
+                        <label>นามสกุล</label>
                         <input type="text" name="lastname" required>
 
-                        <label>Date of Birth</label>
+                        <label>วันเกิด</label>
                         <input type="date" name="dob">
 
-                        <label>Citizen-id</label>
+                        <label>รหัสประจำตัวประชาชน</label>
                         <input type="text" name="citizen_id">
                     </div>
 
                     <div id="right_col">
-                        <label>Gender</label>
+                        <label>เพศ</label>
                         <select name="gender">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                            <option value="Male">ชาย</option>
+                            <option value="Female">หญิง</option>
                         </select>
 
-                        <label>Nationality</label>
+                        <label>สัญชาติ</label>
                         <input type="text" name="nationality">
 
-                        <label>Phone</label>
+                        <label>เบอร์โทรศัพท์</label>
                         <input type="text" name="phone">
 
-                        <label>Student-id</label>
+                        <label>รหัสประจำตัวนักเรียน</label>
                         <input type="text" name="student_id" required>
 
-                        <label>Email</label>
+                        <label>อีเมล</label>
                         <input type="email" name="email">
 
-                        <label>Enrollment Date</label>
-                        <input type="date" name="enroll_date">
-
-                        <label>Room-id</label>
+                        <label>ห้องเรียน</label>
                         <input type="text" name="room_id">
 
-                        <label>Year</label>
-                        <input type="text" name="year">
-
-                        <label>Semester</label>
+                        <label>เทอม</label>
                         <input type="text" name="semester">
 
-                        <label>Enroll year</label>
+                        <label>ปี</label>
+                        <input type="text" name="year">
+
+                        <label>ปีที่เข้าเรียน</label>
                         <input type="text" name="enroll_year">
                     </div>
                 </div>
 
                 <div id="submit_area">
-                    <button type="submit" id="save_btn">Save</button>
+                    <button type="submit" id="save_btn">บันทึก</button>
                 </div>
             </form>
         </div>

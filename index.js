@@ -482,7 +482,7 @@ app.get('/student/exam-schedule', (req, res) => {
     });
 });
 
-app.get('/', function (req, res) {
+app.get('/admin/record-stu', function (req, res) {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const offset = (page - 1) * limit; // ต้องข้ามกี่คน
@@ -509,126 +509,141 @@ app.get('/', function (req, res) {
 });
 //กด edit
 app.get('/edit/:id', function (req, res) {
-    const query = `SELECT rowid, * FROM Students WHERE rowid = ${req.params.id}`;
-    db.get(query, (err, row) => {
-        if (err) {
-            console.log(err.message);
-            return res.send("เกิดข้อผิดพลาด");
-        }
+    // JOIN Students กับ Users โดยใช้ user_id เป็นตัวเชื่อม
+    const query = `
+        SELECT Students.*, Users."profile_picture" 
+        FROM Students 
+        JOIN Users ON Students.user_id = Users.user_id 
+        WHERE Students.rowid = ?`;
 
-        if (!row) {
-            return res.send("ไม่พบข้อมูลนักเรียน");
-        }
+    db.get(query, [req.params.id], (err, row) => {
+        if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
+        if (!row) return res.send("ไม่พบข้อมูลนักเรียน");
 
         let imageBase64 = null;
-        // ตรวจสอบว่ามีข้อมูลในคอลัมน์ profile_image หรือไม่
-        if (row.profile_image) {
-            // แปลง Buffer (BLOB) ให้เป็น Base64 string
-            const base64Data = row.profile_image.toString('base64');
-            // สร้างเป็น Data URL ที่ถูกต้องสำหรับใส่ใน src ของ <img>
-            imageBase64 = `data:image/jpeg;base64,${base64Data}`;
+        // ดึงจากคอลัมน์ "profile-picture" ของตาราง Users
+        if (row["profile_picture"]) {
+            imageBase64 = `data:image/jpeg;base64,${row["profile_picture"].toString('base64')}`;
         }
 
-        // 3. ส่งข้อมูลไปที่ไฟล์ EJS
-        // ส่ง 'data' เป็นข้อมูลนักเรียน และ 'profileImg' เป็นรูป Base64
-        res.render('Edit-Student', { data: row, profileImg : imageBase64 });
+        res.render('Edit-Student', { data: row, profileImg: imageBase64 });
     });
 });
 app.post('/update/:id', upload.single('profile_image'), (req, res) => {
-    const student_id = req.params.id;
+    const studentRowId = req.params.id;
     const data = req.body;
+    const imageBuffer = req.file ? req.file.buffer : null;
 
-    // เช็คว่ามีการส่งไฟล์รูปใหม่มาหรือไม่
-    if (req.file) {
-        // กรณีมีรูปภาพใหม่ อัปเดตข้อมูลทั้งหมดพร้อมรูปลง DB (BLOB)
-        const imageBuffer = req.file.buffer;
-        
-        const sql = `
-            UPDATE Students SET 
-            first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
-            nationality = ?, phone = ?, email = ?, room_id = ?, 
-            year = ?, semester = ?, enroll_year = ?, profile_image = ?
-            WHERE student_id = ?
-        `;
+    // 1. อัปเดตข้อมูลตัวหนังสือในตาราง Students
+    const sqlUpdateStudent = `
+        UPDATE Students SET 
+        first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
+        nationality = ?, phone = ?, email = ?, room_id = ?, 
+        year = ?, semester = ?, enroll_year = ?
+        WHERE rowid = ?
+    `;
 
-        const values = [
-            data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
-            data.nationality, data.phone, data.email, data.room_id,
-            data.year, data.semester, data.enroll_year, imageBuffer, student_id
-        ];
+    const studentValues = [
+        data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
+        data.nationality, data.phone, data.email, data.room_id,
+        data.year, data.semester, data.enroll_year, studentRowId
+    ];
 
-        db.run(sql, values, (err) => {
-            if (err) return console.error(err.message);
-            res.redirect('/');
-        });
+    db.run(sqlUpdateStudent, studentValues, function(err) {
+        if (err) return console.error(err.message);
 
-    } else {
-        // กรณีไม่มีรูปภาพใหม่ อัปเดตเฉพาะข้อมูลตัวหนังสือ ไม่ยุ่งกับคอลัมน์ profile_image
-        const sql = `
-            UPDATE Students SET 
-            first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
-            nationality = ?, phone = ?, email = ?, room_id = ?, 
-            year = ?, semester = ?, enroll_year = ?
-            WHERE student_id = ?
-        `;
-
-        const values = [
-            data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
-            data.nationality, data.phone, data.email, data.room_id,
-            data.year, data.semester, data.enroll_year, student_id
-        ];
-
-        db.run(sql, values, (err) => {
-            if (err) return console.error(err.message);
-            res.redirect('/');
-        });
-    }
+        // 2. ถ้ามีการอัปโหลดรูปใหม่ ให้ไปอัปเดตที่ตาราง Users
+        if (imageBuffer) {
+            // หา user_id จาก rowid ก่อน
+            db.get(`SELECT user_id FROM Students WHERE rowid = ?`, [studentRowId], (err, row) => {
+                if (row && row.user_id) {
+                    const sqlUpdateUser = `UPDATE Users SET "profile_picture" = ? WHERE user_id = ?`;
+                    db.run(sqlUpdateUser, [imageBuffer, row.user_id], (err) => {
+                        res.redirect('/admin/record-stu');
+                    });
+                } else {
+                    res.redirect('/admin/record-stu');
+                }
+            });
+        } else {
+            res.redirect('/admin/record-stu');
+        }
+    });
 });
 app.get('/students', function (req, res) {
         res.render('Add-Student');
 });
-app.post('/add', (req, res) => {
-    const data = req.body;
+app.post('/add', upload.single('profile_image'), async (req, res) => {
+    try {
+        const data = req.body;
+        const imageBuffer = req.file ? req.file.buffer : null;
 
-    const sql = `
-        INSERT INTO Students 
-        (first_name, last_name, dob, citizen_id, sex, nationality, phone, student_id, email, room_id, year, semester, enroll_year) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-    `;
+        // 1. สร้างบัญชีในตาราง Users
+        const accountResult = await createAccount('student');
 
-    const values = [
-        data.firstname, 
-        data.lastname,
-        data.dob,
-        data.citizen_id,
-        data.gender, 
-        data.nationality,
-        data.phone, 
-        data.student_id,
-        data.email,
-        data.room_id,
-        data.year,
-        data.semester,
-        data.enroll_year
-    ];
-    createAccount("student");
-    db.run(sql, values, (err, result) => {
-        if (err) {
-            console.error('Insert error:', err);
-            return res.send("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        if (!accountResult.success) {
+            console.error("Create Account Error:", accountResult.error);
+            return res.status(500).send("ไม่สามารถสร้างบัญชีผู้ใช้ได้: " + accountResult.error);
         }
+
+        const newUserId = accountResult.user.id;
+
+        // ฟังก์ชันช่วยรัน SQL แบบรอผล (Promise)
+        const runSQL = (sql, params) => {
+            return new Promise((resolve, reject) => {
+                db.run(sql, params, function (err) {
+                    if (err) reject(err);
+                    else resolve(this);
+                });
+            });
+        };
+
+        // 2. ถ้ามีรูปภาพ ให้อัปเดตไปที่ตาราง Users และรอจนเสร็จ (ใช้ await)
+        if (imageBuffer) {
+            // ตรวจสอบชื่อคอลัมน์อีกครั้ง: ถ้าเป็นขีดกลางใช้ "profile-picture"
+            // ถ้าเป็น underscore ใช้ "profile_picture"
+            const updateImgSql = `UPDATE Users SET "profile_picture" = ? WHERE user_id = ?`;
+            try {
+                await runSQL(updateImgSql, [imageBuffer, newUserId]);
+                console.log("อัปเดตรูปภาพลงตาราง Users สำเร็จ");
+            } catch (err) {
+                console.error("Update profile picture error:", err.message);
+            }
+        }
+
+        // 3. บันทึกข้อมูลลงตาราง Students
+        const studentSql = `
+            INSERT INTO Students 
+            (first_name, last_name, dob, citizen_id, sex, nationality, phone, student_id, email, room_id, year, semester, enroll_year, user_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        `;
+
+        const studentValues = [
+            data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
+            data.nationality, data.phone, data.student_id, data.email,
+            data.room_id, data.year, data.semester, data.enroll_year,
+            newUserId
+        ];
+
+        // รัน INSERT และรอจนเสร็จ
+        await runSQL(studentSql, studentValues);
         
-        res.redirect('/');
-    });
-})
+        console.log(`เพิ่มนักเรียนสำเร็จ: ${data.firstname}`);
+        res.redirect('/admin/record-stu');
+
+    } catch (error) {
+        console.error('Unexpected Error:', error);
+        res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
+    }
+});
 app.get('/delete/:id', function (req, res) {
-    const query = `DELETE * FROM Students WHERE id = ${req.params.id}`;
+    const query = `DELETE FROM Students WHERE rowid = ${req.params.id}`;
     db.all(query, (err, rows) => {
         if (err) {
             console.log(err.message);
         }
         console.log(rows);
-        res.redirect('/');
+        res.redirect('/admin/record-stu');
     });
 })
 app.get('/student/home', function (req, res) {

@@ -18,10 +18,10 @@
                 <div id="left_col">
 
                     <div id="page_header">
-                        <a href="/">
+                        <a href="/admin/record-stu">
                             <img src="/images/icons/Back.svg" alt="ย้อนกลับ">
                         </a>
-                        <h2>Edit Student Information</h2>
+                        <h2>แก้ไขข้อมูลนักเรียน</h2>
                     </div>
 
                     <div id="profile_upload">
@@ -36,55 +36,55 @@
                         <input type="file" name="profile_image" id="file_input" accept="image/*" style="display: none;">
                     </div>
                     
-                    <p id="section_title">Student Information</p>
+                    <p id="section_title">ข้อมูลนักเรียน</p>
 
-                    <label>Firstname</label>
+                    <label>ชื่อจริง</label>
                     <input type="text" name="firstname" value="<%= data.first_name %>" required>
 
-                    <label>Lastname</label>
+                    <label>นามสกุล</label>
                     <input type="text" name="lastname" value="<%= data.last_name %>" required>
 
-                    <label>Date of Birth</label>
+                    <label>วันเกิด</label>
                     <input type="date" name="dob" value="<%= data.dob %>">
 
-                    <label>Citizen-id</label>
+                    <label>รหัสประจำตัวประชาชน</label>
                     <input type="text" name="citizen_id" value="<%= data.citizen_id %>">
                 </div>
 
                 <div id="right_col">
-                    <label>Gender</label>
+                    <label>เพศ</label>
                     <select name="gender">
-                        <option value="Male" <%= data.sex === 'Male' ? 'selected' : '' %>>Male</option>
-                        <option value="Female" <%= data.sex === 'Female' ? 'selected' : '' %>>Female</option>
+                        <option value="Male" <%= data.sex === 'Male' ? 'selected' : '' %>>ชาย</option>
+                        <option value="Female" <%= data.sex === 'Female' ? 'selected' : '' %>>หญิง</option>
                     </select>
 
-                    <label>Nationality</label>
+                    <label>สัญชาติ</label>
                     <input type="text" name="nationality" value="<%= data.nationality %>">
 
-                    <label>Phone</label>
+                    <label>เบอร์โทรศัพท์</label>
                     <input type="text" name="phone" value="<%= data.phone %>">
 
-                    <label>Student-id</label>
+                    <label>รหัสประจำตัวนักเรียน</label>
                     <input type="text" name="student_id" value="<%= data.student_id %>" readonly style="background-color: #eee;">
-                    <label>Email</label>
+                    <label>อีเมล</label>
                     <input type="email" name="email" value="<%= data.email %>">
 
-                    <label>Room-id</label>
+                    <label>ห้องเรียน</label>
                     <input type="text" name="room_id" value="<%= data.room_id %>">
 
-                    <label>Year</label>
-                    <input type="text" name="year" value="<%= data.year %>">
-
-                    <label>Semester</label>
+                    <label>เทอม</label>
                     <input type="text" name="semester" value="<%= data.semester %>">
 
-                    <label>Enroll year</label>
+                    <label>ปี</label>
+                    <input type="text" name="year" value="<%= data.year %>">
+
+                    <label>ปีที่เข้า</label>
                     <input type="text" name="enroll_year" value="<%= data.enroll_year %>">
                 </div>
             </div>
 
             <div id="submit_area">
-                <button type="submit" id="save_btn">Update</button>
+                <button type="submit" id="save_btn">แก้ไข</button>
             </div>
         </form>
     </div>
