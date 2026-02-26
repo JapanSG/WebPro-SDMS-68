@@ -180,6 +180,22 @@ app.post('/admin/manage-schedule/inside/add',(req,res)=>{
     });
 });
 
+app.post('/admin/manage-schedule/inside/delete',(req,res)=>{
+    const {room_id, day, period, year, semester} = req.body;
+
+    const sqlDeleteSchedule =`
+        DELETE FROM Schedule
+        WHERE room_id = ? AND day= ? AND period = ? AND year = ? AND semester = ?`;
+
+    db.run(sqlDeleteSchedule,[room_id, day, period, year, semester],(err)=>{
+        if (err){
+            console.error("Error deleting schedule:",err.message);
+            return res.status(500).send("เกิดข้อผิดพลาดในการลบวิชา");
+        }
+        res.redirect(`/admin/manage-schedule/inside/${room_id}?year=${year}&semester=${semester}`);
+    });
+});
+
 app.listen(port, () => {
 console.log("Server started.");
 });
