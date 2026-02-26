@@ -164,11 +164,10 @@ app.post('/add', (req, res) => {
         
         res.redirect('/');
     });
-});
-
-app.get('/delete/:id', function (req, res) {
-    const query = `DELETE FROM Students WHERE student_id = ${req.params.id}`;
-    db.run(query, (err, rows) => {
+})
+pp.get('/delete/:id', function (req, res) {
+    const query = `DELETE * FROM Students WHERE id = ${req.params.id}`;
+    db.all(query, (err, rows) => {
         if (err) {
             console.log(err.message);
         }
