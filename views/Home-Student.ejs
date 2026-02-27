@@ -17,13 +17,13 @@
                 <div class="information">
                     <div class="title">
                         <p>ข้อมูลนักเรียน</p>
-                        <img class="edit_icon" src="/images/icons/Edit.svg" alt="Edit">
+                        <img class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit">
                     </div>
                     <div class="info_content">
                         <p>รหัสประจำตัว: <span><%= student.student_id || '-'%></span></p>
                         <p>รหัสประจำตัวประชาชน: <span><%= student.citizen_id || '-'%></span></p>
                         <br>
-                        <p>ชื่อ - นามสกุล (ไทย): <span><%= student.first_name || '-' %> <%= student.last_name || '-'%></span></p>
+                        <p>ชื่อ - นามสกุล: <span><%= student.first_name || '-' %> <%= student.last_name || '-'%></span></p>
                         <p>email: <span><%= student.email || '-'%></span></p>
                         <p>โทรศัพท์: <span><%= student.phone || '-'%></span></p>
                         <br>
@@ -58,6 +58,7 @@
                 <div class="event_wrapper">
                     <div class="event_header">
                         <h3 class="event_title">กิจกรรมต่าง ๆ</h3>
+                        <img class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit">
                     </div>
                     <div class="event_date" id="eventDate"></div>
                     <div class="event_list" id="eventList">ไม่มีกิจกรรม</div>

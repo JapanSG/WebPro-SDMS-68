@@ -11,6 +11,72 @@
 
 <body>
     <%- include('Menu-AS') %>
+        <div class="home_container">
+            <div class="admin_grid">
+                <div class="admin_card">
+                    <img src="/images/icons/Student.svg" alt="icon">
+                    <h3>Manage Student</h3>
+                    <p>ลงทะเบียนนักเรียนใหม่เข้าสู่ระบบและกำหนดให้นักเรียนเข้าเรียนในชั้นเรียนใดชั้นเรียนหนึ่ง.</p>
+                    <a href="/admin/record-stu" class="card_btn">Manage Student</a>
+                </div>
+
+                <div class="admin_card">
+                    <img src="/images/icons/Teacher.svg" alt="icon">
+                    <h3>Manage Teacher</h3>
+                    <p>ลงทะเบียนครูใหม่เข้าสู่ระบบและกำหนดวิชาเรียน.</p>
+                    <a href="/admin/record-teach" class="card_btn">Manage Teacher</a>
+                </div>
+
+                <div class="admin_card">
+                    <img src="/images/icons/Subject.svg" alt="icon">
+                    <h3>Manage Subject</h3>
+                    <p>สร้างวิชาใหม่และเชื่อมโยงกับครูผู้สอน</p>
+                    <a href="/admin/subject" class="card_btn">Manage Subject</a>
+                </div>
+
+                <div class="admin_card">
+                    <img src="/images/icons/Schedule.svg" alt="icon">
+                    <h3>Set Schedule</h3>
+                    <p>วางแผนและมอบหมายชั้นเรียน</p>
+                    <a href="/admin/class-schedule" class="card_btn">Set Schedule</a>
+                </div>
+            </div>
+
+
+            <div class="admin_grid">
+                <div class="admin_card summary">
+                    <img src="/images/icons/Student.svg" alt="stat">
+                    <h3>Total Student</h3>
+                    <span class="stat_num">
+                        <%= locals.stats ? stats.totalStudents : 0 %>
+                    </span>
+                </div>
+
+                <div class="admin_card summary">
+                    <img src="/images/icons/Teacher.svg" alt="stat">
+                    <h3>Total Teacher</h3>
+                    <span class="stat_num">
+                        <%= locals.stats ? stats.totalTeachers : 0 %>
+                    </span>
+                </div>
+
+                <div class="admin_card summary">
+                    <img src="/images/icons/Subject.svg" alt="stat">
+                    <h3>Total Subject</h3>
+                    <span class="stat_num">
+                        <%= locals.stats ? stats.totalSubjects : 0 %>
+                    </span>
+                </div>
+
+                <div class="admin_card summary">
+                    <img src="/images/icons/Class.svg" alt="stat">
+                    <h3>Active Class</h3>
+                    <span class="stat_num">
+                        <%= locals.stats ? stats.activeClasses : 0 %>
+                    </span>
+                </div>
+            </div>
+        </div>
 </body>
 
 </html>

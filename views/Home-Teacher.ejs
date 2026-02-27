@@ -16,24 +16,14 @@
                 <img class="profile" src="/images/icons/User.svg" alt="User-image">
                 <div class="information">
                     <div class="title">
-                        <div class="title_text">
-                            <p>ข้อมูลอาจารย์</p>
-                        </div>
+                        <p>ข้อมูลอาจารย์</p>
+                        <img class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit">
                     </div>
                     <div class="info_content">
-                        <p>รหัสประจำตัว: <span>ไม่มีข้อมูล</span></p>
-                        <p>รหัสประจำตัวประชาชน: <span>ไม่มีข้อมูล</span></p>
-                        <br>
-                        <p>ชื่อ - นามสกุล (ไทย): <span>ไม่มีข้อมูล</span></p>
-                        <p>ชื่อ - นามสกุล (EN): <span>ไม่มีข้อมูล</span></p>
-                        <br>
-                        <p>วัน/เดือน/ปี เกิด: <span>ไม่มีข้อมูล</span></p>
-                        <p>เพศ: <span>ไม่มีข้อมูล</span></p>
-                        <br>
-                        <p>สถานภาพอาจารย์: <span>ไม่มีข้อมูล</span></p>
-                        <p>ปีที่เข้าทำงาน: <span>ไม่มีข้อมูล</span></p>
-                        <p>ห้องประจำชั้น: <span>ไม่มีข้อมูล</span></p>
-
+                        <p>รหัสประจำตัว: <span><%= teacher.teacher_id || '-'%></span></p>
+                        <p>ชื่อ - นามสกุล: <span><%= teacher.first_name || '-' %> <%= teacher.last_name || '-'%></span></p>
+                        <p>email: <span><%= teacher.email || '-'%></span></p>
+                        <p>โทรศัพท์: <span><%= teacher.phone || '-'%></span></p>
                     </div>
                 </div>
             </div>
@@ -56,6 +46,7 @@
                 <div class="event_wrapper">
                     <div class="event_header">
                         <h3 class="event_title">กิจกรรมต่าง ๆ</h3>
+                        <img class="edit_icon" src="/images/icons/Edit-info.svg" alt="edit">
                     </div>
                     <div class="event_date" id="eventDate"></div>
                     <div class="event_list" id="eventList">ไม่มีกิจกรรม</div>
