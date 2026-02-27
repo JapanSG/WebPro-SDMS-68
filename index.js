@@ -121,8 +121,86 @@ app.get('/teacher/home',function(req,res){
 app.get('/admin/home', checkAuthenticated, checkRole('admin'), (req, res) => {
     res.render('Home-Admin',{ user: req.user });
 });
+
+// Submit Attendance
+// =====================================================================
+// [GET] หน้าเว็บสำหรับเช็คชื่อนักเรียน (Submit Attendance)
+// =====================================================================
 app.get('/ao/submit', checkAuthenticated, checkRole('ao'), (req, res) => {
-    res.render('Submit-Attendance',{ user: req.user });
+    const { grade, room, date } = req.query;
+
+    // ถ้าเปิดมาครั้งแรก (ยังไม่กด Filter) ให้แสดงหน้าเปล่าๆ รอไว้
+    if (!grade || !room || !date) {
+        return res.render('Submit-Attendance', { 
+            user: req.user, 
+            students: [], 
+            filterData: { grade: '', room: '', date: '' } 
+        });
+    }
+
+    // แปลงข้อมูลให้ตรงกับ Database
+    // grade_level ใน DB เป็น Int (เช่น 1)
+    const gradeInt = parseInt(grade); 
+    
+    // room_name ใน DB เป็น Text (เช่น "1/1")
+    const roomNameStr = `${grade}/${room}`; 
+
+    // คำสั่ง SQL ดึงรายชื่อเด็กในห้อง + สถานะการมาเรียนของวันนั้น (ถ้ามี)
+    const sql = `
+        SELECT s.student_id, s.first_name, s.last_name, a.status
+        FROM Students s
+        JOIN Rooms r ON s.room_id = r.room_id
+        LEFT JOIN Attendance a ON s.student_id = a.student_id AND a.date = ?
+        WHERE r.grade_level = ? AND r.room_name = ?
+        ORDER BY s.student_id ASC
+    `;
+
+    db.all(sql, [date, gradeInt, roomNameStr], (err, students) => {
+        if (err) {
+            console.error("Error fetching students:", err.message);
+            students = [];
+        }
+
+        res.render('Submit-Attendance', { 
+            user: req.user, 
+            students: students,
+            filterData: { grade, room, date } 
+        });
+    });
+});
+
+// =====================================================================
+// [POST] บันทึกข้อมูลการเช็คชื่อลง Database
+// =====================================================================
+app.post('/ao/submit/save', checkAuthenticated, checkRole('ao'), (req, res) => {
+    const data = req.body;
+    const attendanceDate = data.attendance_date;
+    const grade = data.grade;
+    const room = data.room;
+
+    // ลูปหาเฉพาะข้อมูลที่มาจากปุ่มสถานะ (status_รหัสนักเรียน)
+    for (const key in data) {
+        if (key.startsWith('status_')) {
+            const studentId = key.replace('status_', ''); // ตัดคำว่า status_ ออก เหลือแค่รหัส
+            const status = data[key]; // จะได้ค่า 'Present', 'Absent', หรือ 'Late'
+
+            // คำสั่ง UPSERT: ถ้าไม่เคยเช็คชื่อวันนี่ให้เพิ่มใหม่ แต่ถ้าเคยแล้วให้อัปเดตสถานะทับ
+            const sqlUpsert = `
+                INSERT INTO Attendance (student_id, date, status) 
+                VALUES (?, ?, ?)
+                ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status
+            `;
+
+            db.run(sqlUpsert, [studentId, attendanceDate, status], (err) => {
+                if (err) {
+                    console.error(`Error saving attendance for ${studentId}:`, err.message);
+                }
+            });
+        }
+    }
+
+    // บันทึกเสร็จแล้ว Redirect กลับไปหน้าเดิมพร้อมตัวกรอง จะได้เห็นข้อมูลที่อัปเดต
+    res.redirect(`/ao/submit?grade=${grade}&room=${room}&date=${attendanceDate}`);
 });
 
 const DEFAULT_PASSWORD = 'webPro2026';
