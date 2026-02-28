@@ -1,16 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit-Attendance</title>
+    <title>Submit Attendance</title>
     <link rel="stylesheet" href="/css/global.css">
-
+    <link rel="stylesheet" href="/css/submit-attendance.css">
 </head>
-
 <body>
     <%- include('Menu-AO') %>
-</body>
+    <%- include('showMenu') %>
 
+    <% 
+        const fData = typeof filterData !== 'undefined' ? filterData : { grade: '', room: '', date: '' }; 
+        const studentList = typeof students !== 'undefined' ? students : [];
+    %>
+
+    <div class="container">
+        <div class="top-bar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="ค้นหารหัสนักเรียน หรือ ชื่อ-นามสกุล...">
+            </div>
+
+            <form action="/ao/submit" method="GET" class="filter-group" id="filterForm">
+                <select name="grade" class="filter-select" required>
+                    <option value="" disabled <%= !fData.grade ? 'selected' : '' %>>เลือกระดับชั้น</option>
+                    <% for(let i=1; i<=6; i++) { %>
+                        <option value="<%= i %>" <%= fData.grade == i ? 'selected' : '' %>>ชั้นปีที่ <%= i %></option>
+                    <% } %>
+                </select>
+
+                <select name="room" class="filter-select" required>
+                    <option value="" disabled <%= !fData.room ? 'selected' : '' %>>เลือกห้อง</option>
+                    <% for(let i=1; i<=3; i++) { %>
+                        <option value="<%= i %>" <%= fData.room == i ? 'selected' : '' %>>ห้อง <%= i %></option>
+                    <% } %>
+                </select>
+
+                <input type="date" name="date" class="filter-date" id="filterDate" value="<%= fData.date %>" required>
+
+                <button type="submit" class="btn-filter">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    Filter
+                </button>
+            </form>
+        </div>
+
+        <div class="table-actions">
+            <button type="button" class="btn-mark-all" onclick="markAllPresent()">
+                ✅ เช็คมาเรียนทั้งหมด
+            </button>
+            <button type="submit" form="attendanceForm" class="btn-save">
+                💾 บันทึกการเช็คชื่อ
+            </button>
+        </div>
+
+        <div class="table-container">
+            <form action="/ao/submit/save" method="POST" id="attendanceForm">
+                <input type="hidden" name="attendance_date" value="<%= fData.date %>">
+                <input type="hidden" name="grade" value="<%= fData.grade %>">
+                <input type="hidden" name="room" value="<%= fData.room %>">
+
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Full Name</th>
+                            <th>Date</th>
+                            <th style="text-align: center;">Attendance (สถานะ)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (studentList.length === 0) { %>
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: #888;">
+                                    <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
+                                    กรุณาเลือกระดับชั้น ห้อง และวันที่ เพื่อดึงรายชื่อนักเรียน
+                                </td>
+                            </tr>
+                        <% } else { %>
+                            <% studentList.forEach((student) => { %>
+                                <tr>
+                                    <td><%= student.student_id %></td>
+                                    <td><%= student.first_name %> <%= student.last_name %></td>
+                                    <td><%= fData.date %></td>
+                                    <td>
+                                        <div class="status-group">
+                                            <label class="status-btn present">
+                                                <input type="radio" name="status_<%= student.student_id %>" value="Present" required 
+                                                <%= student.status === 'Present' ? 'checked' : '' %>> มาเรียน
+                                            </label>
+                                            <label class="status-btn absent">
+                                                <input type="radio" name="status_<%= student.student_id %>" value="Absent" 
+                                                <%= student.status === 'Absent' ? 'checked' : '' %>> ขาด
+                                            </label>
+                                            <label class="status-btn leave"> 
+                                                <input type="radio" name="status_<%= student.student_id %>" value="Late" 
+                                                <%= student.status === 'Late' ? 'checked' : '' %>> สาย
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ฟังก์ชันช่วยกดปุ่ม "มาเรียน" ให้ทุกคน
+        function markAllPresent() {
+            const presentRadios = document.querySelectorAll('input[type="radio"][value="Present"]');
+            presentRadios.forEach(radio => radio.checked = true);
+        }
+
+        // เซ็ตวันที่เป็นปัจจุบันอัตโนมัติ
+        window.onload = function() {
+            const dateInput = document.getElementById('filterDate');
+            if (!dateInput.value) { 
+                const today = new Date();
+                const offset = today.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(today - offset)).toISOString().split('T')[0];
+                dateInput.value = localISOTime;
+            }
+        };
+    </script>
+</body>
 </html>
