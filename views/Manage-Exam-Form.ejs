@@ -4,6 +4,7 @@
     <div class="exam-header">
         <div class="date">
             <p>วันที่ <%= dateValues[2] %> <%= monthNames[dateValues[1] - 1] %> <%= dateValues[0] %></p>
+            <button class="editDate" value="<%= exam_id %>"><img src="/images/icons/VerticalSchedule.svg" class="dateIcon"></button>
         </div>
         <button type="button" class="deleteExam" value="<%= exam_id %>">ลบ</button>
     </div>
