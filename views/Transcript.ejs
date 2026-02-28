@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcript</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/Transcript.css">
+</head>
+<body>
+    <%- include('Menu-Student') %>
+    <%- include('showMenu') %>
+    
+    <main class="container">
+        <div class="profile-header card">
+            <div class="profile-info">
+                <img src="<%= user.profile_picture || '/images/default-avatar.png' %>" alt="Profile" class="avatar">
+                <div class="profile-text">
+                    <h2><%= student.first_name %> <%= student.last_name %></h2>
+                    <p class="text-muted">ชั้น ม.<%= student.grade_level || student.year %> ห้อง <%= student.room_name || student.room_id %> | เลขประจำตัวนักเรียน: <%= student.student_id %></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-grid" style="grid-template-columns: 2fr 1fr;">
+            <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+                <h3 style="margin-top: 0;">เลือกปีการศึกษาและภาคเรียน</h3>
+                <div class="filter-group" style="margin-top: 1rem;">
+                    <label for="filter-year">ปีการศึกษา:</label>
+                    <select id="filter-year" class="semester-select" onchange="applyFilters()">
+                        <% availableYears.forEach(function(year) { %>
+                            <option value="<%= year %>" <%= selectedYear == year ? 'selected' : '' %>>
+                                <%= year + 543 %>
+                            </option>
+                        <% }); %>
+                    </select>
+
+                    <label for="filter-term" style="margin-left: 1rem;">ภาคเรียน:</label>
+                    <select id="filter-term" class="semester-select" onchange="applyFilters()">
+                        <option value="1" <%= selectedTerm === '1' ? 'selected' : '' %>>ภาคเรียนที่ 1</option>
+                        <option value="2" <%= selectedTerm === '2' ? 'selected' : '' %>>ภาคเรียนที่ 2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="gpa-card card">
+                <h3>เกรดเฉลี่ยประจำภาคเรียน</h3>
+                <p class="gpa-score"><%= termGPA %></p>
+                <p style="margin: 0; opacity: 0.8;">หน่วยกิตรวม: <%= totalCredits %></p>
+            </div>
+        </div>
+
+        <div class="history-section card">
+            <h3>ผลการเรียน (Transcript)</h3>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>รหัสวิชา</th>
+                        <th>ชื่อวิชา</th>
+                        <th style="text-align: center;">หน่วยกิต</th>
+                        <th style="text-align: center;">เกรดที่ได้</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (grades && grades.length > 0) { %>
+                        <% grades.forEach(function(record) { 
+                            // เช็กสีของเกรด (เกรด 4 สีเขียว, เกรด 0 สีแดง)
+                            let gradeClass = '';
+                            if (record.grade >= 3.5) gradeClass = 'grade-4';
+                            else if (record.grade == 0) gradeClass = 'grade-0';
+                        %>
+                            <tr>
+                                <td><%= record.subject_id %></td>
+                                <td><%= record.subject_name || 'ไม่ระบุชื่อวิชา' %></td>
+                                <td style="text-align: center;"><%= record.credit || '-' %></td>
+                                <td style="text-align: center;">
+                                    <span class="grade-badge <%= gradeClass %>"><%= record.grade %></span>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" class="text-center" style="padding: 3rem 0;">
+                                ยังไม่มีการบันทึกผลการเรียนในภาคเรียนนี้
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        function applyFilters() {
+            const term = document.getElementById('filter-term').value;
+            const year = document.getElementById('filter-year').value;
+            // สั่งโหลดหน้าเว็บใหม่ไปที่ route /student/transcript
+            window.location.href = `/student/transcript-grade?term=${term}&year=${year}`;
+        }
+    </script>
+</body>
+</html>
