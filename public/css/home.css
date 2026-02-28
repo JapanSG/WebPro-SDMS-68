@@ -69,6 +69,8 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+
 .attendance_wrapper {
     display: flex;
     flex-direction: column;

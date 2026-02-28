@@ -115,7 +115,7 @@ app.use('/student', checkAuthenticated, checkRole('student'));
 app.use('/teacher', checkAuthenticated, checkRole('teacher'));
 app.use('/ao', checkAuthenticated, checkRole('ao'));
 
-app.get('/student/home', checkAuthenticated, (req, res) => {
+app.get('/student/home', (req, res) => {
     const userId = req.user.user_id;
 
     const sql = `SELECT * FROM Students
@@ -156,6 +156,13 @@ app.get('/teacher/home', function (req, res) {
             return res.render('Home-Teacher', { user: req.user, student: {} });
         }
 
+        if (teacherData && teacherData.profile_picture) {
+            const base64Image = teacherData.profile_picture.toString('base64');
+            teacherData.profilePictureBase64 = `data:image/jpeg;base64,${base64Image}`;
+        } else if (teacherData) {
+            teacherData.profilePictureBase64 = '/images/icons/User.svg';
+        }
+    
         res.render('Home-Teacher', {
             user: req.user,
             teacher: teacherData || {}
@@ -163,7 +170,7 @@ app.get('/teacher/home', function (req, res) {
     });
 });
 
-app.get('/admin/home', checkAuthenticated, async (req, res) => {
+app.get('/admin/home', async (req, res) => {
     try {
         const getCount = (sql) => {
             return new Promise((resolve, reject) => {
@@ -223,7 +230,7 @@ app.get('/student/attendance_history', (req, res) => {
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.post('/user/upload-profile', upload.single('profile_pic'), (req, res) => {
+app.post('/user/upload-profile', upload.single('profile_pic'), checkAuthenticated, (req, res) => {
     const userId = req.user.user_id;
     const file = req.file;
 
@@ -242,6 +249,46 @@ app.post('/user/upload-profile', upload.single('profile_pic'), (req, res) => {
             return res.status(500).json({ success: false, error: 'Database error' });
         }
         res.json({ success: true, message: 'อัปเดตโปรไฟล์เรียบร้อย' });
+    });
+});
+
+app.post('/event/add',checkAuthenticated, (req, res) => {
+    const { date, time, title } = req.body;
+    
+    const userId = req.user.user_id;
+
+    if (!date || !time || !title) {
+        return res.status(400).json({ success: false, error: 'ข้อมูลไม่ครบถ้วน' });
+    }
+
+    const sql = `INSERT INTO Events (date, time, title, user_id) VALUES (?, ?, ?, ?)`;
+    
+    db.run(sql, [date, time, title, userId], function(err) {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ success: false, error: 'Database error' });
+        }
+        res.json({ success: true, message: 'บันทึกกิจกรรมเรียบร้อย' });
+    });
+});
+
+app.get('/event/list', checkAuthenticated, (req, res) => {
+    const targetDate = req.query.date;
+    
+    const userId = req.user.user_id;
+
+    if (!targetDate) {
+        return res.status(400).json({ error: 'กรุณาระบุวันที่' });
+    }
+
+    const sql = `SELECT * FROM Events WHERE date = ? AND user_id = ? ORDER BY time ASC`;
+    
+    db.all(sql, [targetDate, userId], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        res.json(rows); 
     });
 });
 

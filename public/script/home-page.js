@@ -14,34 +14,34 @@ const eventDateEl = document.getElementById('eventDate');
 const eventListEl = document.getElementById('eventList');
 
 
-const mockEvents = {
-    "2026-02-1": [
-        { time: "08:00 - 9:00", title: "" },
-        { time: "9:00 - 10:00", title: "" }
-    ]
-};
-
-
-function showEvents(day, month, year) {
-
+async function showEvents(day, month, year) {
     eventDateEl.textContent = `กิจกรรมประจำวันที่ ${day} ${monthNames[month]} ${year + 543}`;
 
     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-    eventListEl.innerHTML = '';
+    eventListEl.innerHTML = '<div class="no_event">กำลังโหลดข้อมูล...</div>';
+    try {
+        
+        const response = await fetch(`/event/list?date=${dateKey}`);
+        const events = await response.json();
+        eventListEl.innerHTML = '';
 
-    if (mockEvents[dateKey] && mockEvents[dateKey].length > 0) {
-        mockEvents[dateKey].forEach(ev => {
-            const item = document.createElement('div');
-            item.classList.add('event_item');
-            item.innerHTML = `
-                <div class="time">${ev.time}</div>
-                <div class="desc">${ev.title}</div>
-            `;
-            eventListEl.appendChild(item);
-        });
-    } else {
-        eventListEl.innerHTML = '<div class="no_event">ไม่มีกิจกรรมในวันนี้</div>';
+        if (events.length > 0) {
+            events.forEach(ev => {
+                const item = document.createElement('div');
+                item.classList.add('event_item');
+                item.innerHTML = `
+                    <div class="time">${ev.time}</div>
+                    <div class="desc">${ev.title}</div>
+                `;
+                eventListEl.appendChild(item);
+            });
+        } else {
+            eventListEl.innerHTML = '<div class="no_event">ไม่มีกิจกรรมในวันนี้</div>';
+        }
+    } catch (error) {
+        console.error('Error fetching events:', error);
+        eventListEl.innerHTML = '<div class="no_event" style="color:red;">เกิดข้อผิดพลาดในการดึงข้อมูล</div>';
     }
 }
 
@@ -79,6 +79,8 @@ function renderCalendar(month, year) {
 
         dayDiv.addEventListener('click', () => {
 
+            selectedDateForEvent = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            
             document.querySelectorAll('.day').forEach(d => d.classList.remove('active_day'));
 
             dayDiv.classList.add('active_day');
@@ -259,6 +261,67 @@ saveBtn.addEventListener('click', async () => {
             alert('เปลี่ยนรูปโปรไฟล์สำเร็จ!');
             profileImg.src = previewImg.src; 
             overlay.classList.add('hidden');
+        } else {
+            alert('เกิดข้อผิดพลาด: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+// ---------- Add Event Logic ---------- //
+
+
+let selectedDateForEvent = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(displayDate.getDate()).padStart(2, '0')}`;
+
+const addEventBtn = document.getElementById('btn-add-event');
+const eventOverlay = document.getElementById('event-overlay');
+const cancelEventBtn = document.getElementById('btn-cancel-event');
+const saveEventBtn = document.getElementById('btn-save-event');
+const eventTimeInput = document.getElementById('event-time');
+const eventTitleInput = document.getElementById('event-title');
+const eventModalDate = document.getElementById('event-modal-date');
+
+
+addEventBtn.addEventListener('click', () => {
+    eventModalDate.textContent = `วันที่บันทึก: ${selectedDateForEvent}`;
+    eventOverlay.classList.remove('hidden');
+});
+
+
+cancelEventBtn.addEventListener('click', () => {
+    eventOverlay.classList.add('hidden');
+    eventTimeInput.value = '';
+    eventTitleInput.value = '';
+});
+
+
+saveEventBtn.addEventListener('click', async () => {
+    const time = eventTimeInput.value.trim();
+    const title = eventTitleInput.value.trim();
+
+    if (!time || !title) return alert("กรุณากรอกเวลาและชื่อกิจกรรมให้ครบครับ");
+
+    try {
+        const response = await fetch('/event/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                date: selectedDateForEvent, 
+                time: time, 
+                title: title 
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            alert('เพิ่มกิจกรรมสำเร็จ!');
+            eventOverlay.classList.add('hidden');
+            eventTimeInput.value = '';
+            eventTitleInput.value = '';
+            
+            const [y, m, d] = selectedDateForEvent.split('-');
+            showEvents(parseInt(d), parseInt(m) - 1, parseInt(y));
         } else {
             alert('เกิดข้อผิดพลาด: ' + result.error);
         }
