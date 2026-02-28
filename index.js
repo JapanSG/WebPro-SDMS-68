@@ -14,7 +14,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-let db = new sqlite3.Database('school.db', (err) => {    
+let db = new sqlite3.Database('school.db', (err) => {
     if (err) {
         return console.error(err.message);
     }
@@ -100,7 +100,7 @@ app.use('/teacher', checkAuthenticated, checkRole('teacher'));
 app.use('/ao', checkAuthenticated, checkRole('ao'));
 
 app.get('/student/home', checkAuthenticated, (req, res) => {
-    const userId = req.user.user_id; 
+    const userId = req.user.user_id;
 
     const sql = `SELECT * FROM Users
                  JOIN Students ON Students.user_id = Users.user_id
@@ -113,20 +113,20 @@ app.get('/student/home', checkAuthenticated, (req, res) => {
             return res.render('Home-Student', { user: req.user, student: {} });
         }
 
-        res.render('Home-Student', { 
+        res.render('Home-Student', {
             user: req.user,
-            student: studentData || {} 
+            student: studentData || {}
         });
     });
 });
-app.get('/teacher/home',function(req,res){
+app.get('/teacher/home', function (req, res) {
     res.render('Home-Teacher');
 });
 app.get('/admin/home', checkAuthenticated, checkRole('admin'), (req, res) => {
-    res.render('Home-Admin',{ user: req.user });
+    res.render('Home-Admin', { user: req.user });
 });
 app.get('/ao/submit', checkAuthenticated, checkRole('ao'), (req, res) => {
-    res.render('Submit-Attendance',{ user: req.user });
+    res.render('Submit-Attendance', { user: req.user });
 });
 
 const DEFAULT_PASSWORD = 'webPro2026';
@@ -178,7 +178,7 @@ function createAccount(role) {
 
 app.post('/admin/add-users/:role', checkAuthenticated, checkRole('admin'), async (req, res) => {
     const requestedRole = req.params.role;
-    console.log('requestedRole: ',requestedRole);
+    console.log('requestedRole: ', requestedRole);
 
     const allowedRoles = ['student', 'teacher', 'admin', 'ao'];
 
@@ -228,7 +228,7 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
 }
-app.get('/admin/home',function(req,res){
+app.get('/admin/home', function (req, res) {
     res.render('Home-Admin');
 });
 
@@ -286,7 +286,7 @@ app.get('/admin/exam-schedule', (req, res) => {
         if (req.query.year && req.query.semester && req.query.grade && req.query.type) {
             list = [req.query.year, req.query.semester, req.query.grade, req.query.type];
         }
-        else{
+        else {
             list = [year[0].year, 1, 1, "กลางภาค"];
         }
         db.all(sql2, list, (err, result1) => {
@@ -317,7 +317,7 @@ app.get('/admin/exam-schedule', (req, res) => {
                 result2.forEach(entry => {
                     entries[`${entry.exam_id}`].push(entry);
                 });
-                res.render('Manage-Exam', {year: year, exam_ids: exam_ids, entries: entries, dates: dates, query: req.query});
+                res.render('Manage-Exam', { year: year, exam_ids: exam_ids, entries: entries, dates: dates, query: req.query });
             });
         });
     });
@@ -333,13 +333,13 @@ app.get('/admin/exam-schedule/view', (req, res) => {
             return;
         }
         console.log(result);
-        res.render('View-Exam', {exam: result});
+        res.render('View-Exam', { exam: result });
     });
 });
 
 app.post('/admin/exam-schedule/addExam', (req, res) => {
     console.log("", req.body);
-    db.run('INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)', [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade], function(err) {
+    db.run('INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)', [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade], function (err) {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error adding exam");
@@ -354,7 +354,7 @@ app.post('/admin/exam-schedule/addEntry', (req, res) => {
     console.log(req.body);
     const sql = 'INSERT INTO Exam_Schedule_Entries (entry_id, start, end, subject_id, exam_id) VALUES (NULL, ?, ?, ?, ?)';
     let params = [req.body.start, req.body.end, req.body.subject_id, req.body.exam_id];
-    db.run(sql, params, function(err) {
+    db.run(sql, params, function (err) {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error adding exam entry");
@@ -408,7 +408,7 @@ app.delete('/admin/exam-schedule/deleteExam', (req, res) => {
                 if (err) {
                     console.error(err.message);
                     res.status(500).send("Error deleting exam schedule");
-                } 
+                }
                 else {
                     console.log("Exam Schedule Deleted");
                     res.status(200).send("Exam schedule deleted successfully");
@@ -456,7 +456,7 @@ app.get('/student/exam-schedule', (req, res) => {
         else {
             type = "กลางภาค";
         }
-        db.all(sqlGetExamSchedule, [student.year-student.enroll_year+1, student.semester, student.year, type], (err, examSchedule) => {
+        db.all(sqlGetExamSchedule, [student.year - student.enroll_year + 1, student.semester, student.year, type], (err, examSchedule) => {
             if (err) {
                 console.error(err.message);
                 res.status(500).send("Error retrieving exam schedule");
@@ -476,7 +476,7 @@ app.get('/student/exam-schedule', (req, res) => {
                 });
                 // console.log(entries);
                 console.log(student);
-                res.render('View-Exam.ejs', {examSchedule: examSchedule, entries: entries, student: student, type: type});
+                res.render('View-Exam.ejs', { examSchedule: examSchedule, entries: entries, student: student, type: type });
             });
         });
     });
@@ -494,24 +494,25 @@ app.get('/admin/record-stu', function (req, res) {
     const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
     const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
     db.get(count, (err, count_all) => {
-    let whereSQL = '';
-    const search = req.query.search || '';
-    if (search !== '') { // ดูว่ามีคำค้นหา
-        whereSQL = `WHERE student_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
-    }
-    const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
-    const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
-    db.get(count, (err, count_all) => {
-        if (err) {
-            console.log(err.message);
+        let whereSQL = '';
+        const search = req.query.search || '';
+        if (search !== '') { // ดูว่ามีคำค้นหา
+            whereSQL = `WHERE student_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
         }
-        const totals = count_all ? count_all.total : 0;
-        const totalPages = Math.ceil(totals / limit);
-        db.all(query, (err, rows) => {
+        const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
+        const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
+        db.get(count, (err, count_all) => {
             if (err) {
                 console.log(err.message);
             }
-            res.render('Manage_Student_Records', { totalPeople: totals, students : rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
+            const totals = count_all ? count_all.total : 0;
+            const totalPages = Math.ceil(totals / limit);
+            db.all(query, (err, rows) => {
+                if (err) {
+                    console.log(err.message);
+                }
+                res.render('Manage_Student_Records', { totalPeople: totals, students: rows, currentPage: page, totalPages: totalPages, searchKeyword: search });
+            });
         });
     });
 });
@@ -535,14 +536,14 @@ app.get('/edit/student/:id', function (req, res) {
         // 1. ดึงข้อมูลตาราง Room
         db.all(`SELECT * FROM Rooms`, [], (err, rooms) => {
             if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
-            
+
             // 2. ดึงข้อมูลตาราง Year
             db.all(`SELECT * FROM Year`, [], (err, years) => {
                 if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
-                
+
                 // 3. ส่งข้อมูลทั้งหมดไปที่ EJS
-                res.render('Edit-Student', { 
-                    data: row, 
+                res.render('Edit-Student', {
+                    data: row,
                     profileImg: imageBase64,
                     rooms: rooms || [],
                     years: years || []
@@ -571,7 +572,7 @@ app.post('/update/student/:id', upload.single('profile_image'), (req, res) => {
         data.year, data.semester, data.enroll_year, studentRowId
     ];
 
-    db.run(sqlUpdateStudent, studentValues, function(err) {
+    db.run(sqlUpdateStudent, studentValues, function (err) {
         if (err) return console.error(err.message);
 
         // 2. ถ้ามีการอัปโหลดรูปใหม่ ให้ไปอัปเดตที่ตาราง Users
@@ -593,7 +594,7 @@ app.post('/update/student/:id', upload.single('profile_image'), (req, res) => {
     });
 })
 app.get('/students', function (req, res) {
-        res.render('Add-Student');
+    res.render('Add-Student');
 });
 app.post('/add', (req, res) => {
     const data = req.body;
@@ -605,13 +606,13 @@ app.post('/add', (req, res) => {
     `;
 
     const values = [
-        data.firstname, 
+        data.firstname,
         data.lastname,
         data.dob,
         data.citizen_id,
-        data.gender, 
+        data.gender,
         data.nationality,
-        data.phone, 
+        data.phone,
         data.student_id,
         data.email,
         data.room_id,
@@ -625,7 +626,7 @@ app.post('/add', (req, res) => {
             console.error('Insert error:', err);
             return res.send("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
         }
-        
+
         res.redirect('/');
     });
 });
@@ -636,18 +637,18 @@ app.get('/students', function (req, res) {
             console.error(err);
             return res.status(500).send("Database Error");
         }
-        
+
         // 2. ดึงข้อมูลตาราง Year
         db.all(`SELECT * FROM Year`, [], (err, years) => {
             if (err) {
                 console.error(err);
                 return res.status(500).send("Database Error");
             }
-            
+
             // 3. ส่งข้อมูล rooms และ years ไปให้ไฟล์ EJS
-            res.render('Add-Student', { 
-                rooms: rooms, 
-                years: years 
+            res.render('Add-Student', {
+                rooms: rooms,
+                years: years
             });
         });
     });
@@ -706,7 +707,7 @@ app.post('/add/student', upload.single('profile_image'), async (req, res) => {
 
         // รัน INSERT และรอจนเสร็จ
         await runSQL(studentSql, studentValues);
-        
+
         console.log(`เพิ่มนักเรียนสำเร็จ: ${data.firstname}`);
         res.redirect('/admin/record-stu');
 
@@ -746,7 +747,7 @@ app.get('/admin/record-teach', function (req, res) {
             if (err) {
                 console.log(err.message);
             }
-            res.render('Manage_Teacher_Records', { totalPeople : totals, teachers : rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
+            res.render('Manage_Teacher_Records', { totalPeople: totals, teachers: rows, currentPage: page, totalPages: totalPages, searchKeyword: search });
         });
     });
 });
@@ -757,10 +758,10 @@ app.get('/teachers', function (req, res) {
             console.error(err);
             return res.status(500).send("Database Error");
         }
-        
-            
+
+
         // 3. ส่งข้อมูล rooms และ years ไปให้ไฟล์ EJS
-        res.render('Add-Teacher', { 
+        res.render('Add-Teacher', {
             rooms: rooms,
         });
     });
@@ -815,12 +816,12 @@ app.post('/add/teacher', upload.single('profile_image'), async (req, res) => {
         const teacherValues = [
             data.firstname, data.lastname,
             data.phone, data.teacher_id, data.email,
-            newUserId,roomIdForDB
+            newUserId, roomIdForDB
         ];
 
         // รัน INSERT และรอจนเสร็จ
         await runSQL(teacherSql, teacherValues);
-        
+
         console.log(`เพิ่มคุณครูสำเร็จ: ${data.firstname}`);
         res.redirect('/admin/record-teach');
 
@@ -849,14 +850,14 @@ app.get('/edit/teacher/:id', function (req, res) {
         // 1. ดึงข้อมูลตาราง Room
         db.all(`SELECT * FROM Rooms`, [], (err, rooms) => {
             if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
-            
+
             // 2. ดึงข้อมูลตาราง Year
             db.all(`SELECT * FROM Year`, [], (err, years) => {
                 if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
-                
+
                 // 3. ส่งข้อมูลทั้งหมดไปที่ EJS
-                res.render('Edit-Teacher', { 
-                    data: row, 
+                res.render('Edit-Teacher', {
+                    data: row,
                     profileImg: imageBase64,
                     rooms: rooms || [],   // ส่งข้อมูลห้อง
                 });
@@ -883,7 +884,7 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
         teacherRowId
     ];
 
-    db.run(sqlUpdateTeacher, teacherValues, function(err) {
+    db.run(sqlUpdateTeacher, teacherValues, function (err) {
         if (err) return console.error(err.message);
 
         // 2. ถ้ามีการอัปโหลดรูปใหม่ ให้ไปอัปเดตที่ตาราง Users
