@@ -20,7 +20,11 @@
                         <img class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit">
                     </div>
                     <div class="info_content">
-                        <p>รหัสประจำตัว: <span><%= student.student_id || '-'%></span></p>
+                        <p>รหัสประจำตัว: 
+                            <span id="student-id-display" data-id="<%= student.student_id %>">
+                                <%= student.student_id || '-'%>
+                            </span>
+                        </p>
                         <p>รหัสประจำตัวประชาชน: <span><%= student.citizen_id || '-'%></span></p>
                         <br>
                         <p>ชื่อ - นามสกุล: <span><%= student.first_name || '-' %> <%= student.last_name || '-'%></span></p>
@@ -74,37 +78,25 @@
                         <div class="attendance_stats">
                             <div class="stat_box">
                                 <span class="stat_label">มาเรียน</span>
-                                <span class="stat_value good">0</span>
+                                <span class="stat_value good" id="statGood">0</span>
                             </div>
                             <div class="stat_box">
                                 <span class="stat_label">ขาด</span>
-                                <span class="stat_value danger">0</span>
+                                <span class="stat_value danger" id="statDanger">0</span>
                             </div>
                             <div class="stat_box">
                                 <span class="stat_label">สาย</span>
-                                <span class="stat_value warning">0</span>
+                                <span class="stat_value warning" id="statWarning">0</span>
                             </div>
                             <div class="stat_box">
                                 <span class="stat_label">ลา</span>
-                                <span class="stat_value info">0</span>
+                                <span class="stat_value leave" id="statLeave">0</span>
                             </div>
                         </div>
 
                         <div class="attendance_records">
                             <h4>บันทึกล่าสุด</h4>
-                            <div class="record_list">
-                                <!-- <div class="record_item warning">
-                                    <span class="record_date"></span>
-                                    <span class="record_status"></span>
-                                </div>
-                                <div class="record_item danger">
-                                    <span class="record_date"></span>
-                                    <span class="record_status"></span>
-                                </div>
-                                <div class="record_item info">
-                                    <span class="record_date"></span>
-                                    <span class="record_status"></span>
-                                </div> -->
+                            <div class="record_list" id="recordList">
                             </div>
                         </div>
                     </div>

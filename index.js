@@ -36,7 +36,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 5
+        maxAge: 1000 * 60 * 60 * 24
     }
 }));
 
@@ -63,11 +63,12 @@ app.get('/', checkAuthenticated, (req, res) => {
         return res.status(403).send('คุณไม่มีสิทธิ์เข้าถึงระบบ');
     }
 })
+
 app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login');
 });
-app.post('/login', checkNotAuthenticated, (req, res, next) => {
 
+app.post('/login', checkNotAuthenticated, (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
         if (err) {
             return next(err);
@@ -82,10 +83,19 @@ app.post('/login', checkNotAuthenticated, (req, res, next) => {
 
         req.logIn(user, (err) => {
             if (err) return next(err);
+
+            if (req.body.remember) {
+                const age = 1000 * 60 * 60 * 24;
+                req.session.cookie.maxAge = age;
+            } else {
+                req.session.cookie.expires = false;
+            }
+            console.log(`System: User ${user.username} successfully logged in.`);
             return res.redirect('/');
         });
     })(req, res, next);
 });
+
 app.get('/logout', (req, res, next) => {
     req.logout(function (err) {
         if (err) {
@@ -125,6 +135,7 @@ app.get('/student/home', checkAuthenticated, (req, res) => {
         });
     });
 });
+
 app.get('/teacher/home', function (req, res) {
     const userId = req.user.user_id;
 
@@ -144,6 +155,7 @@ app.get('/teacher/home', function (req, res) {
         });
     });
 });
+
 app.get('/admin/home', checkAuthenticated, async (req, res) => {
     try {
         const getCount = (sql) => {
@@ -174,10 +186,32 @@ app.get('/admin/home', checkAuthenticated, async (req, res) => {
         });
     }
 });
-app.get('/ao/submit', checkAuthenticated, checkRole('ao'), (req, res) => {
+
+app.get('/ao/submit', (req, res) => {
     res.render('Submit-Attendance', { user: req.user });
 });
 
+app.get('/student/attendance_history',(req, res) => {
+    const targetYear = req.query.year;
+    const studentId = req.query.student_id;
+
+
+    if(!targetYear){
+        return res.status(400).json({error: 'กรุณาระบุปีที่ต้องการ'});
+    }
+
+    const sql = `SELECT * FROM Attendance WHERE student_id = ? AND date LIKE ?`;
+    const params = [studentId, `${targetYear}-%`];
+
+    db.all(sql,params, (err,rows) => {
+        if(err){
+            console.error(err.message);
+            return res.status(500).json({error: 'Database error'});
+        }
+
+        res.json(rows);
+    })
+})
 
 
 function createAccount(role) {

@@ -115,7 +115,9 @@ body {
     border-color: var(--info-color);
     box-shadow: 0 0 0 2px rgba(1, 179, 255, 0.1);
 }
-
+.remember-btn{
+    padding: 10px 0px;
+}
 
 .login-btn {
     display: flex;

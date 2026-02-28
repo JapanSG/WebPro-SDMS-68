@@ -353,7 +353,7 @@ body {
 .stat_value.good { color: #28a745; }
 .stat_value.danger { color: #dc3545; }
 .stat_value.warning { color: #ff9800; }
-.stat_value.info { color: #17a2b8; }
+.stat_value.leave { color: #17a2b8; }
 
 
 .attendance_records {
@@ -400,7 +400,7 @@ body {
 
 .record_item.danger { border-left-color: #dc3545; }
 .record_item.warning { border-left-color: #ff9800; }
-.record_item.info { border-left-color: #17a2b8; }
+.record_item.leave { border-left-color: #17a2b8; }
 
 .record_date {
     font-weight: var(--weight-bold);

@@ -25,9 +25,9 @@ const mockEvents = {
 function showEvents(day, month, year) {
 
     eventDateEl.textContent = `กิจกรรมประจำวันที่ ${day} ${monthNames[month]} ${year + 543}`;
-    
+
     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
+
     eventListEl.innerHTML = '';
 
     if (mockEvents[dateKey] && mockEvents[dateKey].length > 0) {
@@ -80,7 +80,7 @@ function renderCalendar(month, year) {
         dayDiv.addEventListener('click', () => {
 
             document.querySelectorAll('.day').forEach(d => d.classList.remove('active_day'));
-            
+
             dayDiv.classList.add('active_day');
 
             showEvents(i, month, year);
@@ -92,7 +92,7 @@ function renderCalendar(month, year) {
 
 
 renderCalendar(currentMonth, currentYear);
-showEvents(displayDate.getDate(), displayDate.getMonth(), displayDate.getFullYear()); 
+showEvents(displayDate.getDate(), displayDate.getMonth(), displayDate.getFullYear());
 
 prevBtn.addEventListener('click', () => {
     currentMonth--;
@@ -120,3 +120,92 @@ function backToday() {
     renderCalendar(currentMonth, currentYear);
     showEvents(displayDate.getDate(), currentMonth, currentYear);
 }
+
+
+async function createAtdRecord() {
+
+    const studentDisplay = document.getElementById('student-id-display');
+    const studentId = studentDisplay.dataset.id;
+
+    if (!studentId || studentId === 'undefined') {
+        console.log("ไม่พบรหัสนักเรียน ไม่สามารถดึงข้อมูล API ได้");
+        return;
+    }
+    const api = `/student/attendance_history?year=${currentYear}&student_id=${studentId}`;
+
+    try {
+        const response = await fetch(api);
+        const data = await response.json()
+        console.log(`ข้อมูล API ของนักเรียนรหัส ${studentId}:`, data);
+
+        const container = document.getElementById('recordList');
+
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+            const messages = document.createElement('p');
+            messages.textContent = 'ไม่มีประวัติการเช็คชื่อ';
+            container.appendChild(messages);;
+        }
+
+
+        let countAbsent = 0;
+        let countLeave = 0;
+        let countLate = 0;
+        let countPresent = 0;
+
+        const totalDays = data.length;
+
+
+        data.forEach(item => {
+            const div = document.createElement('div');
+            div.classList.add('record_item');
+
+            if (item.status === "Absent") {
+                div.classList.add('record_item', 'danger');
+                countAbsent++;
+            }
+            else if (item.status === "Personal Leave") {
+                div.classList.add('record_item', 'leave');
+                countLeave++;
+            }
+            else if (item.status === "Late") {
+                div.classList.add('record_item', 'warning');
+                countLate++;
+            }
+            else{
+                return;
+            }
+
+            const spanDate = document.createElement('span');
+            spanDate.className = "record_date";
+            spanDate.textContent = item.date;
+
+
+            const spanStatus = document.createElement('span');
+            spanStatus.className = "record_status";
+            spanStatus.textContent = item.status;
+
+
+            div.append(spanDate, spanStatus);
+            container.appendChild(div);
+        });
+
+        
+        countPresent = totalDays - countAbsent - countLeave - countLate;
+
+        
+        let presentPercentage = totalDays > 0 ? ((countPresent / totalDays) * 100).toFixed(0) : 0;
+
+        
+        document.getElementById('statDanger').textContent = countAbsent;
+        document.getElementById('statWarning').textContent = countLate;
+        document.getElementById('statLeave').textContent = countLeave;
+        document.getElementById('statGood').textContent = `${presentPercentage}%`;
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+createAtdRecord();
