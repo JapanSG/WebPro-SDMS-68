@@ -10,7 +10,7 @@ const flash = require('express-flash')
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 
-let db = new sqlite3.Database('school.db', (err) => {    
+let db = new sqlite3.Database('school.db', (err) => {
     if (err) {
         return console.error(err.message);
     }
@@ -24,7 +24,7 @@ initializePassport(passport, db);
 
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
-// app.use(express.urlencoded({ extended: false })); @WarakonTangcharoenarri Hey why is this false shouldn't it be turned on
+
 
 app.use(session({
     store: new SQLiteStore({
@@ -36,7 +36,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 5
+        maxAge: 1000 * 60 * 60 * 24
     }
 }));
 
@@ -63,19 +63,39 @@ app.get('/', checkAuthenticated, (req, res) => {
         return res.status(403).send('คุณไม่มีสิทธิ์เข้าถึงระบบ');
     }
 })
+
 app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login');
 });
+
 app.post('/login', checkNotAuthenticated, (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            return next(err);
+        }
 
-    console.log("User:", req.body);
+        if (!user) {
+            return res.render('login', {
+                messages: { error: info.message },
+                lastUsername: req.body.username
+            });
+        }
 
-    next();
-}, passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-}));
+        req.logIn(user, (err) => {
+            if (err) return next(err);
+
+            if (req.body.remember) {
+                const age = 1000 * 60 * 60 * 24;
+                req.session.cookie.maxAge = age;
+            } else {
+                req.session.cookie.expires = false;
+            }
+            console.log(`System: User ${user.username} successfully logged in.`);
+            return res.redirect('/');
+        });
+    })(req, res, next);
+});
+
 app.get('/logout', (req, res, next) => {
     req.logout(function (err) {
         if (err) {
@@ -95,11 +115,11 @@ app.use('/student', checkAuthenticated, checkRole('student'));
 app.use('/teacher', checkAuthenticated, checkRole('teacher'));
 app.use('/ao', checkAuthenticated, checkRole('ao'));
 
-app.get('/student/home', checkAuthenticated, (req, res) => {
-    const userId = req.user.user_id; 
+app.get('/student/home', (req, res) => {
+    const userId = req.user.user_id;
 
-    const sql = `SELECT * FROM Users
-                 JOIN Students ON Students.user_id = Users.user_id
+    const sql = `SELECT * FROM Students
+                 JOIN Users ON Students.user_id = Users.user_id
                  JOIN Rooms ON Students.room_id = Rooms.room_id
                  WHERE Students.user_id = ?`;
 
@@ -109,24 +129,83 @@ app.get('/student/home', checkAuthenticated, (req, res) => {
             return res.render('Home-Student', { user: req.user, student: {} });
         }
 
-        res.render('Home-Student', { 
+        if (studentData && studentData.profile_picture) {
+            const base64Image = studentData.profile_picture.toString('base64');
+            studentData.profilePictureBase64 = `data:image/jpeg;base64,${base64Image}`;
+        } else if (studentData) {
+            studentData.profilePictureBase64 = '/images/icons/User.svg';
+        }
+
+        res.render('Home-Student', {
             user: req.user,
-            student: studentData || {} 
+            student: studentData || {}
         });
     });
 });
-app.get('/teacher/home',function(req,res){
-    res.render('Home-Teacher');
+
+app.get('/teacher/home', function (req, res) {
+    const userId = req.user.user_id;
+
+    const sql = `SELECT * FROM Teacher 
+                JOIN Users ON Teacher.user_id = Users.user_id 
+                WHERE Teacher.user_id = ?`;
+
+    db.get(sql, [userId], (err, teacherData) => {
+        if (err) {
+            console.error(err.message);
+            return res.render('Home-Teacher', { user: req.user, student: {} });
+        }
+
+        if (teacherData && teacherData.profile_picture) {
+            const base64Image = teacherData.profile_picture.toString('base64');
+            teacherData.profilePictureBase64 = `data:image/jpeg;base64,${base64Image}`;
+        } else if (teacherData) {
+            teacherData.profilePictureBase64 = '/images/icons/User.svg';
+        }
+    
+        res.render('Home-Teacher', {
+            user: req.user,
+            teacher: teacherData || {}
+        });
+    });
 });
-app.get('/admin/home', checkAuthenticated, checkRole('admin'), (req, res) => {
-    res.render('Home-Admin',{ user: req.user });
+
+app.get('/admin/home', async (req, res) => {
+    try {
+        const getCount = (sql) => {
+            return new Promise((resolve, reject) => {
+                db.get(sql, [], (err, row) => {
+                    if (err) reject(err);
+                    resolve(row && row.count ? row.count : 0);
+                });
+            });
+        };
+
+        const [totalStudents, totalTeachers, totalSubjects, activeClasses] = await Promise.all([
+            getCount("SELECT COUNT(*) as count FROM Students"),
+            getCount("SELECT COUNT(*) as count FROM Teacher"),
+            getCount("SELECT COUNT(*) as count FROM Subjects"),
+            getCount("SELECT COUNT(*) as count FROM Rooms WHERE status = 'In-used'")
+        ]);
+
+        res.render('Home-Admin', {
+            user: req.user,
+            stats: { totalStudents, totalTeachers, totalSubjects, activeClasses }
+        });
+    } catch (err) {
+        console.error("Dashboard Error:", err);
+        res.render('Home-Admin', {
+            user: req.user,
+            stats: { totalStudents: 0, totalTeachers: 0, totalSubjects: 0, activeClasses: 0 }
+        });
+    }
 });
 
 // Submit Attendance
 // =====================================================================
 // [GET] หน้าเว็บสำหรับเช็คชื่อนักเรียน (Submit Attendance)
 // =====================================================================
-app.get('/ao/submit', checkAuthenticated, checkRole('ao'), (req, res) => {
+app.get('/ao/submit', (req, res) => {
     const { grade, room, date } = req.query;
 
     // ถ้าเปิดมาครั้งแรก (ยังไม่กด Filter) ให้แสดงหน้าเปล่าๆ รอไว้
@@ -332,20 +411,126 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 });
 
 
-const DEFAULT_PASSWORD = 'webPro2026';
+
+
+
+
+app.get('/student/attendance_history', (req, res) => {
+    const targetYear = req.query.year;
+    const studentId = req.query.student_id;
+
+
+    if (!targetYear) {
+        return res.status(400).json({ error: 'กรุณาระบุปีที่ต้องการ' });
+    }
+
+    const sql = `SELECT * FROM Attendance WHERE student_id = ? AND date LIKE ?`;
+    const params = [studentId, `${targetYear}-%`];
+
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        res.json(rows);
+    })
+})
+
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/user/upload-profile', upload.single('profile_pic'), checkAuthenticated, (req, res) => {
+    const userId = req.user.user_id;
+    const file = req.file;
+
+    if (!file) {
+        return res.status(400).json({ success: false, error: 'ไม่มีไฟล์ส่งมา' });
+    }
+
+    const imageBuffer = file.buffer;
+
+    const sql = `UPDATE Users SET profile_picture = ? WHERE user_id = ?`;
+    const params = [imageBuffer, userId];
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ success: false, error: 'Database error' });
+        }
+        res.json({ success: true, message: 'อัปเดตโปรไฟล์เรียบร้อย' });
+    });
+});
+
+app.post('/event/add',checkAuthenticated, (req, res) => {
+    const { date, time, title } = req.body;
+    
+    const userId = req.user.user_id;
+
+    if (!date || !time || !title) {
+        return res.status(400).json({ success: false, error: 'ข้อมูลไม่ครบถ้วน' });
+    }
+
+    const sql = `INSERT INTO Events (date, time, title, user_id) VALUES (?, ?, ?, ?)`;
+    
+    db.run(sql, [date, time, title, userId], function(err) {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ success: false, error: 'Database error' });
+        }
+        res.json({ success: true, message: 'บันทึกกิจกรรมเรียบร้อย' });
+    });
+});
+
+app.get('/event/list', checkAuthenticated, (req, res) => {
+    const targetDate = req.query.date;
+    
+    const userId = req.user.user_id;
+
+    if (!targetDate) {
+        return res.status(400).json({ error: 'กรุณาระบุวันที่' });
+    }
+
+    const sql = `SELECT * FROM Events WHERE date = ? AND user_id = ? ORDER BY time ASC`;
+    
+    db.all(sql, [targetDate, userId], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        res.json(rows); 
+    });
+});
 
 function createAccount(role) {
     return new Promise(async (resolve, reject) => {
         try {
+            const DEFAULT_PASSWORD = 'webPro2026';
             const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
 
-            db.get(`SELECT MAX(user_id) as maxId FROM Users`, (err, row) => {
+            db.get(`SELECT username FROM Users WHERE role = ? ORDER BY user_id DESC LIMIT 1`, [role], (err, row) => {
                 if (err) {
                     console.error('Database Error:', err.message);
                     return resolve({ success: false, error: err.message });
                 }
-                let nextId = (row.maxId || 0) + 1;
+                let nextId = 1;
 
+                if (row && row.username) {
+                    const numberPart = row.username.match(/\d+/);
+                    if (numberPart) {
+                        nextId = parseInt(numberPart[0], 10) + 1;
+                    }
+                }
+
+                const allowedRoles = ['student', 'teacher', 'admin', 'ao'];
+
+                if (!allowedRoles.includes(role)) {
+                    console.log('Invalid Role');
+                    return resolve({
+                        success: false,
+                        error: 'Invalid Role: Only student, teacher, admin, and ao are allowed.'
+                    });
+                }
 
                 let prefix = 'u';
                 if (role === 'student') prefix = 's';
@@ -362,6 +547,7 @@ function createAccount(role) {
                         console.error('INSERT Error:', err.message);
                         return resolve({ success: false, error: err.message });
                     }
+                    console.log("Create User Account Success:", generatedUsername);
                     resolve({
                         success: true,
                         user: {
@@ -381,16 +567,7 @@ function createAccount(role) {
 
 app.post('/admin/add-users/:role', checkAuthenticated, checkRole('admin'), async (req, res) => {
     const requestedRole = req.params.role;
-    console.log('requestedRole: ',requestedRole);
-
-    const allowedRoles = ['student', 'teacher', 'admin', 'ao'];
-
-    if (!allowedRoles.includes(requestedRole)) {
-        return res.status(400).json({
-            message: 'ไม่สามารถสร้างบัญชีได้',
-            error: 'รูปแบบ Role ไม่ถูกต้อง (รับเฉพาะ student, teacher, admin, ao เท่านั้น)'
-        });
-    }
+    console.log('requestedRole: ', requestedRole);
 
     const result = await createAccount(requestedRole);
 
@@ -431,9 +608,7 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
 }
-app.get('/admin/home',function(req,res){
-    res.render('Home-Admin');
-});
+
 
 // Japan's Pages
 function handleError(err, res) {
@@ -485,7 +660,7 @@ app.get('/admin/exam-schedule', (req, res) => {
         if (req.query.year && req.query.semester && req.query.grade && req.query.type) {
             list = [req.query.year, req.query.semester, req.query.grade, req.query.type];
         }
-        else{
+        else {
             list = [year[0].year, 1, 1, "กลางภาค"];
         }
         db.all(sql2, list, (err, result1) => {
@@ -516,7 +691,7 @@ app.get('/admin/exam-schedule', (req, res) => {
                 result2.forEach(entry => {
                     entries[`${entry.exam_id}`].push(entry);
                 });
-                res.render('Manage-Exam', {year: year, exam_ids: exam_ids, entries: entries, dates: dates, query: req.query});
+                res.render('Manage-Exam', { year: year, exam_ids: exam_ids, entries: entries, dates: dates, query: req.query });
             });
         });
     });
@@ -532,13 +707,13 @@ app.get('/admin/exam-schedule/view', (req, res) => {
             return;
         }
         console.log(result);
-        res.render('View-Exam', {exam: result});
+        res.render('View-Exam', { exam: result });
     });
 });
 
 app.post('/admin/exam-schedule/addExam', (req, res) => {
     console.log("", req.body);
-    db.run('INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)', [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade], function(err) {
+    db.run('INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)', [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade], function (err) {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error adding exam");
@@ -553,7 +728,7 @@ app.post('/admin/exam-schedule/addEntry', (req, res) => {
     console.log(req.body);
     const sql = 'INSERT INTO Exam_Schedule_Entries (entry_id, start, end, subject_id, exam_id) VALUES (NULL, ?, ?, ?, ?)';
     let params = [req.body.start, req.body.end, req.body.subject_id, req.body.exam_id];
-    db.run(sql, params, function(err) {
+    db.run(sql, params, function (err) {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error adding exam entry");
@@ -607,7 +782,7 @@ app.delete('/admin/exam-schedule/deleteExam', (req, res) => {
                 if (err) {
                     console.error(err.message);
                     res.status(500).send("Error deleting exam schedule");
-                } 
+                }
                 else {
                     console.log("Exam Schedule Deleted");
                     res.status(200).send("Exam schedule deleted successfully");
@@ -670,7 +845,7 @@ app.get('/student/exam-schedule', (req, res) => {
         else {
             type = "กลางภาค";
         }
-        db.all(sqlGetExamSchedule, [student.year-student.enroll_year+1, student.semester, student.year, type], (err, examSchedule) => {
+        db.all(sqlGetExamSchedule, [student.year - student.enroll_year + 1, student.semester, student.year, type], (err, examSchedule) => {
             if (err) {
                 console.error(err.message);
                 res.status(500).send("Error retrieving exam schedule");
@@ -690,7 +865,7 @@ app.get('/student/exam-schedule', (req, res) => {
                 });
                 // console.log(entries);
                 console.log(student);
-                res.render('View-Exam.ejs', {examSchedule: examSchedule, entries: entries, student: student, type: type});
+                res.render('View-Exam.ejs', { examSchedule: examSchedule, entries: entries, student: student, type: type });
             });
         });
     });
@@ -789,11 +964,5 @@ app.put("/teacher/grade/submit", (req, res) => {
 
 app.listen(port, () => {
     console.log("Server started.");
-    // createAccount('teacher').then(result => {
-    //     if (result.success) {
-    //         console.log('Admin account created:', result.user);
-    //     } else {
-    //         console.error('Error creating admin account:', result.error);
-    //     }
-    // });
+
 });
