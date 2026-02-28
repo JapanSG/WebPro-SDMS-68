@@ -1,39 +1,57 @@
 body {
     display: flex;
     margin: 0;
-    font-family: sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* แนะนำให้ใช้ font system ดูดีขึ้น */
     flex-direction: column;
+    background-color: #f5f7fb; /* พื้นหลังสีเทาอมฟ้าอ่อนๆ */
 }
 
 #search_add {
     padding: 20px;
-    background-color: white;
+    background-color: transparent;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-top: 10px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 #search {
     display: flex;
     align-items: center;
-    width: 750px;
-    height: 60px;
-    border-radius: 4px;
-    box-shadow: 0px 0px 4px 8px #f5f5f5;
-    padding: 20px;
+    width: 50%;
+    height: 50px;
+    background: white;
+    border-radius: 25px; /* ทำแถบค้นหาให้โค้งมนแบบแคปซูล */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* เงานุ่มๆ */
+    padding: 5px 20px;
     margin-left: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
 }
+
+#search:focus-within {
+    border-color: #093B7E; /* เปลี่ยนสีขอบเมื่อคลิกพิมพ์ค้นหา */
+    box-shadow: 0 4px 20px rgba(9, 59, 126, 0.15);
+}
+
 #search-button {
     cursor: pointer;
+    transition: transform 0.2s;
+}
+#search-button:hover {
+    transform: scale(1.1);
 }
 
 #search_bar {
     display: block; 
     border: none;
     outline: none;
-    padding: 5px;
+    padding: 10px;
     width: 100%;
+    font-size: 16px;
+    background: transparent;
 }
 
 #add_btn {
@@ -41,9 +59,18 @@ body {
     justify-content: center;
     background-color: #093B7E;
     color: white;
-    border-radius: 4px;
-    width: 200px;
-    height: 60px;
+    border-radius: 12px;
+    width: 220px;
+    height: 50px;
+    margin-right: 20px;
+    box-shadow: 0 4px 10px rgba(9, 59, 126, 0.2);
+    transition: all 0.3s ease;
+}
+
+#add_btn:hover {
+    background-color: #1252a8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(9, 59, 126, 0.3);
 }
 
 #add_btn a {
@@ -55,51 +82,126 @@ body {
     color: white;
     cursor: pointer;
     gap: 8px;
+    width: 100%;
+    height: 100%;
+    font-weight: bold;
+    font-size: 15px;
 }
+
 #student_records {
-    border-collapse: collapse;
+    border-collapse: separate; /* เปลียนเป็น separate เพื่อทำขอบมน */
+    border-spacing: 0;
     text-align: left;
-    margin:20px;
+    margin: 20px 40px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden; /* ตัดขอบตารางให้มน */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
+
 #first_head {
-    border-bottom: solid black 2px;
+    background-color: #f8fafc;
 }
-th {
-    padding: 20px;
+
+#first_head th {
+    border-bottom: 2px solid #e2e8f0;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
 }
-td {
-    padding: 20px;
+
+th, td {
+    padding: 18px 20px;
+    border-bottom: 1px solid #f1f5f9;
 }
+
+/* เอฟเฟกต์ Highlight แถวที่เมาส์ชี้ในตาราง */
+tr:not(#first_head) {
+    transition: background-color 0.2s ease;
+}
+tr:not(#first_head):hover {
+    background-color: #f1f5f9; /* สีเทาอ่อนๆ เวลากวาดเมาส์ผ่าน */
+}
+
+/* ปุ่ม Action (ลบ/แก้ไข) ในตาราง */
+td a img {
+    transition: transform 0.2s ease, filter 0.2s;
+    margin-right: 10px;
+}
+td a:hover img {
+    transform: scale(1.2); /* ขยายปุ่มนิดนึง */
+}
+
+/* =========================================
+   ส่วน Pagination (จัดเรียงใหม่ให้สวยงาม)
+   ========================================= */
+
 #next_page_and_back {
     display: flex;
-    gap: 20px;
-    justify-content: space-between;
+    justify-content: space-between; /* 🌟 ดันซ้าย-กลาง-ขวา ให้ออกจากกัน */
+    align-items: center;
+    margin: 30px 40px; /* เว้นระยะขอบให้ตรงกับแนวตารางพอดี */
 }
+
+/* จัดกลุ่มปุ่มเปลี่ยนหน้า (< 1 2 3 >) ให้อยู่เรียงกันตรงกลาง */
+#num-button {
+    display: flex;
+    gap: 10px; 
+    align-items: center;
+    justify-content: center;
+}
+
+/* ล็อกความกว้างของปุ่ม "กลับ" และ div ว่างฝั่งขวา ให้เท่ากัน (เพื่อถ่วงน้ำหนักให้ตัวเลขอยู่กึ่งกลางจอเป๊ะๆ) */
+#next_page_and_back > a {
+    text-decoration: none;
+    width: 100px;
+}
+#next_page_and_back > div:last-child {
+    width: 100px; /* ถ่วงน้ำหนักฝั่งขวา */
+}
+
+/* สไตล์พื้นฐานของปุ่มเปลี่ยนหน้าและปุ่มกลับ */
+.page, #page-back, #page-next, #back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    background-color: white; 
+    color: #093B7E; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 8px; 
+    font-weight: bold;
+    transition: all 0.2s ease; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+}
+
+/* ปุ่ม 'กลับ' ให้กว้างกว่าปุ่มตัวเลขหน่อย จะได้ดูสมส่วน */
 #back {
-    width: 200px;
-    height: 51.3px;
-    margin-left: 20px;
-    cursor: pointer;
+    width: 100px;
+}
+
+/* เอฟเฟกต์เวลาเอาเมาส์ชี้ปุ่ม */
+.page:hover, #page-back:hover, #page-next:hover, #back:hover {
+    background-color: #093B7E; 
+    color: white; 
+    border-color: #093B7E; 
+    transform: translateY(-3px); 
+    box-shadow: 0 4px 10px rgba(9, 59, 126, 0.2); 
+}
+
+/* เอฟเฟกต์ปุ่มเปลี่ยนหน้า */
+.page:hover, #page-back:hover, #page-next:hover, #back:hover {
     background-color: #093B7E;
     color: white;
-    border-radius: 10px;
+    border-color: #093B7E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(9, 59, 126, 0.15);
 }
-#page-back , #page-next {
-    width: 51.3px;
-    height: 51.3px;
-    cursor: pointer;
-    background-color: #093B7E;
-    color: white;
-    border-radius: 10px;
-}
-.page {
-    width: 51.3px;
-    height: 51.3px;
-    cursor: pointer;
-    background-color: #093B7E;
-    color: white;
-    border-radius: 10px;
-}
+
 a {
     text-decoration: none;
 }
