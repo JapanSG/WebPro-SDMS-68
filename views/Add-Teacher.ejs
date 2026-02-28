@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Student</title>
+    <link rel="stylesheet" href="/css/add_stu.css">
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body>
+    <%- include('Menu-AS') %>
+
+        <div id="add_container">
+            <form action="/add/teacher" method="POST" id="add_form" enctype="multipart/form-data">
+                <div id="form_layout">
+                    <div id="left_col">
+
+                        <div id="page_header">
+                            <a href="/admin/record-teach">
+                                <img src="/images/icons/Back.svg" alt="ย้อนกลับ">
+                            </a>
+                            <h2>เพิ่มข้อมูลคุณครู</h2>
+                        </div>
+
+                        <div id="profile_upload">
+                            <label for="file_input" style="cursor: pointer;">
+                                <img src="/images/icons/imgProfile.svg" alt="รูปโปรไฟล์" id="profile_img">
+                                <br>
+                                <div id="upload">
+                                    <img src="/images/icons/Upload.svg" alt="ก้อนเมฆ">
+                                    <span>คลิกเพื่ออัปโหลดรูปภาพ</span>
+                                </div>
+                            </label>
+
+                            <input type="file" name="profile_image" id="file_input" accept="images/*"
+                                style="display: none;">
+                        </div>
+                        <p id="section_title">ข้อมูลคุณครู</p>
+
+                        <label>ชื่อจริง</label>
+                        <input type="text" name="firstname" required>
+
+                        <label>นามสกุล</label>
+                        <input type="text" name="lastname" required>
+
+                        <label>เบอร์โทรศัพท์</label>
+                        <input type="text" name="phone">
+
+                        <label>รหัสประจำตัวคุณครู</label>
+                        <input type="text" name="teacher_id" required>
+
+                        <label>อีเมล</label>
+                        <input type="email" name="email"><br>
+
+                        <label for="room_id">ห้องเรียน</label>
+                        <select name="room_id">
+                            <option value="" selected>-- ไม่ระบุห้องเรียน / ไม่มีห้องประจำชั้น --</option>
+
+                            <% rooms.forEach((room)=> { %>
+                                <option value="<%= room.room_id %>">
+                                    <%= room.room_name %>
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="submit_area">
+                    <button type="submit" id="save_btn">บันทึก</button>
+                </div>
+            </form>
+        </div>
+        <script>
+            const fileInput = document.getElementById('file_input');
+            const profileImg = document.getElementById('profile_img');
+
+            // เมื่อมีการเลือกไฟล์ใหม่
+            fileInput.addEventListener('change', function (event) {
+                // ดึงไฟล์ที่ผู้ใช้เลือกมา
+                const file = event.target.files[0];
+
+                if (file) {
+                    // สร้าง URL จำลองของรูปภาพนั้น แล้วเอาไปใส่เป็น src ของ <img>
+                    const imageUrl = URL.createObjectURL(file);
+                    profileImg.src = imageUrl;
+                }
+            });
+        </script>
+</body>
+
+</html>

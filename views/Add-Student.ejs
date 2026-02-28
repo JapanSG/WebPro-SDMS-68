@@ -13,7 +13,7 @@
     <%- include('Menu-AS') %>
 
         <div id="add_container">
-            <form action="/add" method="POST" id="add_form" enctype="multipart/form-data">
+            <form action="/add/student" method="POST" id="add_form" enctype="multipart/form-data">
                 <div id="form_layout">
                     <div id="left_col">
 
@@ -72,16 +72,37 @@
                         <input type="email" name="email">
 
                         <label>ห้องเรียน</label>
-                        <input type="text" name="room_id">
+                        <select name="room_id" required>
+                            <option value="" disabled selected>-- เลือกห้องเรียน --</option>
+                            <% rooms.forEach((room)=> { %>
+                                <option value="<%= room.room_id %>">
+                                    <%= room.room_name %>
+                                </option>
+                                <% }); %>
+                        </select>
 
                         <label>เทอม</label>
                         <input type="text" name="semester">
 
                         <label>ปี</label>
-                        <input type="text" name="year">
+                        <select name="year" required>
+                            <option value="" disabled selected>-- เลือกปี --</option>
+                            <% years.forEach((y)=> { %>
+                                <option value="<%= y.year %>">
+                                    <%= y.year %>
+                                </option>
+                                <% }); %>
+                        </select>
 
                         <label>ปีที่เข้าเรียน</label>
-                        <input type="text" name="enroll_year">
+                        <select name="enroll_year" required>
+                            <option value="" disabled selected>-- เลือกปี --</option>
+                            <% years.forEach((y)=> { %>
+                                <option value="<%= y.year %>">
+                                    <%= y.year %>
+                                </option>
+                                <% }); %>
+                        </select>
                     </div>
                 </div>
 

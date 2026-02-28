@@ -503,13 +503,12 @@ app.get('/admin/record-stu', function (req, res) {
             if (err) {
                 console.log(err.message);
             }
-            res.render('Manage_Student_Records', { totalStudents: totals, students : rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
+            res.render('Manage_Student_Records', { totalPeople: totals, students : rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
         });
     });
 });
 //กด edit
-app.get('/edit/:id', function (req, res) {
-    // JOIN Students กับ Users โดยใช้ user_id เป็นตัวเชื่อม
+app.get('/edit/student/:id', function (req, res) {
     const query = `
         SELECT Students.*, Users."profile_picture" 
         FROM Students 
@@ -521,15 +520,30 @@ app.get('/edit/:id', function (req, res) {
         if (!row) return res.send("ไม่พบข้อมูลนักเรียน");
 
         let imageBase64 = null;
-        // ดึงจากคอลัมน์ "profile-picture" ของตาราง Users
         if (row["profile_picture"]) {
             imageBase64 = `data:image/jpeg;base64,${row["profile_picture"].toString('base64')}`;
         }
 
-        res.render('Edit-Student', { data: row, profileImg: imageBase64 });
+        // 1. ดึงข้อมูลตาราง Room
+        db.all(`SELECT * FROM Rooms`, [], (err, rooms) => {
+            if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
+            
+            // 2. ดึงข้อมูลตาราง Year
+            db.all(`SELECT * FROM Year`, [], (err, years) => {
+                if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
+                
+                // 3. ส่งข้อมูลทั้งหมดไปที่ EJS
+                res.render('Edit-Student', { 
+                    data: row, 
+                    profileImg: imageBase64,
+                    rooms: rooms || [],
+                    years: years || []
+                });
+            });
+        });
     });
 });
-app.post('/update/:id', upload.single('profile_image'), (req, res) => {
+app.post('/update/student/:id', upload.single('profile_image'), (req, res) => {
     const studentRowId = req.params.id;
     const data = req.body;
     const imageBuffer = req.file ? req.file.buffer : null;
@@ -571,9 +585,29 @@ app.post('/update/:id', upload.single('profile_image'), (req, res) => {
     });
 });
 app.get('/students', function (req, res) {
-        res.render('Add-Student');
+    // 1. ดึงข้อมูลตาราง Room
+    db.all(`SELECT * FROM Rooms`, [], (err, rooms) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Database Error");
+        }
+        
+        // 2. ดึงข้อมูลตาราง Year
+        db.all(`SELECT * FROM Year`, [], (err, years) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send("Database Error");
+            }
+            
+            // 3. ส่งข้อมูล rooms และ years ไปให้ไฟล์ EJS
+            res.render('Add-Student', { 
+                rooms: rooms, 
+                years: years 
+            });
+        });
+    });
 });
-app.post('/add', upload.single('profile_image'), async (req, res) => {
+app.post('/add/student', upload.single('profile_image'), async (req, res) => {
     try {
         const data = req.body;
         const imageBuffer = req.file ? req.file.buffer : null;
@@ -636,7 +670,7 @@ app.post('/add', upload.single('profile_image'), async (req, res) => {
         res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
     }
 });
-app.get('/delete/:id', function (req, res) {
+app.get('/delete/student/:id', function (req, res) {
     const query = `DELETE FROM Students WHERE rowid = ${req.params.id}`;
     db.all(query, (err, rows) => {
         if (err) {
@@ -645,7 +679,196 @@ app.get('/delete/:id', function (req, res) {
         console.log(rows);
         res.redirect('/admin/record-stu');
     });
-})
+});
+app.get('/admin/record-teach', function (req, res) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit; // ต้องข้ามกี่คน
+    let whereSQL = '';
+    const search = req.query.search || '';
+    if (search !== '') { // ดูว่ามีคำค้นหา
+        whereSQL = `WHERE teacher_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
+    }
+    const query = `SELECT rowid, * FROM Teacher ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
+    const count = `SELECT COUNT(*) AS total FROM Teacher ${whereSQL}`;
+    db.get(count, (err, count_all) => {
+        if (err) {
+            console.log(err.message);
+        }
+        const totals = count_all ? count_all.total : 0;
+        const totalPages = Math.ceil(totals / limit);
+        db.all(query, (err, rows) => {
+            if (err) {
+                console.log(err.message);
+            }
+            res.render('Manage_Teacher_Records', { totalPeople : totals, teachers : rows, currentPage: page, totalPages: totalPages, searchKeyword: search});
+        });
+    });
+});
+app.get('/teachers', function (req, res) {
+    // 1. ดึงข้อมูลตาราง Room
+    db.all(`SELECT * FROM Rooms`, [], (err, rooms) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Database Error");
+        }
+        
+            
+        // 3. ส่งข้อมูล rooms และ years ไปให้ไฟล์ EJS
+        res.render('Add-Teacher', { 
+            rooms: rooms,
+        });
+    });
+});
+
+app.post('/add/teacher', upload.single('profile_image'), async (req, res) => {
+    try {
+        const data = req.body;
+        const imageBuffer = req.file ? req.file.buffer : null;
+        const roomIdForDB = data.room_id === "" ? null : data.room_id;
+
+        // 1. สร้างบัญชีในตาราง Users
+        const accountResult = await createAccount('teacher');
+
+        if (!accountResult.success) {
+            console.error("Create Account Error:", accountResult.error);
+            return res.status(500).send("ไม่สามารถสร้างบัญชีผู้ใช้ได้: " + accountResult.error);
+        }
+
+        const newUserId = accountResult.user.id;
+
+        // ฟังก์ชันช่วยรัน SQL แบบรอผล (Promise)
+        const runSQL = (sql, params) => {
+            return new Promise((resolve, reject) => {
+                db.run(sql, params, function (err) {
+                    if (err) reject(err);
+                    else resolve(this);
+                });
+            });
+        };
+
+        // 2. ถ้ามีรูปภาพ ให้อัปเดตไปที่ตาราง Users และรอจนเสร็จ (ใช้ await)
+        if (imageBuffer) {
+            // ตรวจสอบชื่อคอลัมน์อีกครั้ง: ถ้าเป็นขีดกลางใช้ "profile-picture"
+            // ถ้าเป็น underscore ใช้ "profile_picture"
+            const updateImgSql = `UPDATE Users SET "profile_picture" = ? WHERE user_id = ?`;
+            try {
+                await runSQL(updateImgSql, [imageBuffer, newUserId]);
+                console.log("อัปเดตรูปภาพลงตาราง Users สำเร็จ");
+            } catch (err) {
+                console.error("Update profile picture error:", err.message);
+            }
+        }
+
+        // 3. บันทึกข้อมูลลงตาราง Teachers
+        const teacherSql = `
+            INSERT INTO Teacher 
+            (first_name, last_name, phone, teacher_id, email, user_id, room_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        `;
+
+        const teacherValues = [
+            data.firstname, data.lastname,
+            data.phone, data.teacher_id, data.email,
+            newUserId,roomIdForDB
+        ];
+
+        // รัน INSERT และรอจนเสร็จ
+        await runSQL(teacherSql, teacherValues);
+        
+        console.log(`เพิ่มคุณครูสำเร็จ: ${data.firstname}`);
+        res.redirect('/admin/record-teach');
+
+    } catch (error) {
+        console.error('Unexpected Error:', error);
+        res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
+    }
+});
+//กด edit
+app.get('/edit/teacher/:id', function (req, res) {
+    const query = `
+        SELECT Teacher.*, Users."profile_picture" 
+        FROM Teacher 
+        JOIN Users ON Teacher.user_id = Users.user_id 
+        WHERE Teacher.rowid = ?`;
+
+    db.get(query, [req.params.id], (err, row) => {
+        if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
+        if (!row) return res.send("ไม่พบข้อมูลนักเรียน");
+
+        let imageBase64 = null;
+        if (row["profile_picture"]) {
+            imageBase64 = `data:image/jpeg;base64,${row["profile_picture"].toString('base64')}`;
+        }
+
+        // 1. ดึงข้อมูลตาราง Room
+        db.all(`SELECT * FROM Rooms`, [], (err, rooms) => {
+            if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
+            
+            // 2. ดึงข้อมูลตาราง Year
+            db.all(`SELECT * FROM Year`, [], (err, years) => {
+                if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
+                
+                // 3. ส่งข้อมูลทั้งหมดไปที่ EJS
+                res.render('Edit-Teacher', { 
+                    data: row, 
+                    profileImg: imageBase64,
+                    rooms: rooms || [],   // ส่งข้อมูลห้อง
+                });
+            });
+        });
+    });
+});
+app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
+    const teacherRowId = req.params.id;
+    const data = req.body;
+    const imageBuffer = req.file ? req.file.buffer : null;
+
+    // 1. อัปเดตข้อมูลตัวหนังสือในตาราง Teacher
+    const sqlUpdateTeacher = `
+        UPDATE Teacher SET 
+        first_name = ?, last_name = ?,
+        email = ?, room_id = ? 
+        WHERE rowid = ?
+    `;
+
+    const teacherValues = [
+        data.firstname, data.lastname,
+        data.email, data.room_id,
+        teacherRowId
+    ];
+
+    db.run(sqlUpdateTeacher, teacherValues, function(err) {
+        if (err) return console.error(err.message);
+
+        // 2. ถ้ามีการอัปโหลดรูปใหม่ ให้ไปอัปเดตที่ตาราง Users
+        if (imageBuffer) {
+            // หา user_id จาก rowid ก่อน
+            db.get(`SELECT user_id FROM Teacher WHERE rowid = ?`, [teacherRowId], (err, row) => {
+                if (row && row.user_id) {
+                    const sqlUpdateUser = `UPDATE Users SET "profile_picture" = ? WHERE user_id = ?`;
+                    db.run(sqlUpdateUser, [imageBuffer, row.user_id], (err) => {
+                        res.redirect('/admin/record-teach');
+                    });
+                } else {
+                    res.redirect('/admin/record-teach');
+                }
+            });
+        } else {
+            res.redirect('/admin/record-teach');
+        }
+    });
+});
+app.get('/delete/teacher/:id', function (req, res) {
+    const query = `DELETE FROM Teacher WHERE rowid = ${req.params.id}`;
+    db.all(query, (err, rows) => {
+        if (err) {
+            console.log(err.message);
+        }
+        console.log(rows);
+        res.redirect('/admin/record-teach');
+    });
+});
 app.get('/student/home', function (req, res) {
     res.render('Home-Student');
 });
