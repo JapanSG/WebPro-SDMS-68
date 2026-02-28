@@ -26,13 +26,13 @@
         </div>
         <table id="student_records">
             <tr id="first_head">
-                <th>Student ID</th>
-                <th>Full Name</th>
-                <th>Gender</th>
-                <th>Nationality</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Enroll Date</th>
+                <th>รหัสประจำตัวนักเรียน</th>
+                <th>ชื่อ</th>
+                <th>เพศ</th>
+                <th>สัญชาติ</th>
+                <th>เบอร์โทรศัพท์</th>
+                <th>อีเมล</th>
+                <th>ปีที่เข้า</th>
             </tr>
             <% students.forEach((student)=>{ %>
                 <tr>
@@ -59,10 +59,10 @@
                         <%=student.enroll_year%>
                     </td>
                     <td id="S<%=student.rowid%>">
-                        <a href="/delete/<%=student.student_id%>">
+                        <a href="/delete/student/<%=student.student_id%>">
                             <img src="/images/icons/Delete.svg" alt="ปุ่มลบ">
                         </a>
-                        <a href="/edit/<%=student.student_id%>">
+                        <a href="/edit/student/<%=student.student_id%>">
                             <img src="/images/icons/Edit.svg" alt="ปุ่มแก้ไข">
                         </a>
                     </td>
@@ -81,14 +81,14 @@
                 const img = document.getElementById('search-button');
                 img.addEventListener('click', function () {
                     const keyword = document.getElementById('search_bar').value;
-                    window.location.href = `/?search=${keyword}&page=1`;
+                    window.location.href = `/admin/record-stu/?search=${keyword}&page=1`;
                 });
 
                 // 1. กดเลขหน้า
                 const pageButtons = document.querySelectorAll('.page');
                 pageButtons.forEach(button => {
                     button.addEventListener('click', function () {
-                        window.location.href = `/?${searchParam}page=${this.id}`;
+                        window.location.href = `/admin/record-stu/?${searchParam}page=${this.id}`;
                     });
                 });
 
@@ -97,7 +97,7 @@
                 if (prevBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
                     prevBtn.addEventListener('click', function () {
                         if (currentPage > 1) {
-                            window.location.href = `/?page=${currentPage - 1}${searchParam}`;
+                            window.location.href = `/admin/record-stu/?page=${currentPage - 1}${searchParam}`;
                         }
                     });
                 }
@@ -107,7 +107,7 @@
                 if (nextBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
                     nextBtn.addEventListener('click', function () {
                         if (currentPage < totalPages) {
-                            window.location.href = `/?page=${currentPage + 1}${searchParam}`;
+                            window.location.href = `/admin/record-stu/?page=${currentPage + 1}${searchParam}`;
                         }
                     });
                 }
@@ -118,7 +118,7 @@
                     if (e.key === 'Enter') {
                         const keyword = this.value;
                         // บังคับเปลี่ยน URL และให้กลับไปเริ่มที่หน้า 1 เสมอ
-                        window.location.href = `/?search=${keyword}&page=1`;
+                        window.location.href = `/admin/record-stu/?search=${keyword}&page=1`;
                     }
                 });
 

@@ -6,11 +6,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home-Student</title>
     <link rel="stylesheet" href="/css/global.css">
-
+    <link rel="stylesheet" href="/css/home.css">
 </head>
 
 <body>
     <%- include('Menu-Student') %>
+        <div class="home_container">
+            <div class="home_content">
+                <img class="profile" src="/images/icons/User.svg" alt="User-image">
+                <div class="information">
+                    <div class="title">
+                        <p>ข้อมูลนักเรียน</p>
+                        <img class="edit_icon" src="/images/icons/Edit.svg" alt="Edit">
+                    </div>
+                    <div class="info_content">
+                        <p>รหัสประจำตัว: <span><%= student.student_id || '-'%></span></p>
+                        <p>รหัสประจำตัวประชาชน: <span><%= student.citizen_id || '-'%></span></p>
+                        <br>
+                        <p>ชื่อ - นามสกุล (ไทย): <span><%= student.first_name || '-' %> <%= student.last_name || '-'%></span></p>
+                        <p>email: <span><%= student.email || '-'%></span></p>
+                        <p>โทรศัพท์: <span><%= student.phone || '-'%></span></p>
+                        <br>
+                        <p>วัน/เดือน/ปี เกิด: <span><%= student.dob || '-'%></span></p>
+                        <p>สัญชาติ: <span><%= student.nationality || '-'%></span></p>
+                        <p>เพศ: <span><%= student.sex || '-'%></span></p>
+                        <p>ภาคเรียน: <span><%= student.semester || '-'%></span></p>
+                        <p>ปีที่เข้าศึกษา: <span><%= student.enroll_year || '-'%></span></p>
+                        <p>ระดับชั้น: <span><%= student.grade_level || '-'%></span></p>
+                        <p>ห้อง: <span><%= student.room_id || '-'%></span></p>
+
+                    </div>
+                </div>
+            </div>
+            <div class="home_content">
+                <div class="calendar_wrapper">
+                    <div class="calendar_header">
+                        <button id="prevMonth" class="cal_btn">&lt;</button>
+                        <h3 class="month_title" id="monthTitle">เดือน ปี</h3>
+                        <button id="nextMonth" class="cal_btn">&gt;</button>
+                    </div>
+
+                    <div class="calendar_grid" id="calendarGrid">
+                    </div>
+                    <div class="calendar_footer">
+                        <button class="today_btn" id="backToday" onclick="backToday()">Today</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home_content">
+                <div class="event_wrapper">
+                    <div class="event_header">
+                        <h3 class="event_title">กิจกรรมต่าง ๆ</h3>
+                    </div>
+                    <div class="event_date" id="eventDate"></div>
+                    <div class="event_list" id="eventList">ไม่มีกิจกรรม</div>
+                </div>
+            </div>
+            <div class="home_content">
+                <div class="attendance_wrapper">
+                    <div class="attendance_header">
+                        <h3 class="attendance_title">ประวัติ ขาด/สาย</h3>
+                    </div>
+
+                    <div class="attendance_content">
+                        <div class="attendance_stats">
+                            <div class="stat_box">
+                                <span class="stat_label">มาเรียน</span>
+                                <span class="stat_value good">0</span>
+                            </div>
+                            <div class="stat_box">
+                                <span class="stat_label">ขาด</span>
+                                <span class="stat_value danger">0</span>
+                            </div>
+                            <div class="stat_box">
+                                <span class="stat_label">สาย</span>
+                                <span class="stat_value warning">0</span>
+                            </div>
+                            <div class="stat_box">
+                                <span class="stat_label">ลา</span>
+                                <span class="stat_value info">0</span>
+                            </div>
+                        </div>
+
+                        <div class="attendance_records">
+                            <h4>บันทึกล่าสุด</h4>
+                            <div class="record_list">
+                                <!-- <div class="record_item warning">
+                                    <span class="record_date"></span>
+                                    <span class="record_status"></span>
+                                </div>
+                                <div class="record_item danger">
+                                    <span class="record_date"></span>
+                                    <span class="record_status"></span>
+                                </div>
+                                <div class="record_item info">
+                                    <span class="record_date"></span>
+                                    <span class="record_status"></span>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/script/home-page.js"></script>
 </body>
 
 </html>

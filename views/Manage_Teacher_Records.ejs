@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/manage_stu.css">
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body>
+    <%- include('Menu-AS') %>
+        <div id="search_add">
+            <div id="search">
+                <img src="/images/icons/Search.svg" alt="glass" id="search-button">
+                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อครูผู้สอน"
+                    value="<%= locals.searchKeyword || '' %>">
+            </div>
+            <div id="add_btn">
+                <a href="/teachers">
+                    <img src="/images/icons/Add_circle.svg" alt="รูปบวก">
+                    <span>เพิ่มข้อมูลคุณครู</span>
+                </a>
+            </div>
+        </div>
+        <table id="student_records">
+            <tr id="first_head">
+                <th>รหัสประจำตัวคุณครู</th>
+                <th>ชื่อ</th>
+                <th>เบอร์โทรศัพท์</th>
+                <th>อีเมล</th>
+            </tr>
+            <% teachers.forEach((teacher)=>{ %>
+                <tr>
+                    <td>
+                        <%=teacher.teacher_id%>
+                    </td>
+                    <td>
+                        <%=teacher.first_name%>
+                            <%=teacher.last_name%>
+                    </td>
+                    <td>
+                        <%=teacher.phone%>
+                    </td>
+                    <td>
+                        <%=teacher.email%>
+                    </td>
+                    <td id="S<%=teacher.rowid%>">
+                        <a href="/delete/teacher/<%=teacher.teacher_id%>">
+                            <img src="/images/icons/Delete.svg" alt="ปุ่มลบ">
+                        </a>
+                        <a href="/edit/teacher/<%=teacher.teacher_id%>">
+                            <img src="/images/icons/Edit.svg" alt="ปุ่มแก้ไข">
+                        </a>
+                    </td>
+                </tr>
+
+                <% }); %>
+        </table>
+        <%- include('slide_next') %>
+            <script>
+                // ดึงค่าหน้าที่กำลังเปิดอยู่ และหน้าทั้งหมดจาก EJS มาให้ JavaScript รู้จัก
+                const currentPage = parseInt("<%= currentPage %>") || 1;
+                const totalPages = parseInt("<%= totalPages %>") || 1;
+                const searchKeyword = "<%= locals.searchKeyword || '' %>";
+                const searchParam = searchKeyword ? `&search=${searchKeyword}` : "";
+
+                const img = document.getElementById('search-button');
+                img.addEventListener('click', function () {
+                    const keyword = document.getElementById('search_bar').value;
+                    window.location.href = `/admin/record-teach/?search=${keyword}&page=1`;
+                });
+
+                // 1. กดเลขหน้า
+                const pageButtons = document.querySelectorAll('.page');
+                pageButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        window.location.href = `/admin/record-teach/?${searchParam}page=${this.id}`;
+                    });
+                });
+
+                // 2. กดปุ่มลูกศรซ้าย (ย้อนกลับ)
+                const prevBtn = document.getElementById('page-back');
+                if (prevBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
+                    prevBtn.addEventListener('click', function () {
+                        if (currentPage > 1) {
+                            window.location.href = `/admin/record-teach/?page=${currentPage - 1}${searchParam}`;
+                        }
+                    });
+                }
+
+                // 3. กดปุ่มลูกศรขวา (ถัดไป)
+                const nextBtn = document.getElementById('page-next');
+                if (nextBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
+                    nextBtn.addEventListener('click', function () {
+                        if (currentPage < totalPages) {
+                            window.location.href = `/admin/record-teach/?page=${currentPage + 1}${searchParam}`;
+                        }
+                    });
+                }
+
+                const searchBar = document.getElementById('search_bar');
+                searchBar.addEventListener('keypress', function (e) {
+                    // ถ้าผู้ใช้พิมพ์เสร็จแล้วกดปุ่ม Enter (บนคีย์บอร์ด)
+                    if (e.key === 'Enter') {
+                        const keyword = this.value;
+                        // บังคับเปลี่ยน URL และให้กลับไปเริ่มที่หน้า 1 เสมอ
+                        window.location.href = `/admin/record-teach/?search=${keyword}&page=1`;
+                    }
+                });
+
+            </script>
+</body>
+
+</html>

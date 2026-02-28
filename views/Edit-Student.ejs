@@ -12,95 +12,121 @@
 <body>
     <%- include('Menu-AS') %>
 
-    <div id="add_container">
-        <form action="/update/<%= data.student_id %>" method="POST" enctype="multipart/form-data" id="add_form">
-            <div id="form_layout">
-                <div id="left_col">
+        <div id="add_container">
+            <form action="/update/student/<%= data.student_id %>" method="POST" enctype="multipart/form-data"
+                id="add_form">
+                <div id="form_layout">
+                    <div id="left_col">
 
-                    <div id="page_header">
-                        <a href="/">
-                            <img src="/images/icons/Back.svg" alt="ย้อนกลับ">
-                        </a>
-                        <h2>Edit Student Information</h2>
+                        <div id="page_header">
+                            <a href="/admin/record-stu">
+                                <img src="/images/icons/Back.svg" alt="ย้อนกลับ">
+                            </a>
+                            <h2>แก้ไขข้อมูลนักเรียน</h2>
+                        </div>
+
+                        <div id="profile_upload">
+                            <label for="file_input" style="cursor: pointer;">
+                                <img src="<%= profileImg || '/images/icons/imgProfile.svg' %>" alt="รูปโปรไฟล์"
+                                    id="profile_img" width="150" height="150"
+                                    style="object-fit: cover; border-radius: 50%;">
+                                <br>
+                                <div id="upload">
+                                    <img src="/images/icons/Upload.svg" alt="ก้อนเมฆ">
+                                    <span>คลิกเพื่อเปลี่ยนรูปภาพใหม่</span>
+                                </div>
+                            </label>
+                            <input type="file" name="profile_image" id="file_input" accept="image/*"
+                                style="display: none;">
+                        </div>
+
+                        <p id="section_title">ข้อมูลนักเรียน</p>
+
+                        <label>ชื่อจริง</label>
+                        <input type="text" name="firstname" value="<%= data.first_name %>" required>
+
+                        <label>นามสกุล</label>
+                        <input type="text" name="lastname" value="<%= data.last_name %>" required>
+
+                        <label>วันเกิด</label>
+                        <input type="date" name="dob" value="<%= data.dob %>">
+
+                        <label>รหัสประจำตัวประชาชน</label>
+                        <input type="text" name="citizen_id" value="<%= data.citizen_id %>">
                     </div>
 
-                    <div id="profile_upload">
-                        <label for="file_input" style="cursor: pointer;">
-                            <img src="<%= profileImg || '/images/icons/imgProfile.svg' %>" alt="รูปโปรไฟล์" id="profile_img" width="150" height="150" style="object-fit: cover; border-radius: 50%;">
-                            <br>
-                            <div id="upload">
-                                <img src="/images/icons/Upload.svg" alt="ก้อนเมฆ">
-                                <span>คลิกเพื่อเปลี่ยนรูปภาพใหม่</span>
-                            </div>
-                        </label>
-                        <input type="file" name="profile_image" id="file_input" accept="image/*" style="display: none;">
+                    <div id="right_col">
+                        <label>เพศ</label>
+                        <select name="gender">
+                            <option value="Male" <%=data.sex==='Male' ? 'selected' : '' %>>ชาย</option>
+                            <option value="Female" <%=data.sex==='Female' ? 'selected' : '' %>>หญิง</option>
+                        </select>
+
+                        <label>สัญชาติ</label>
+                        <input type="text" name="nationality" value="<%= data.nationality %>">
+
+                        <label>เบอร์โทรศัพท์</label>
+                        <input type="text" name="phone" value="<%= data.phone %>">
+
+                        <label>รหัสประจำตัวนักเรียน</label>
+                        <input type="text" name="student_id" value="<%= data.student_id %>" readonly
+                            style="background-color: #eee;">
+                        <label>อีเมล</label>
+                        <input type="email" name="email" value="<%= data.email %>">
+
+                        <label>ห้องเรียน</label>
+                        <select name="room_id" required>
+                            <option value="" disabled>-- เลือกห้องเรียน --</option>
+                            <% rooms.forEach((room)=> { %>
+                                <option value="<%= room.room_id %>" <%=data.room_id==room.room_id ? 'selected' : '' %>>
+                                    <%= room.room_name %>
+                                </option>
+                                <% }); %>
+                        </select>
+
+                        <label>เทอม</label>
+                        <input type="text" name="semester" value="<%= data.semester %>">
+
+                        <label>ปี</label>
+                        <select name="year" required>
+                            <option value="" disabled>-- เลือกปี --</option>
+                            <% years.forEach((y)=> { %>
+                                <option value="<%= y.year %>" <%=data.year==y.year ? 'selected' : '' %>>
+                                    <%= y.year %>
+                                </option>
+                                <% }); %>
+                        </select>
+
+                        <label>ปีที่เข้า</label>
+                        <select name="enroll_year" required>
+                            <option value="" disabled>-- เลือกปี --</option>
+                            <% years.forEach((y)=> { %>
+                                <option value="<%= y.year %>" <%=data.year==y.year ? 'selected' : '' %>>
+                                    <%= y.year %>
+                                </option>
+                                <% }); %>
+                        </select>
                     </div>
-                    
-                    <p id="section_title">Student Information</p>
-
-                    <label>Firstname</label>
-                    <input type="text" name="firstname" value="<%= data.first_name %>" required>
-
-                    <label>Lastname</label>
-                    <input type="text" name="lastname" value="<%= data.last_name %>" required>
-
-                    <label>Date of Birth</label>
-                    <input type="date" name="dob" value="<%= data.dob %>">
-
-                    <label>Citizen-id</label>
-                    <input type="text" name="citizen_id" value="<%= data.citizen_id %>">
                 </div>
 
-                <div id="right_col">
-                    <label>Gender</label>
-                    <select name="gender">
-                        <option value="Male" <%= data.sex === 'Male' ? 'selected' : '' %>>Male</option>
-                        <option value="Female" <%= data.sex === 'Female' ? 'selected' : '' %>>Female</option>
-                    </select>
-
-                    <label>Nationality</label>
-                    <input type="text" name="nationality" value="<%= data.nationality %>">
-
-                    <label>Phone</label>
-                    <input type="text" name="phone" value="<%= data.phone %>">
-
-                    <label>Student-id</label>
-                    <input type="text" name="student_id" value="<%= data.student_id %>" readonly style="background-color: #eee;">
-                    <label>Email</label>
-                    <input type="email" name="email" value="<%= data.email %>">
-
-                    <label>Room-id</label>
-                    <input type="text" name="room_id" value="<%= data.room_id %>">
-
-                    <label>Year</label>
-                    <input type="text" name="year" value="<%= data.year %>">
-
-                    <label>Semester</label>
-                    <input type="text" name="semester" value="<%= data.semester %>">
-
-                    <label>Enroll year</label>
-                    <input type="text" name="enroll_year" value="<%= data.enroll_year %>">
+                <div id="submit_area">
+                    <button type="submit" id="save_btn">แก้ไข</button>
                 </div>
-            </div>
+            </form>
+        </div>
 
-            <div id="submit_area">
-                <button type="submit" id="save_btn">Update</button>
-            </div>
-        </form>
-    </div>
+        <script>
+            const fileInput = document.getElementById('file_input');
+            const profileImg = document.getElementById('profile_img');
 
-    <script>
-        const fileInput = document.getElementById('file_input');
-        const profileImg = document.getElementById('profile_img');
-
-        fileInput.addEventListener('change', function (event) {
-            const file = event.target.files[0];
-            if (file) {
-                const imageUrl = URL.createObjectURL(file);
-                profileImg.src = imageUrl;
-            }
-        });
-    </script>
+            fileInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const imageUrl = URL.createObjectURL(file);
+                    profileImg.src = imageUrl;
+                }
+            });
+        </script>
 </body>
 
 </html>
