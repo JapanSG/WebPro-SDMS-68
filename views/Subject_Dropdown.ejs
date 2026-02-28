@@ -1,0 +1,7 @@
+<form action="/teacher/grade" method="GET">
+    <select class="subject-dropdown" name="subject">
+        <% subjects.forEach(subject => { %>
+            <option value="<%= subject.subject_id %>" <% if(selected == subject.subject_id) { %>selected<% } %>><%= subject.subject_name %> ป.<%= subject.grade_level %></option>
+        <% }); %>
+    </select>
+</form>

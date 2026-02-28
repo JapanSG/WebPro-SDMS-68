@@ -201,9 +201,219 @@ app.get('/admin/home', async (req, res) => {
     }
 });
 
+// Submit Attendance
+// =====================================================================
+// [GET] หน้าเว็บสำหรับเช็คชื่อนักเรียน (Submit Attendance)
+// =====================================================================
 app.get('/ao/submit', (req, res) => {
-    res.render('Submit-Attendance', { user: req.user });
+    const { grade, room, date } = req.query;
+
+    // ถ้าเปิดมาครั้งแรก (ยังไม่กด Filter) ให้แสดงหน้าเปล่าๆ รอไว้
+    if (!grade || !room || !date) {
+        return res.render('Submit-Attendance', { 
+            user: req.user, 
+            students: [], 
+            filterData: { grade: '', room: '', date: '' } 
+        });
+    }
+
+    // แปลงข้อมูลให้ตรงกับ Database
+    // grade_level ใน DB เป็น Int (เช่น 1)
+    const gradeInt = parseInt(grade); 
+    
+    // room_name ใน DB เป็น Text (เช่น "1/1")
+    const roomNameStr = `${grade}/${room}`; 
+
+    // คำสั่ง SQL ดึงรายชื่อเด็กในห้อง + สถานะการมาเรียนของวันนั้น (ถ้ามี)
+    const sql = `
+        SELECT s.student_id, s.first_name, s.last_name, a.status
+        FROM Students s
+        JOIN Rooms r ON s.room_id = r.room_id
+        LEFT JOIN Attendance a ON s.student_id = a.student_id AND a.date = ?
+        WHERE r.grade_level = ? AND r.room_name = ?
+        ORDER BY s.student_id ASC
+    `;
+
+    db.all(sql, [date, gradeInt, roomNameStr], (err, students) => {
+        if (err) {
+            console.error("Error fetching students:", err.message);
+            students = [];
+        }
+
+        res.render('Submit-Attendance', { 
+            user: req.user, 
+            students: students,
+            filterData: { grade, room, date } 
+        });
+    });
 });
+
+// =====================================================================
+// [POST] บันทึกข้อมูลการเช็คชื่อลง Database
+// =====================================================================
+app.post('/ao/submit/save', checkAuthenticated, checkRole('ao'), (req, res) => {
+    const data = req.body;
+    const attendanceDate = data.attendance_date;
+    const grade = data.grade;
+    const room = data.room;
+
+    // ลูปหาเฉพาะข้อมูลที่มาจากปุ่มสถานะ (status_รหัสนักเรียน)
+    for (const key in data) {
+        if (key.startsWith('status_')) {
+            const studentId = key.replace('status_', ''); // ตัดคำว่า status_ ออก เหลือแค่รหัส
+            const status = data[key]; // จะได้ค่า 'Present', 'Absent', หรือ 'Late'
+
+            // คำสั่ง UPSERT: ถ้าไม่เคยเช็คชื่อวันนี่ให้เพิ่มใหม่ แต่ถ้าเคยแล้วให้อัปเดตสถานะทับ
+            const sqlUpsert = `
+                INSERT INTO Attendance (student_id, date, status) 
+                VALUES (?, ?, ?)
+                ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status
+            `;
+
+            db.run(sqlUpsert, [studentId, attendanceDate, status], (err) => {
+                if (err) {
+                    console.error(`Error saving attendance for ${studentId}:`, err.message);
+                }
+            });
+        }
+    }
+
+    // บันทึกเสร็จแล้ว Redirect กลับไปหน้าเดิมพร้อมตัวกรอง จะได้เห็นข้อมูลที่อัปเดต
+    res.redirect(`/ao/submit?grade=${grade}&room=${room}&date=${attendanceDate}`);
+});
+
+// Attendance Page
+
+app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (req, res) => {
+    try {
+        const userId = req.user.user_id; 
+
+        // 1. ดึงข้อมูลนักเรียน (ใช้ db.get ของ SQLite)
+        const sqlStudent = `
+    SELECT 
+        s.student_id, 
+        s.first_name, 
+        s.last_name, 
+        s.year, 
+        s.room_id, 
+        s.enroll_year, 
+        r.room_name, 
+        r.grade_level
+    FROM Students s
+    LEFT JOIN Rooms r ON r.room_id = s.room_id
+    WHERE s.user_id = ?
+`;
+        const student = await new Promise((resolve, reject) => {
+            db.get(sqlStudent, [userId], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (!student) {
+            return res.status(404).send('ไม่พบข้อมูลนักเรียนในระบบ');
+        }
+
+        // --- ระบบ FILTER (แบบไดนามิก) ---
+        const today = new Date();
+        let currentAcademicYear = today.getFullYear();
+        
+        // เช็กเดือนปัจจุบัน: ถ้าเป็น ม.ค. - เม.ย. (เดือน 0-3) ถือเป็นปีการศึกษาเก่า
+        if (today.getMonth() < 4) {
+            currentAcademicYear--;
+        }
+
+        // สร้างรายการปีการศึกษาทั้งหมดที่เลือกได้ (ดึงค่า enroll_year ถ้าไม่มีใช้ปีปัจจุบัน)
+        let enrollYear = student.enroll_year || currentAcademicYear;
+        if (enrollYear > 2500) {
+            enrollYear = enrollYear - 543;
+        }
+        const availableYears = [];
+        for (let y = enrollYear; y <= currentAcademicYear; y++) {
+            availableYears.push(y);
+        }
+
+        // กำหนดค่า Default หากเปิดหน้าเว็บครั้งแรก (เทอมปัจจุบัน)
+        const currentTerm = (today.getMonth() >= 4 && today.getMonth() <= 9) ? '1' : '2';
+        
+        // รับค่าที่เลือกมาจาก Dropdown
+        const selectedTerm = req.query.term || currentTerm;
+        const selectedYear = req.query.year || currentAcademicYear.toString();
+
+        // แปลงเทอมเป็นช่วงวันที่ เพื่อเอาไป Query Database
+        let startDate, endDate;
+        if (selectedTerm === '1') {
+            startDate = `${selectedYear}-05-01`; 
+            endDate = `${selectedYear}-10-31`;   
+        } else {
+            startDate = `${selectedYear}-11-01`;             
+            endDate = `${parseInt(selectedYear) + 1}-03-31`; 
+        }
+
+        // 2. ดึงประวัติการเข้าเรียนเฉพาะช่วงวันที่ Filter ไว้
+        const sqlAttendance = `
+            SELECT date, status 
+            FROM Attendance 
+            WHERE student_id = ? AND date >= ? AND date <= ? 
+            ORDER BY date DESC
+        `;
+        const attendanceHistory = await new Promise((resolve, reject) => {
+            db.all(sqlAttendance, [student.student_id, startDate, endDate], (err, rows) => {
+                if (err) reject(err);
+                // ถ้าไม่มีข้อมูลเลย ให้ส่ง Array ว่าง [] กลับไป จะได้ไม่ Error ตอน forEach
+                else resolve(rows || []); 
+            });
+        });
+
+        // 3. คำนวณยอดรวม (Summary)
+        // คราวนี้ attendanceHistory จะเป็น Array แล้ว ใช้ forEach ได้เลยครับ!
+        const summary = { present: 0, absent: 0, late: 0 };
+        attendanceHistory.forEach(record => {
+            if (record.status === 'Present') summary.present++;
+            if (record.status === 'Absent') summary.absent++;
+            if (record.status === 'Late') summary.late++;
+        }); 
+
+        // 4. เตรียมข้อมูลให้ Chart.js (แยกนับยอดรายเดือน)
+        const chartData = { labels: [], present: [], late: [], absent: [] };
+        const months = selectedTerm === '1' 
+            ? [{m:5, l:'May'}, {m:6, l:'Jun'}, {m:7, l:'Jul'}, {m:8, l:'Aug'}, {m:9, l:'Sep'}, {m:10, l:'Oct'}]
+            : [{m:11, l:'Nov'}, {m:12, l:'Dec'}, {m:1, l:'Jan'}, {m:2, l:'Feb'}, {m:3, l:'Mar'}];
+
+        months.forEach(month => {
+            chartData.labels.push(month.l);
+            const recordsInMonth = attendanceHistory.filter(r => {
+                const rMonth = new Date(r.date).getMonth() + 1; 
+                return rMonth === month.m;
+            });
+            
+            chartData.present.push(recordsInMonth.filter(r => r.status === 'Present').length);
+            chartData.late.push(recordsInMonth.filter(r => r.status === 'Late').length);
+            chartData.absent.push(recordsInMonth.filter(r => r.status === 'Absent').length);
+        });
+
+        // 5. ส่งข้อมูลทั้งหมดไปที่ EJS
+        res.render('attendance', { 
+            user: req.user, 
+            student: student, 
+            attendance: attendanceHistory, 
+            summary: summary,
+            selectedTerm: selectedTerm,
+            selectedYear: selectedYear,
+            availableYears: availableYears,
+            chartData: JSON.stringify(chartData) 
+        });
+
+    } catch (error) {
+        console.error("Database Error:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+
+
+
 
 app.get('/student/attendance_history', (req, res) => {
     const targetYear = req.query.year;
@@ -408,10 +618,6 @@ function handleError(err, res) {
 }
 
 // Manage Exam Schedule Page
-app.get('/teacher/grade', (req, res) => {
-    res.render('Submit-grades');
-});
-
 app.get('/admin/exam-schedule/get-subjects-entry', (req, res) => {
     const subquery = `SELECT grade_level 
     FROM exam_schedule 
@@ -607,6 +813,21 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
     });
 });
 
+app.put('/admin/exam-schedule/editDate', (req, res) => {
+    console.log(req.body);
+    const sql = 'UPDATE Exam_Schedule SET date = ? WHERE exam_id = ?';
+    db.run(sql, [req.body.date, req.body.exam_id], err => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error editing exam date");
+        } 
+        else {
+            console.log("Exam Date Edited");
+            res.status(200).send("Exam date edited successfully");
+        }
+    });
+});
+
 // Student view exam schedule
 app.get('/student/exam-schedule', (req, res) => {
     const sqlGetStudent = 'SELECT *  FROM Users JOIN Students USING(user_id) JOIN Rooms USING(room_id) WHERE user_id = ?';
@@ -649,6 +870,97 @@ app.get('/student/exam-schedule', (req, res) => {
         });
     });
 });
+
+//submit grade page
+app.get('/teacher/grade', (req, res) => {
+    const getSubjectSQL = `SELECT * FROM Subjects JOIN Teacher USING (teacher_id) WHERE user_id = ${req.user.user_id}`
+    db.all(getSubjectSQL, (err, subjects) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error retrieving exam entries");
+            return;
+        }
+        let selectedSubject;
+        if (req.query.subject){
+            selectedSubject = req.query.subject
+        }
+        else if (subjects.length > 0){
+            selectedSubject = subjects[0].subject_id
+        }
+        const getStudentSQL = ` SELECT *
+                                FROM Students st
+                                JOIN Rooms
+                                USING (room_id)
+                                WHERE Rooms.grade_level = (SELECT grade_level 
+                                                            FROM Subjects
+                                                            WHERE subject_id = ${selectedSubject}
+                                                            );`
+        db.all(getStudentSQL, (err, students) => {
+            if (err) {
+                console.error(err.message);
+                res.status(500).send("Error retrieving exam entries");
+                return;
+            }
+            let grades = {};
+            const getGradesSQL = `SELECT student_id, grade FROM Grade_Entries JOIN Subjects USING (subject_id) WHERE subject_id = ${selectedSubject} AND year = (SELECT max(year) FROM Year);`;
+            db.all(getGradesSQL, (err, result) => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error retrieving exam entries");
+                    return;
+                }
+                result.forEach(grade => {
+                    grades[`${grade.student_id}`] = grade;
+                });
+                res.render('Submit-Grades.ejs', {subjects : subjects, students : students, selected : selectedSubject, grades : grades});
+            });
+        });
+    });
+});
+
+function updateGrade(student_id, value, subject, res){
+    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year);`
+    value = value.trim();
+    db.get(checkSQL, (err, result) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error getting grade entries while updating");
+            return;
+        }
+        if (isNaN(value) || (!value)){
+            return;
+        }
+        if (result) {
+            db.run(`UPDATE Grade_Entries SET grade = ${value} WHERE grade_id = ${result.grade_id};`, (err) => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error updating grade entries");
+                    return;
+                }
+            });
+        }
+        else {
+            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT max(year) FROM Year), ${subject}, ${value})`;
+            db.run(sql, (err) => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error inserting new grade entries");
+                    return;
+                }
+            })
+        }
+    });
+}
+
+app.put("/teacher/grade/submit", (req, res) => {
+    let keys = Object.keys(req.body.values);
+    keys.forEach(key => {
+        updateGrade(key, req.body.values[key], req.body.subject, res);
+    })
+    
+    res.send("Data Sent");
+});
+
 
 app.listen(port, () => {
     console.log("Server started.");
