@@ -441,7 +441,7 @@ app.get('/student/attendance_history', (req, res) => {
     })
 })
 
-const multer = require('multer');
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.post('/user/upload-profile', upload.single('profile_pic'), checkAuthenticated, (req, res) => {
