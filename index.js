@@ -228,9 +228,7 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
 }
-app.get('/admin/home', function (req, res) {
-    res.render('Home-Admin');
-});
+
 
 // Japan's Pages
 function handleError(err, res) {
@@ -915,15 +913,7 @@ app.get('/delete/teacher/:id', function (req, res) {
         res.redirect('/admin/record-teach');
     });
 });
-app.get('/student/home', function (req, res) {
-    res.render('Home-Student');
-});
-app.get('/teacher/home', function (req, res) {
-    res.render('Home-Teacher');
-});
-app.get('/admin/home', function (req, res) {
-    res.render('Home-Admin');
-});
+
 app.listen(port, () => {
     console.log("Server started.");
     // createAccount('student').then(result => {

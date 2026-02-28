@@ -2,7 +2,9 @@
     <% const rowsPerPage = 10; %>
     <% const totalPages=Math.ceil(totalPeople / rowsPerPage); %>
         <div id="next_page_and_back">
-            <button id="back">กลับ</button>
+            <a href="/admin/home">
+                <button id="back">กลับ</button>
+            </a>
             <div id="num-button">
                 <button id="page-back">&lt;</button>
 
