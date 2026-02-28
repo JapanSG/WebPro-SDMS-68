@@ -13,31 +13,55 @@
     <%- include('Menu-Student') %>
         <div class="home_container">
             <div class="home_content">
-                <img class="profile" src="/images/icons/User.svg" alt="User-image">
+                <img id="profile-img" class="profile" src="<%= student.profilePictureBase64 || '/images/icons/User.svg' %>" alt="User-image">
                 <div class="information">
                     <div class="title">
                         <p>ข้อมูลนักเรียน</p>
-                        <img class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit">
+                        <img id="btn-edit-profile" class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit"
+                            style="cursor: pointer;">
                     </div>
                     <div class="info_content">
-                        <p>รหัสประจำตัว: 
+                        <p>รหัสประจำตัว:
                             <span id="student-id-display" data-id="<%= student.student_id %>">
-                                <%= student.student_id || '-'%>
+                                <%= student.student_id || '-' %>
                             </span>
                         </p>
-                        <p>รหัสประจำตัวประชาชน: <span><%= student.citizen_id || '-'%></span></p>
+                        <p>รหัสประจำตัวประชาชน: <span>
+                                <%= student.citizen_id || '-' %>
+                            </span></p>
                         <br>
-                        <p>ชื่อ - นามสกุล: <span><%= student.first_name || '-' %> <%= student.last_name || '-'%></span></p>
-                        <p>email: <span><%= student.email || '-'%></span></p>
-                        <p>โทรศัพท์: <span><%= student.phone || '-'%></span></p>
+                        <p>ชื่อ - นามสกุล: <span>
+                                <%= student.first_name || '-' %>
+                                    <%= student.last_name || '-' %>
+                            </span></p>
+                        <p>email: <span>
+                                <%= student.email || '-' %>
+                            </span></p>
+                        <p>โทรศัพท์: <span>
+                                <%= student.phone || '-' %>
+                            </span></p>
                         <br>
-                        <p>วัน/เดือน/ปี เกิด: <span><%= student.dob || '-'%></span></p>
-                        <p>สัญชาติ: <span><%= student.nationality || '-'%></span></p>
-                        <p>เพศ: <span><%= student.sex || '-'%></span></p>
-                        <p>ภาคเรียน: <span><%= student.semester || '-'%></span></p>
-                        <p>ปีที่เข้าศึกษา: <span><%= student.enroll_year || '-'%></span></p>
-                        <p>ระดับชั้น: <span><%= student.grade_level || '-'%></span></p>
-                        <p>ห้อง: <span><%= student.room_id || '-'%></span></p>
+                        <p>วัน/เดือน/ปี เกิด: <span>
+                                <%= student.dob || '-' %>
+                            </span></p>
+                        <p>สัญชาติ: <span>
+                                <%= student.nationality || '-' %>
+                            </span></p>
+                        <p>เพศ: <span>
+                                <%= student.sex || '-' %>
+                            </span></p>
+                        <p>ภาคเรียน: <span>
+                                <%= student.semester || '-' %>
+                            </span></p>
+                        <p>ปีที่เข้าศึกษา: <span>
+                                <%= student.enroll_year || '-' %>
+                            </span></p>
+                        <p>ระดับชั้น: <span>
+                                <%= student.grade_level || '-' %>
+                            </span></p>
+                        <p>ห้อง: <span>
+                                <%= student.room_id || '-' %>
+                            </span></p>
 
                     </div>
                 </div>
@@ -100,6 +124,22 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="upload-overlay" class="overlay hidden">
+            <div class="overlay-box">
+                <h3>เปลี่ยนรูปโปรไฟล์</h3>
+                <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg">
+
+                <div style="margin: 15px 0;">
+                    <img id="preview-img" src="" style="display: none; max-width: 150px; border-radius: 50%;">
+                </div>
+
+                <div class="overlay-actions">
+                    <button id="btn-cancel" class="btn-cancel">ยกเลิก</button>
+                    <button id="btn-save" class="btn-save">บันทึกรูปภาพ</button>
                 </div>
             </div>
         </div>

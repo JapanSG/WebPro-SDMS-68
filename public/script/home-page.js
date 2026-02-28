@@ -176,7 +176,7 @@ async function createAtdRecord() {
             else{
                 return;
             }
-
+            
             const spanDate = document.createElement('span');
             spanDate.className = "record_date";
             spanDate.textContent = item.date;
@@ -209,3 +209,60 @@ async function createAtdRecord() {
 }
 
 createAtdRecord();
+
+// ---------- upload profile image ---------- //
+
+const editBtn = document.getElementById('btn-edit-profile');
+const overlay = document.getElementById('upload-overlay');
+const cancelBtn = document.getElementById('btn-cancel');
+const saveBtn = document.getElementById('btn-save');
+const fileInput = document.getElementById('file-input');
+const previewImg = document.getElementById('preview-img');
+const profileImg = document.getElementById('profile-img');
+
+editBtn.addEventListener('click', () => overlay.classList.remove('hidden'));
+cancelBtn.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    fileInput.value = '';
+    previewImg.style.display = 'none';
+});
+
+
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewImg.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+
+saveBtn.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file) return alert("กรุณาเลือกรูปภาพก่อน");
+
+    const formData = new FormData();
+    formData.append('profile_pic', file);
+
+    try {
+        const response = await fetch('/user/upload-profile', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            alert('เปลี่ยนรูปโปรไฟล์สำเร็จ!');
+            profileImg.src = previewImg.src; 
+            overlay.classList.add('hidden');
+        } else {
+            alert('เกิดข้อผิดพลาด: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});

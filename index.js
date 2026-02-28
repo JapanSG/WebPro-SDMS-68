@@ -129,6 +129,13 @@ app.get('/student/home', checkAuthenticated, (req, res) => {
             return res.render('Home-Student', { user: req.user, student: {} });
         }
 
+        if (studentData && studentData.profile_picture) {
+            const base64Image = studentData.profile_picture.toString('base64');
+            studentData.profilePictureBase64 = `data:image/jpeg;base64,${base64Image}`;
+        } else if (studentData) {
+            studentData.profilePictureBase64 = '/images/icons/User.svg';
+        }
+
         res.render('Home-Student', {
             user: req.user,
             student: studentData || {}
@@ -191,28 +198,52 @@ app.get('/ao/submit', (req, res) => {
     res.render('Submit-Attendance', { user: req.user });
 });
 
-app.get('/student/attendance_history',(req, res) => {
+app.get('/student/attendance_history', (req, res) => {
     const targetYear = req.query.year;
     const studentId = req.query.student_id;
 
 
-    if(!targetYear){
-        return res.status(400).json({error: 'กรุณาระบุปีที่ต้องการ'});
+    if (!targetYear) {
+        return res.status(400).json({ error: 'กรุณาระบุปีที่ต้องการ' });
     }
 
     const sql = `SELECT * FROM Attendance WHERE student_id = ? AND date LIKE ?`;
     const params = [studentId, `${targetYear}-%`];
 
-    db.all(sql,params, (err,rows) => {
-        if(err){
+    db.all(sql, params, (err, rows) => {
+        if (err) {
             console.error(err.message);
-            return res.status(500).json({error: 'Database error'});
+            return res.status(500).json({ error: 'Database error' });
         }
 
         res.json(rows);
     })
 })
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/user/upload-profile', upload.single('profile_pic'), (req, res) => {
+    const userId = req.user.user_id;
+    const file = req.file;
+
+    if (!file) {
+        return res.status(400).json({ success: false, error: 'ไม่มีไฟล์ส่งมา' });
+    }
+
+    const imageBuffer = file.buffer;
+
+    const sql = `UPDATE Users SET profile_picture = ? WHERE user_id = ?`;
+    const params = [imageBuffer, userId];
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ success: false, error: 'Database error' });
+        }
+        res.json({ success: true, message: 'อัปเดตโปรไฟล์เรียบร้อย' });
+    });
+});
 
 function createAccount(role) {
     return new Promise(async (resolve, reject) => {

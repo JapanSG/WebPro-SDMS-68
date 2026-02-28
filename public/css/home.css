@@ -114,6 +114,35 @@ body {
 .edit_icon{
     cursor: pointer;
 }
+
+.overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.overlay.hidden {
+    display: none;
+}
+
+.overlay-box {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.overlay-actions button {
+    margin: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
 .info_content {
     display: flex;
     width: 100%;
