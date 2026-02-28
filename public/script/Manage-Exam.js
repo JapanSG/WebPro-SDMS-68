@@ -520,6 +520,83 @@ function deleteAllHandler() {
   });
 }
 
+function createEditDatePopup(event) {
+    const exam_id = event.target.parentNode.value;
+    console.log("Editing date for exam ID:", exam_id);
+
+    let popup = document.createElement("div");
+    popup.setAttribute("class", "editDatePopup");
+
+    let title = document.createElement("h2");
+    title.textContent = "Edit Exam Date";
+    popup.appendChild(title);
+
+    // Create date input field
+    let input = document.createElement("input");
+    input.setAttribute("type", "date");
+    input.setAttribute("class", "dateInput");
+    popup.appendChild(input);
+
+    let btnsDiv = document.createElement("div");
+    btnsDiv.setAttribute("class", "popupBtns");
+    popup.appendChild(btnsDiv);
+
+    // Create Cancel button
+    let cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.setAttribute("class", "cancelBtn");
+    cancelBtn.addEventListener("click", closeEditDatePopup);
+    btnsDiv.appendChild(cancelBtn);
+
+    // Create Confirm button
+    let confirmBtn = document.createElement("button");
+    confirmBtn.textContent = "Edit";
+    confirmBtn.setAttribute("class", "confirmBtn");
+    confirmBtn.addEventListener("click", () => editDateHandler(exam_id));
+    btnsDiv.appendChild(confirmBtn);
+
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "flex";
+    layer.appendChild(popup);
+}
+
+function closeEditDatePopup() {
+    let popup = document.querySelector(".editDatePopup");
+    if (popup) {
+        popup.remove();
+    }
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "none";
+}
+
+function editDateHandler(exam_id) {
+    let date = document.querySelector(".dateInput").value;
+    if (date) {
+        console.log("Editing date for exam ID:", exam_id, "New date:", date);
+        fetch("/admin/exam-schedule/editDate", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                exam_id: exam_id,
+                date: date
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } 
+            else {
+                console.error("Failed to update exam date");
+            }
+        })
+        .catch(error => {
+            console.error("Error updating exam date:", error);
+        });
+    }
+}
+
 function init(){
     let addExam = document.getElementById("addExam");
     addExam.addEventListener("click", createAddExamPopup);
@@ -541,6 +618,10 @@ function init(){
     let deleteExamButtons = document.querySelectorAll(".deleteExam");
     deleteExamButtons.forEach(button => {
         button.addEventListener("click", createDeleteExamWarningPopup);
+    });
+    let editDateButtons = document.querySelectorAll(".editDate");
+    editDateButtons.forEach(button => {
+        button.addEventListener("click", createEditDatePopup);
     });
 }
 
