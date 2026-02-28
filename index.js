@@ -1023,10 +1023,15 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
             LEFT JOIN Subjects s ON g.subject_id = s.subject_id
             WHERE g.student_id = ? AND g.year = ? AND g.semester = ?
         `;
+        //แปลกปี
+
         const grades = await new Promise((resolve, reject) => {
-            db.all(sqlGrades, [student.student_id, selectedYear, selectedTerm], (err, rows) => {
+            db.all(sqlGrades, [student.student_id, parseInt(selectedYear)+543, selectedTerm], (err, rows) => {
                 if (err) reject(err);
-                else resolve(rows || []);
+                else{
+                    console.log(rows);
+                    resolve(rows || []);
+                } 
             });
         });
 
