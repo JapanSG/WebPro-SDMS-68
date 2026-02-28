@@ -456,7 +456,9 @@ app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => 
                 subjects: subjects, 
                 searchQuery: searchQuery, 
                 currentPage: currentPage, 
-                totalPages: totalPages 
+                totalPages: totalPages ,
+                errorMsg: req.query.error || null,
+                successMsg: req.query.success || null
             });
         });
     });
@@ -548,53 +550,62 @@ app.get('/admin/subject/delete/:id', checkAuthenticated, checkRole('admin'), (re
     db.run(sql, [subjectId], function(err) {
         if (err) {
             console.error("Error deleting subject:", err.message);
-            // ถ้าลบไม่ได้ (เช่น ติด Foreign Key กับตารางอื่น) ให้แจ้งเตือน
-            return res.status(500).send("ไม่สามารถลบวิชานี้ได้ เนื่องจากมีการใช้งานอยู่ในตารางอื่น (เช่น ตารางเรียน หรือ ตารางสอบ)");
+            
+            const errorMsg = "ไม่สามารถลบวิชานี้ได้ เนื่องจากมีการใช้งานอยู่ในตารางเรียนหรือตารางสอบ";
+            return res.redirect('/admin/subject?error=' + encodeURIComponent(errorMsg));
         }
         
-        console.log(`Deleted subject_id: ${subjectId}`);
-        // ลบเสร็จแล้วให้เด้งกลับไปหน้าจัดการเหมือนเดิม
-        res.redirect('/admin/subject');
+        
+        const successMsg = "ลบรายวิชาสำเร็จ";
+        res.redirect('/admin/subject?success=' + encodeURIComponent(successMsg));
     });
 });
-app.get('/student/class-schedule', checkAuthenticated, (req, res) => {
-    const userId = req.user.user_id;
+// เพิ่ม Route นี้ใน index.js
+// Route สำหรับหน้าตารางเรียนฝั่งนักเรียน
+app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (req, res) => {
+    
+    // ตั้งค่าตามข้อมูลที่เรา Insert ไว้: ห้อง 1, เทอม 1, ปี 2568
+    // (ในอนาคต: roomId ควรดึงมาจากตาราง Students โดยใช้ req.user.user_id ครับ)
+    const roomId = 1; 
+    const targetSemester = 1;
+    const targetYear = 2568; 
 
-    // ดึงตารางเรียนของนักเรียนคนนี้
+    // คำสั่ง SQL ดึงข้อมูลตารางเรียน พร้อมชื่อวิชาและชื่ออาจารย์
     const sql = `
-        SELECT 
-            sc.day, 
-            sc.period, 
-            sub.subject_id, 
-            sub.subject_name
-        FROM Students st
-        JOIN Schedule sc ON st.room_id = sc."room-id"
-        JOIN Subjects sub ON sc.subject_id = sub.subject_id
-        WHERE st.user_id = ?
+        SELECT sch.day, sch.period, sub.subject_id, sub.subject_name, t.first_name, t.last_name
+        FROM Schedule sch
+        LEFT JOIN Subjects sub ON sch.subject_id = sub.subject_id
+        LEFT JOIN Teacher t ON sub.teacher_id = t.teacher_id
+        WHERE sch."room-id" = ? AND sch.semester = ? AND sch.year = ?
+        ORDER BY sch.day, sch.period
     `;
 
-    db.all(sql, [userId], (err, rows) => {
+    db.all(sql, [roomId, targetSemester, targetYear], (err, schedules) => {
         if (err) {
-            console.error("Error fetching schedule:", err.message);
-            return res.status(500).send("Database Error");
+            console.error("Error fetching class schedule:", err.message);
+            return res.status(500).send("Database Error: ไม่สามารถดึงข้อมูลตารางเรียนได้");
         }
 
-        const scheduleMap = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
+        // จัดกลุ่มข้อมูลให้อยู่ในรูปแบบ Object เพื่อให้ฝั่ง EJS วนลูปสร้างตารางง่ายๆ
+        // 1=จันทร์, 2=อังคาร, 3=พุธ, 4=พฤหัส, 5=ศุกร์
+        const timetable = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
+        
+        schedules.forEach(item => {
+            if (timetable[item.day]) {
+                timetable[item.day][item.period] = item;
+            }
+        });
 
-        if (rows && rows.length > 0) {
-            rows.forEach(row => {
-                if (scheduleMap[row.day]) {
-                    scheduleMap[row.day][row.period] = row;
-                }
-            });
-        }
-
-        res.render('Student-Schedule', { 
+        // ส่งข้อมูลไปที่ไฟล์ EJS (สมมติว่าไฟล์ชื่อ Schedule.ejs ตามที่เราเคยเขียน CSS มินิมอลไว้)
+        res.render('Schedule', { 
             user: req.user, 
-            scheduleMap: scheduleMap 
+            timetable: timetable,
+            year: targetYear,
+            semester: targetSemester
         });
     });
 });
+
 // ==========================================
 
 

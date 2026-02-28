@@ -1,0 +1,137 @@
+/* =========================================
+   Schedule.css (Minimalist Theme)
+========================================= */
+
+body {
+    background-color: #f8fafc; /* พื้นหลังสีสว่างๆ อมฟ้าเล็กน้อย */
+    font-family: 'Kanit', sans-serif;
+    color: #334155;
+}
+
+.schedule-container {
+    max-width: 1200px;
+    margin: 100px auto 40px auto;
+    padding: 0 20px;
+}
+
+.schedule-header {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.schedule-header h2 {
+    font-size: 24px;
+    color: #0f172a;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* --- Container ของตาราง --- */
+.table-responsive {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* เงาบางๆ ให้ดูเป็นแผ่นการ์ดลอยขึ้นมา */
+    overflow-x: auto; /* เผื่อจอมือถือให้เลื่อนซ้ายขวาได้ */
+    border: 1px solid #e2e8f0;
+}
+
+/* --- การออกแบบตาราง --- */
+.minimal-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+/* หัวตาราง */
+.minimal-table th {
+    background-color: #ffffff;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 20px 10px;
+    text-align: center;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+/* เส้นขอบภายในตารางบางๆ */
+.minimal-table td {
+    border: 1px solid #f1f5f9;
+    padding: 10px;
+    text-align: center;
+    vertical-align: top;
+    height: 100px; /* ล็อกความสูงให้เท่ากันหมด */
+}
+
+/* คอลัมน์วัน (จันทร์-ศุกร์) */
+.minimal-table .day-name {
+    background-color: #f8fafc;
+    color: #1e293b;
+    font-weight: 500;
+    vertical-align: middle;
+    width: 100px;
+}
+
+/* --- การ์ดวิชาเรียนในแต่ละช่อง --- */
+.subject-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #f0f9ff; /* สีฟ้าอ่อนๆ เวลามีเรียน */
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+}
+
+.subject-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.15);
+}
+
+.sub-id {
+    font-size: 12px;
+    color: #0284c7;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.sub-name {
+    font-size: 14px;
+    color: #0f172a;
+    font-weight: 500;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.teacher-name {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.empty-slot {
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* --- ช่องพักกลางวัน --- */
+.lunch-break {
+    background-color: #fdfcf8;
+    color: #94a3b8;
+    vertical-align: middle;
+    width: 60px;
+    border-left: 2px dashed #e2e8f0 !important;
+    border-right: 2px dashed #e2e8f0 !important;
+}
+
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin: 0 auto;
+}

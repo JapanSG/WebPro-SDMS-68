@@ -18,6 +18,16 @@
                 <input type="text" name="search" placeholder="ค้นหารายวิชา..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
             </form>
 
+            <% if (errorMsg) { %>
+        <div class="alert alert-danger">
+            <strong>⚠️ แจ้งเตือน:</strong> <%= errorMsg %>
+        </div>  <% } %>
+
+        <% if (successMsg) { %>
+            <div class="alert alert-success">
+            <strong>✅ สำเร็จ:</strong> <%= successMsg %>
+            </div><% } %>
+
             <a href="/admin/subject/add" class="add_btn">+ เพิ่มรายวิชาใหม่</a>
         </div>
 
