@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ตารางเรียน - นักเรียน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/Student-Schedule.css"> 
+</head>
+<body>
+    
+    <%- include('Menu-Student') %> 
+
+    <main class="main_content">
+        <div class="schedule_container">
+            <h2 class="page_title">ตารางเรียน</h2>
+            
+            <div class="table_responsive">
+                <table class="schedule_table">
+                    <thead>
+                        <tr>
+                            <th class="day_header"></th>
+                            <th>8.00 AM</th>
+                            <th>9.00 AM</th>
+                            <th>10.00 AM</th>
+                            <th>11.00 AM</th>
+                            <th class="lunch_header">12.00 PM</th>
+                            <th>1.00 PM</th>
+                            <th>2.00 PM</th>
+                            <th>3.00 PM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% const days = ['วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์']; %>
+                        <% /* เปลี่ยนตรงนี้จาก => เป็น function */ %>
+                        <% days.forEach(function(day, index) { %>
+                            <% var currentDay = index + 1; %>
+                            <tr>
+                                <td class="day_col"><%= day %></td>
+                                
+                                <% for(var period = 1; period <= 4; period++) { %>
+                                    <td>
+                                        <% if (typeof scheduleMap !== 'undefined' && scheduleMap[currentDay] && scheduleMap[currentDay][period]) { %>
+                                            <div class="subject_id"><%= scheduleMap[currentDay][period].subject_id %></div>
+                                            <div class="subject_name"><%= scheduleMap[currentDay][period].subject_name %></div>
+                                            <div class="teacher_name" style="color: #ccc;">- รอระบุผู้สอน -</div>
+                                        <% } %>
+                                    </td>
+                                <% } %>
+
+                                <% if (index === 0) { %>
+                                    <td rowspan="5" class="lunch_col">
+                                        <div class="lunch_text">พักกลางวัน</div>
+                                    </td>
+                                <% } %>
+
+                                <% for(var period = 6; period <= 8; period++) { %>
+                                    <td>
+                                        <% if (typeof scheduleMap !== 'undefined' && scheduleMap[currentDay] && scheduleMap[currentDay][period]) { %>
+                                            <div class="subject_id"><%= scheduleMap[currentDay][period].subject_id %></div>
+                                            <div class="subject_name"><%= scheduleMap[currentDay][period].subject_name %></div>
+                                            <div class="teacher_name" style="color: #ccc;">- รอระบุผู้สอน -</div>
+                                        <% } %>
+                                    </td>
+                                <% } %>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
