@@ -365,10 +365,6 @@ function handleError(err, res) {
 }
 
 // Manage Exam Schedule Page
-app.get('/teacher/grade', (req, res) => {
-    res.render('Submit-grades');
-});
-
 app.get('/admin/exam-schedule/get-subjects-entry', (req, res) => {
     const subquery = `SELECT grade_level 
     FROM exam_schedule 
@@ -564,6 +560,21 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
     });
 });
 
+app.put('/admin/exam-schedule/editDate', (req, res) => {
+    console.log(req.body);
+    const sql = 'UPDATE Exam_Schedule SET date = ? WHERE exam_id = ?';
+    db.run(sql, [req.body.date, req.body.exam_id], err => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error editing exam date");
+        } 
+        else {
+            console.log("Exam Date Edited");
+            res.status(200).send("Exam date edited successfully");
+        }
+    });
+});
+
 // Student view exam schedule
 app.get('/student/exam-schedule', (req, res) => {
     const sqlGetStudent = 'SELECT *  FROM Users JOIN Students USING(user_id) JOIN Rooms USING(room_id) WHERE user_id = ?';
@@ -607,9 +618,100 @@ app.get('/student/exam-schedule', (req, res) => {
     });
 });
 
+//submit grade page
+app.get('/teacher/grade', (req, res) => {
+    const getSubjectSQL = `SELECT * FROM Subjects JOIN Teacher USING (teacher_id) WHERE user_id = ${req.user.user_id}`
+    db.all(getSubjectSQL, (err, subjects) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error retrieving exam entries");
+            return;
+        }
+        let selectedSubject;
+        if (req.query.subject){
+            selectedSubject = req.query.subject
+        }
+        else if (subjects.length > 0){
+            selectedSubject = subjects[0].subject_id
+        }
+        const getStudentSQL = ` SELECT *
+                                FROM Students st
+                                JOIN Rooms
+                                USING (room_id)
+                                WHERE Rooms.grade_level = (SELECT grade_level 
+                                                            FROM Subjects
+                                                            WHERE subject_id = ${selectedSubject}
+                                                            );`
+        db.all(getStudentSQL, (err, students) => {
+            if (err) {
+                console.error(err.message);
+                res.status(500).send("Error retrieving exam entries");
+                return;
+            }
+            let grades = {};
+            const getGradesSQL = `SELECT student_id, grade FROM Grade_Entries JOIN Subjects USING (subject_id) WHERE subject_id = ${selectedSubject} AND year = (SELECT max(year) FROM Year);`;
+            db.all(getGradesSQL, (err, result) => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error retrieving exam entries");
+                    return;
+                }
+                result.forEach(grade => {
+                    grades[`${grade.student_id}`] = grade;
+                });
+                res.render('Submit-Grades.ejs', {subjects : subjects, students : students, selected : selectedSubject, grades : grades});
+            });
+        });
+    });
+});
+
+function updateGrade(student_id, value, subject, res){
+    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year);`
+    value = value.trim();
+    db.get(checkSQL, (err, result) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).send("Error getting grade entries while updating");
+            return;
+        }
+        if (isNaN(value) || (!value)){
+            return;
+        }
+        if (result) {
+            db.run(`UPDATE Grade_Entries SET grade = ${value} WHERE grade_id = ${result.grade_id};`, (err) => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error updating grade entries");
+                    return;
+                }
+            });
+        }
+        else {
+            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT max(year) FROM Year), ${subject}, ${value})`;
+            db.run(sql, (err) => {
+                if (err) {
+                    console.error(err.message);
+                    res.status(500).send("Error inserting new grade entries");
+                    return;
+                }
+            })
+        }
+    });
+}
+
+app.put("/teacher/grade/submit", (req, res) => {
+    let keys = Object.keys(req.body.values);
+    keys.forEach(key => {
+        updateGrade(key, req.body.values[key], req.body.subject, res);
+    })
+    
+    res.send("Data Sent");
+});
+
+
 app.listen(port, () => {
     console.log("Server started.");
-    // createAccount('student').then(result => {
+    // createAccount('teacher').then(result => {
     //     if (result.success) {
     //         console.log('Admin account created:', result.user);
     //     } else {
