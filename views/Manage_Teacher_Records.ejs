@@ -14,55 +14,43 @@
         <div id="search_add">
             <div id="search">
                 <img src="/images/icons/Search.svg" alt="glass" id="search-button">
-                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อนักเรียน"
+                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อครูผู้สอน"
                     value="<%= locals.searchKeyword || '' %>">
             </div>
             <div id="add_btn">
-                <a href="/students">
+                <a href="/teachers">
                     <img src="/images/icons/Add_circle.svg" alt="รูปบวก">
-                    <span>เพิ่มข้อมูลนักเรียน</span>
+                    <span>เพิ่มข้อมูลคุณครู</span>
                 </a>
             </div>
         </div>
         <table id="student_records">
             <tr id="first_head">
-                <th>รหัสประจำตัวนักเรียน</th>
+                <th>รหัสประจำตัวคุณครู</th>
                 <th>ชื่อ</th>
-                <th>เพศ</th>
-                <th>สัญชาติ</th>
                 <th>เบอร์โทรศัพท์</th>
                 <th>อีเมล</th>
-                <th>ปีที่เข้า</th>
             </tr>
-            <% students.forEach((student)=>{ %>
+            <% teachers.forEach((teacher)=>{ %>
                 <tr>
                     <td>
-                        <%=student.student_id%>
+                        <%=teacher.teacher_id%>
                     </td>
                     <td>
-                        <%=student.first_name%>
-                            <%=student.last_name%>
+                        <%=teacher.first_name%>
+                            <%=teacher.last_name%>
                     </td>
                     <td>
-                        <%=student.sex%>
+                        <%=teacher.phone%>
                     </td>
                     <td>
-                        <%=student.nationality%>
+                        <%=teacher.email%>
                     </td>
-                    <td>
-                        <%=student.phone%>
-                    </td>
-                    <td>
-                        <%=student.email%>
-                    </td>
-                    <td>
-                        <%=student.enroll_year%>
-                    </td>
-                    <td id="S<%=student.rowid%>">
-                        <a href="/delete/student/<%=student.student_id%>">
+                    <td id="S<%=teacher.rowid%>">
+                        <a href="/delete/teacher/<%=teacher.teacher_id%>">
                             <img src="/images/icons/Delete.svg" alt="ปุ่มลบ">
                         </a>
-                        <a href="/edit/student/<%=student.student_id%>">
+                        <a href="/edit/teacher/<%=teacher.teacher_id%>">
                             <img src="/images/icons/Edit.svg" alt="ปุ่มแก้ไข">
                         </a>
                     </td>
@@ -81,14 +69,14 @@
                 const img = document.getElementById('search-button');
                 img.addEventListener('click', function () {
                     const keyword = document.getElementById('search_bar').value;
-                    window.location.href = `/admin/record-stu/?search=${keyword}&page=1`;
+                    window.location.href = `/admin/record-teach/?search=${keyword}&page=1`;
                 });
 
                 // 1. กดเลขหน้า
                 const pageButtons = document.querySelectorAll('.page');
                 pageButtons.forEach(button => {
                     button.addEventListener('click', function () {
-                        window.location.href = `/admin/record-stu/?${searchParam}page=${this.id}`;
+                        window.location.href = `/admin/record-teach/?${searchParam}page=${this.id}`;
                     });
                 });
 
@@ -97,7 +85,7 @@
                 if (prevBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
                     prevBtn.addEventListener('click', function () {
                         if (currentPage > 1) {
-                            window.location.href = `/admin/record-stu/?page=${currentPage - 1}${searchParam}`;
+                            window.location.href = `/admin/record-teach/?page=${currentPage - 1}${searchParam}`;
                         }
                     });
                 }
@@ -107,7 +95,7 @@
                 if (nextBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
                     nextBtn.addEventListener('click', function () {
                         if (currentPage < totalPages) {
-                            window.location.href = `/admin/record-stu/?page=${currentPage + 1}${searchParam}`;
+                            window.location.href = `/admin/record-teach/?page=${currentPage + 1}${searchParam}`;
                         }
                     });
                 }
@@ -118,7 +106,7 @@
                     if (e.key === 'Enter') {
                         const keyword = this.value;
                         // บังคับเปลี่ยน URL และให้กลับไปเริ่มที่หน้า 1 เสมอ
-                        window.location.href = `/admin/record-stu/?search=${keyword}&page=1`;
+                        window.location.href = `/admin/record-teach/?search=${keyword}&page=1`;
                     }
                 });
 
