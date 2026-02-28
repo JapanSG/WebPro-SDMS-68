@@ -80,7 +80,7 @@ app.get('/admin/manage-schedule',function(req,res){
                             AND s.year = ? AND s.semester = ?
                         ) as schedule_count
                     FROM Rooms r
-                    LEFT JOIN Teacher t ON r.advisor_id = t.teacher_id
+                    LEFT JOIN Teacher t ON r.room_id = t.room_id
                     `;
 
         db.all(sql, [selectedYear, selectedSemester], (err, dbRooms)=>{
