@@ -10,7 +10,7 @@ const flash = require('express-flash')
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 
-let db = new sqlite3.Database('schoolTestGrade.db', (err) => {    
+let db = new sqlite3.Database('school.db', (err) => {    
     if (err) {
         return console.error(err.message);
     }
