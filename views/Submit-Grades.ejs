@@ -9,9 +9,33 @@
 </head>
 <body>
     <%- include('Menu-Teacher') %>
-    <div id="drop-zone">
-        <p>Upload Files Here</p>
+    <div class="container">
+        <div class="top">
+            <%- include('Subject_Dropdown.ejs', {subjects: subjects, selected: selected}) %>
+            <button type="button" id="submit">Submit Grade</button>
+        </div>
+        <form>
+            <input type="hidden" name="subject" value="<%= selected%>" id="form-subject">
+            <table>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Grade</th>
+                </tr>
+                <% students.forEach(student => { %>
+                    <tr>
+                        <td><%= student.student_id %></th>
+                        <td><%= student.first_name %> <%= student.last_name %></th>
+                        <td>
+                            <% let value = "" %>
+                            <% if (grades[`${student.student_id}`]) {value = grades[`${student.student_id}`].grade} %>
+                            <input type="text" value="<%= value %>" name="<%= student.student_id %>" class="grade-field">
+                        </td>
+                    </tr>
+                <% }); %>
+            </table>
+        </form>
     </div>
-    <input type="file" id="fileInput" style="display: none;">
+    <script src="/script/Submit-Grade.js"></script>
 </body>
 </html>
