@@ -1,0 +1,170 @@
+:root {
+    --card-bg: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    
+    /* สีสถานะ */
+    --color-present: #10b981;
+    --color-late: #f59e0b;
+    --color-absent: #ef4444;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8fafc;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Card Style พื้นฐาน */
+.card {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03), 0 4px 10px rgba(0, 0, 0, 0.02);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Profile Section */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.avatar {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+}
+
+.profile-text h2 { 
+    margin: 0 0 0.25rem 0; 
+    font-size: 1.5rem; 
+}
+.profile-text p { 
+    margin: 0; 
+    font-size: 1rem; 
+    color: var(--text-muted);
+}
+
+/* Summary Grid */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    margin-bottom: 0;
+}
+
+.card-icon { font-size: 2.5rem; }
+.card-details h3 { 
+    margin: 0; 
+    font-size: 1rem; 
+    color: var(--text-muted); 
+    font-weight: normal; 
+}
+.card-details .count { 
+    margin: 0; 
+    font-size: 2rem; 
+    font-weight: bold; 
+}
+
+/* Chart & Filter Section */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.legend-item { 
+    margin-right: 1.5rem; 
+    display: inline-flex; 
+    align-items: center; 
+    font-weight: 500;
+}
+
+/* จุดสีสถานะ */
+.dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+.dot-green { background-color: var(--color-present); }
+.dot-yellow { background-color: var(--color-late); }
+.dot-red { background-color: var(--color-absent); }
+
+.filter-group { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    font-weight: 500;
+}
+
+.semester-select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.canvas-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* History Table */
+.history-section h3 { 
+    margin-top: 0; 
+    margin-bottom: 1.5rem; 
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table th, .history-table td {
+    padding: 1rem 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.history-table th { 
+    color: var(--text-muted); 
+    font-weight: 600; 
+}
+
+.status-wrap { 
+    display: flex; 
+    align-items: center; 
+    font-weight: 500;
+}
+
+.text-center {
+    text-align: center;
+    color: var(--text-muted);
+}

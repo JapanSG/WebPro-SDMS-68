@@ -6,15 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>login</title>
     <link rel="stylesheet" href="/css/login.css">
-    
+
 </head>
 
 <body>
     <div class="container">
 
-        <div class="background">
-
-        </div>
         <div class="login-container">
 
             <div class="login">
@@ -25,44 +22,72 @@
                 <div class="login-body">
                     <form action="/login" method="post" class="login-form">
                         <h2>Username</h2>
-                        <input type="text" name="username" placeholder="Username" class="input-field">
+                        <input type="text" name="username" id="usernameField" placeholder="Username"
+                            class="input-field <%= messages.error === 'ไม่พบชื่อผู้ใช้งานนี้ในระบบ' ? 'error-border' : '' %>"
+                            value="<%= locals.lastUsername ? lastUsername : '' %>" required>
+
                         <div class="input-label">
                             <h2>Password</h2>
-                            <p class="forgot-password">forgot your password?</p>
                         </div>
                         <div class="password-wrapper">
-                            <input type="password" name="password" placeholder="Password" class="input-field" id="passwordField">
+                            <input type="password" name="password" id="passwordField" placeholder="Password"
+                                class="input-field <%= messages.error === 'รหัสผ่านไม่ถูกต้อง' ? 'error-border' : '' %>"
+                                required>
                             <span class="toggle-icon" onclick="togglePassword()" id="toggleicon">
                                 <img src="/images/icons/PasswordToggle.png" alt="Password Toggle">
                             </span>
                         </div>
-                    </div>
-                        <button type="submit" class="login-btn">
+                        <div class="remember-btn">
+                            <input type="checkbox" name="remember" id="rememberMe">
+                            <label for="rememberMe">Remember Me</label>
+                        </div>
+
+                        <button type="submit" class="login-btn" id="loginBtn" disabled>
                             <img src="/images/icons/Login.svg" alt="login">
                             Login
                         </button>
                     </form>
+
                     <% if (messages.error){ %>
-                         <p class="error-messages"><%= messages.error %></p>
-                    <% }%>
+                        <p class="error-messages">
+                            <img src="/images/icons/error-icon.svg"
+                                style="width: 16px; vertical-align: middle; margin-right: 5px;">
+                            <%= messages.error %>
+                        </p>
+                        <% } %>
                 </div>
             </div>
-
         </div>
+
+    </div>
     </div>
     <script>
-        function togglePassword(){
-            const passwordfield = document.getElementById('passwordField');
-            const toggleicon = document.getElementById('toggleicon');
 
-            if(passwordfield.type === 'password'){
-                passwordfield.type = 'text';
+        const usernameInput = document.getElementById('usernameField');
+        const passwordInput = document.getElementById('passwordField');
+        const loginBtn = document.getElementById('loginBtn');
+        const toggleicon = document.getElementById('toggleicon');
+
+        function checkInputs() {
+            if (usernameInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+                loginBtn.disabled = false;
+            } else {
+                loginBtn.disabled = true;
+            }
+        }
+
+        usernameInput.addEventListener('input', checkInputs);
+        passwordInput.addEventListener('input', checkInputs);
+
+        function togglePassword() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
                 toggleicon.style.opacity = 1
-            }else{
-                passwordfield.type = 'password';
+            } else {
+                passwordInput.type = 'password';
                 toggleicon.style.opacity = 0.5
             }
-            
+
 
         }
     </script>

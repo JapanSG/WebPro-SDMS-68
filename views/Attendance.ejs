@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/Attendance.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <%- include('Menu-Student') %>
+    <%- include('showMenu') %>
+    
+    <main class="container">
+        <div class="profile-header card">
+            <div class="profile-info">
+                <img src="<%= user.profile_picture || '/images/default-avatar.png' %>" alt="Profile" class="avatar">
+                <div class="profile-text">
+                    <h2><%= student.first_name %> <%= student.last_name %></h2>
+                    <p class="text-muted">ชั้น ม.<%= student.grade_level %> ห้อง <%= student.room_name %> | เลขประจำตัวนักเรียน: <%= student.student_id %></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card card">
+                <div class="card-icon present-icon">✅</div>
+                <div class="card-details">
+                    <h3>มาเรียน</h3>
+                    <p class="count"><%= summary.present %></p>
+                </div>
+            </div>
+            <div class="summary-card card">
+                <div class="card-icon late-icon">⏱️</div>
+                <div class="card-details">
+                    <h3>สาย</h3>
+                    <p class="count"><%= summary.late %></p>
+                </div>
+            </div>
+            <div class="summary-card card">
+                <div class="card-icon absent-icon">❌</div>
+                <div class="card-details">
+                    <h3>ขาด</h3>
+                    <p class="count"><%= summary.absent %></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section card">
+            <div class="chart-header">
+                <div class="legend">
+                    <span class="legend-item"><span class="dot dot-green"></span> Present</span>
+                    <span class="legend-item"><span class="dot dot-yellow"></span> Late</span>
+                    <span class="legend-item"><span class="dot dot-red"></span> Absent</span>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-year">ปีการศึกษา:</label>
+                    <select id="filter-year" class="semester-select" onchange="applyFilters()">
+                        <% availableYears.forEach(function(year) { %>
+                            <option value="<%= year %>" <%= selectedYear == year ? 'selected' : '' %>>
+                                <%= year + 543 %>
+                            </option>
+                        <% }); %>
+                    </select>
+
+                    <label for="filter-term">ภาคเรียน:</label>
+                    <select id="filter-term" class="semester-select" onchange="applyFilters()">
+                        <option value="1" <%= selectedTerm === '1' ? 'selected' : '' %>>ภาคเรียนที่ 1</option>
+                        <option value="2" <%= selectedTerm === '2' ? 'selected' : '' %>>ภาคเรียนที่ 2</option>
+                    </select>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="history-section card">
+            <h3>ประวัติการเข้าแถวล่าสุด</h3>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>วันที่</th>
+                        <th>วันในสัปดาห์</th>
+                        <th>สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (attendance && attendance.length > 0) { %>
+                        <% attendance.forEach(function(record) { 
+                            const dateObj = new Date(record.date);
+                            const dateString = dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
+                            const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' });
+                        %>
+                            <tr>
+                                <td><%= dateString %></td>
+                                <td><%= dayName %></td>
+                                <td>
+                                    <% if(record.status === 'Present') { %> 
+                                        <div class="status-wrap"><span class="dot dot-green"></span> มาเรียน</div>
+                                    <% } else if(record.status === 'Late') { %> 
+                                        <div class="status-wrap"><span class="dot dot-yellow"></span> สาย</div>
+                                    <% } else if(record.status === 'Absent') { %> 
+                                        <div class="status-wrap"><span class="dot dot-red"></span> ขาด</div>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="3" class="text-center">ไม่มีข้อมูลประวัติการเช็คชื่อในภาคเรียนนี้</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // ฟังก์ชันเมื่อเปลี่ยน Dropdown ให้รีเฟรชหน้าเว็บเพื่อดึงข้อมูลใหม่
+        function applyFilters() {
+            const term = document.getElementById('filter-term').value;
+            const year = document.getElementById('filter-year').value;
+            window.location.href = `/student/attendance?term=${term}&year=${year}`;
+        }
+
+        // ดึงข้อมูลกราฟที่ Backend เตรียมไว้ให้
+        const dbChartData = <%- chartData %>; 
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dbChartData.labels, 
+                datasets: [
+                    {
+                        label: 'Present',
+                        data: dbChartData.present, 
+                        backgroundColor: '#10b981',
+                    },
+                    {
+                        label: 'Late',
+                        data: dbChartData.late,
+                        backgroundColor: '#f59e0b',
+                    },
+                    {
+                        label: 'Absent',
+                        data: dbChartData.absent,
+                        backgroundColor: '#ef4444',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, grid: { display: false } },
+                    y: { 
+                        stacked: true, 
+                        beginAtZero: true, 
+                        title: { display: true, text: 'จำนวนวัน' },
+                        ticks: { stepSize: 5 } 
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

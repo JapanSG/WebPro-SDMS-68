@@ -13,27 +13,28 @@
     <%- include('Menu-Teacher') %>
         <div class="home_container">
             <div class="home_content">
-                <img class="profile" src="/images/icons/User.svg" alt="User-image">
+                <img id="profile-img" class="profile"
+                    src="<%= teacher.profilePictureBase64 || '/images/icons/User.svg' %>" alt="User-image">
                 <div class="information">
                     <div class="title">
-                        <div class="title_text">
-                            <p>ข้อมูลอาจารย์</p>
-                        </div>
+                        <p>ข้อมูลอาจารย์</p>
+                        <img id="btn-edit-profile" class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit"
+                            style="cursor: pointer;">
                     </div>
                     <div class="info_content">
-                        <p>รหัสประจำตัว: <span>ไม่มีข้อมูล</span></p>
-                        <p>รหัสประจำตัวประชาชน: <span>ไม่มีข้อมูล</span></p>
-                        <br>
-                        <p>ชื่อ - นามสกุล (ไทย): <span>ไม่มีข้อมูล</span></p>
-                        <p>ชื่อ - นามสกุล (EN): <span>ไม่มีข้อมูล</span></p>
-                        <br>
-                        <p>วัน/เดือน/ปี เกิด: <span>ไม่มีข้อมูล</span></p>
-                        <p>เพศ: <span>ไม่มีข้อมูล</span></p>
-                        <br>
-                        <p>สถานภาพอาจารย์: <span>ไม่มีข้อมูล</span></p>
-                        <p>ปีที่เข้าทำงาน: <span>ไม่มีข้อมูล</span></p>
-                        <p>ห้องประจำชั้น: <span>ไม่มีข้อมูล</span></p>
-
+                        <p>รหัสประจำตัว: <span>
+                                <%= teacher.teacher_id || '-' %>
+                            </span></p>
+                        <p>ชื่อ - นามสกุล: <span>
+                                <%= teacher.first_name || '-' %>
+                                    <%= teacher.last_name || '-' %>
+                            </span></p>
+                        <p>email: <span>
+                                <%= teacher.email || '-' %>
+                            </span></p>
+                        <p>โทรศัพท์: <span>
+                                <%= teacher.phone || '-' %>
+                            </span></p>
                     </div>
                 </div>
             </div>
@@ -56,9 +57,65 @@
                 <div class="event_wrapper">
                     <div class="event_header">
                         <h3 class="event_title">กิจกรรมต่าง ๆ</h3>
+                        <img id="btn-add-event" class="edit_icon" src="/images/icons/Edit-info.svg" alt="Add Event"
+                            style="cursor: pointer;">
                     </div>
                     <div class="event_date" id="eventDate"></div>
                     <div class="event_list" id="eventList">ไม่มีกิจกรรม</div>
+                </div>
+            </div>
+            <div class="route_cards_wrapper">
+
+                <a href="/teacher/record-stu" class="route_card">
+                    <div class="route_card_content">
+                        <h3 class="route_title">📝 บันทึกข้อมูลนักเรียน</h3>
+                        <p class="route_desc">คลิกเพื่อจัดการข้อมูลและการเข้าเรียน</p>
+                    </div>
+                </a>
+
+                <a href="/teacher/grade" class="route_card">
+                    <div class="route_card_content">
+                        <h3 class="route_title">📊 จัดการผลการเรียน</h3>
+                        <p class="route_desc">คลิกเพื่อจัดการเกรดและคะแนนสอบ</p>
+                    </div>
+                </a>
+
+            </div>
+
+        </div>
+        <div id="event-overlay" class="overlay hidden">
+            <div class="overlay-box" style="min-width: 300px;">
+                <h3>เพิ่มกิจกรรม</h3>
+                <p id="event-modal-date" style="color: gray; margin-bottom: 15px;"></p>
+
+                <div style="margin: 15px 0; text-align: left;">
+                    <label style="font-weight: bold;">เวลา:</label>
+                    <input type="text" id="event-time" placeholder="เช่น 08:00 - 09:00"
+                        style="width: 100%; padding: 8px; margin: 5px 0 15px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+
+                    <label style="font-weight: bold;">รายละเอียดกิจกรรม:</label>
+                    <input type="text" id="event-title" placeholder="ชื่อกิจกรรม"
+                        style="width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+                </div>
+
+                <div class="overlay-actions">
+                    <button id="btn-cancel-event" class="btn-cancel">ยกเลิก</button>
+                    <button id="btn-save-event" class="btn-save">บันทึกกิจกรรม</button>
+                </div>
+            </div>
+        </div>
+        <div id="upload-overlay" class="overlay hidden">
+            <div class="overlay-box">
+                <h3>เปลี่ยนรูปโปรไฟล์</h3>
+                <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg">
+
+                <div style="margin: 15px 0;">
+                    <img id="preview-img" src="" style="display: none; max-width: 150px; border-radius: 50%;">
+                </div>
+
+                <div class="overlay-actions">
+                    <button id="btn-cancel" class="btn-cancel">ยกเลิก</button>
+                    <button id="btn-save" class="btn-save">บันทึกรูปภาพ</button>
                 </div>
             </div>
         </div>
