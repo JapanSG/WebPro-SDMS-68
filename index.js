@@ -398,9 +398,7 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
 }
-app.get('/admin/home', function (req, res) {
-    res.render('Home-Admin');
-});
+
 
 // Japan's Pages
 function handleError(err, res) {
