@@ -9,24 +9,25 @@
 </head>
 <body>
     <%- include('Menu-Student') %>
-    <%= console.log(examSchedule) %>
-    <div class="header">
-        <h3>
-            ชั้นประถมศึกษาปีที่ <%= student.grade_level %><br>
-            ตารางสอบ<%= type %> ภาคเรียนที่ <%= student.semester %>/ <%= student.year %><br>
-            โรงเรียน Nexus School<br>
-            ห้องสอบ <%= student.room_id %>
-        </h3>
-        <select>
-            <option value="กลางภาค" <% if(type === 'กลางภาค') { %>selected<% } %>>กลางภาค</option>
-            <option value="ปลายภาค" <% if(type === 'ปลายภาค') { %>selected<% } %>>ปลายภาค</option>
-        </select>
+    <div class="container">
+        <div class="header">
+            <h3>
+                ชั้นประถมศึกษาปีที่ <%= student.grade_level %><br>
+                ตารางสอบ<%= type %> ภาคเรียนที่ <%= student.semester %>/ <%= student.year %><br>
+                โรงเรียน Nexus School<br>
+                ห้องสอบ <%= student.room_id %>
+            </h3>
+            <select>
+                <option value="กลางภาค" <% if(type === 'กลางภาค') { %>selected<% } %>>กลางภาค</option>
+                <option value="ปลายภาค" <% if(type === 'ปลายภาค') { %>selected<% } %>>ปลายภาค</option>
+            </select>
+        </div>
+        <table>
+            <% examSchedule.forEach((exam) => { %>
+                <%- include('Exam-Table', { exam: exam, entries: entries[`${exam.exam_id}`]}) %>
+            <% }) %>
+        </table>
     </div>
-    <table>
-        <% examSchedule.forEach((exam) => { %>
-            <%- include('Exam-Table', { exam: exam, entries: entries[`${exam.exam_id}`]}) %>
-        <% }) %>
-    </table>
     <script>
         document.querySelector('select').addEventListener('change', function(event) {
             let selectedValue = event.target.value;
