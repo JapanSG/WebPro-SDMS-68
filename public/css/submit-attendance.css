@@ -85,3 +85,4 @@ body { background-color: #f8fafc; margin: 0; font-family: sans-serif; }
 .status-btn.present:has(input:checked) { background: #10b981; color: white; border-color: #10b981; } /* สีเขียว */
 .status-btn.absent:has(input:checked) { background: #ef4444; color: white; border-color: #ef4444; }   /* สีแดง */
 .status-btn.leave:has(input:checked) { background: #f59e0b; color: white; border-color: #f59e0b; }    /* สีส้ม */
+.status-btn.personal-leave:has(input:checked) { background: #17a2b8; color: white; border-color: #17a2b8; }    /* สีฟ้า */

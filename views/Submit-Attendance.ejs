@@ -10,7 +10,7 @@
 <body>
     <%- include('Menu-AO') %>
     <%- include('showMenu') %>
-
+    
     <% 
         const fData = typeof filterData !== 'undefined' ? filterData : { grade: '', room: '', date: '' }; 
         const studentList = typeof students !== 'undefined' ? students : [];
@@ -98,6 +98,10 @@
                                             <label class="status-btn leave"> 
                                                 <input type="radio" name="status_<%= student.student_id %>" value="Late" 
                                                 <%= student.status === 'Late' ? 'checked' : '' %>> สาย
+                                            </label>
+                                            <label class="status-btn personal-leave"> 
+                                                <input type="radio" name="status_<%= student.student_id %>" value="Personal Leave" 
+                                                <%= student.status === 'Personal Leave' ? 'checked' : '' %>> ลากิจ
                                             </label>
                                         </div>
                                     </td>

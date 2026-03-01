@@ -15,8 +15,7 @@
     <main class="container">
         <div class="profile-header card">
             <div class="profile-info">
-                <img src="<%= user.profile_picture || '/images/default-avatar.png' %>" alt="Profile" class="avatar">
-                <div class="profile-text">
+                <img src="<%= user.profile_picture ? 'data:image/jpeg;base64,' + user.profile_picture.toString('base64') : '/images/icons/User.svg' %>" alt="Profile" class="avatar">
                     <h2><%= student.first_name %> <%= student.last_name %></h2>
                     <p class="text-muted">ชั้น ม.<%= student.grade_level %> ห้อง <%= student.room_name %> | เลขประจำตัวนักเรียน: <%= student.student_id %></p>
                 </div>
@@ -45,6 +44,13 @@
                     <p class="count"><%= summary.absent %></p>
                 </div>
             </div>
+            <div class="summary-card card">
+                <div class="card-icon personal-leave-icon">😷</div>
+                <div class="card-details">
+                    <h3>ลากิจ</h3>
+                    <p class="count"><%= summary.personal_leave %></p>
+                </div>
+            </div>
         </div>
 
         <div class="chart-section card">
@@ -53,6 +59,7 @@
                     <span class="legend-item"><span class="dot dot-green"></span> Present</span>
                     <span class="legend-item"><span class="dot dot-yellow"></span> Late</span>
                     <span class="legend-item"><span class="dot dot-red"></span> Absent</span>
+                    <span class="legend-item"><span class="dot dot-blue"></span> Personal Leave</span>
                 </div>
                 <div class="filter-group">
                     <label for="filter-year">ปีการศึกษา:</label>
@@ -103,6 +110,8 @@
                                         <div class="status-wrap"><span class="dot dot-yellow"></span> สาย</div>
                                     <% } else if(record.status === 'Absent') { %> 
                                         <div class="status-wrap"><span class="dot dot-red"></span> ขาด</div>
+                                    <% } else if (record.status === 'Personal Leave') { %>
+                                        <div class="status-wrap"><span class="dot dot-blue"></span> ลากิจ</div>
                                     <% } %>
                                 </td>
                             </tr>
@@ -126,7 +135,7 @@
         }
 
         // ดึงข้อมูลกราฟที่ Backend เตรียมไว้ให้
-        const dbChartData = <%- chartData %>; 
+        const dbChartData = <%- chartData %>;
         const ctx = document.getElementById('attendanceChart').getContext('2d');
         
         new Chart(ctx, {
@@ -148,6 +157,11 @@
                         label: 'Absent',
                         data: dbChartData.absent,
                         backgroundColor: '#ef4444',
+                    },
+                    {
+                        label: 'Personal Leave',
+                        data: dbChartData.personal_leave,
+                        backgroundColor: '#17a2b8',
                     }
                 ]
             },
