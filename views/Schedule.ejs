@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางเรียน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/Schedule.css">
+</head>
+<body>
+
+    <%- include('Menu-AS') %>
+
+    <main class="schedule-container">
+        <div class="schedule-header">
+            <h2>ตารางเรียน (ห้อง <%= roomName %>)</h2>
+        </div>
+
+        <div class="table-responsive">
+            <table class="minimal-table">
+                <thead>
+                    <tr>
+                        <th class="day-col">วัน / เวลา</th>
+                        <th>08.00 - 09.00</th>
+                        <th>09.00 - 10.00</th>
+                        <th>10.00 - 11.00</th>
+                        <th>11.00 - 12.00</th>
+                        <th class="lunch-col">12.00 - 13.00</th>
+                        <th>13.00 - 14.00</th>
+                        <th>14.00 - 15.00</th>
+                        <th>15.00 - 16.00</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% 
+                    const days = { 1: 'วันจันทร์', 2: 'วันอังคาร', 3: 'วันพุธ', 4: 'วันพฤหัสบดี', 5: 'วันศุกร์' };
+                    // คาบเรียนปกติ (ข้ามคาบ 5 ที่เป็นพักเที่ยง)
+                    const periods = [1, 2, 3, 4, 5, 6, 7, 8]; 
+                    %>
+
+                    <% for(let day = 1; day <= 5; day++) { %>
+                        <tr>
+                            <td class="day-name"><%= days[day] %></td>
+                            
+                            <% periods.forEach(period => { %>
+                                <% if (period === 5) { %>
+                                    <% if (day === 1) { %>
+                                        <td rowspan="5" class="lunch-break">
+                                            <div class="vertical-text">พักกลางวัน</div>
+                                        </td>
+                                    <% } %>
+                                <% } else { %>
+                                    <% 
+                                    let dbPeriod = period > 5 ? period - 1 : period; 
+                                    let subject = timetable[day][dbPeriod]; 
+                                    %>
+                                    
+                                    <td>
+                                        <% if (subject) { %>
+                                            <div class="subject-card">
+                                                <div class="sub-id"><%= subject.subject_id %></div>
+                                                <div class="sub-name"><%= subject.subject_name %></div>
+                                                <div class="teacher-name">
+                                                    <%= subject.first_name ? 'อ.' + subject.first_name : 'ไม่ระบุผู้สอน' %>
+                                                </div>
+                                            </div>
+                                        <% } else { %>
+                                            <div class="empty-slot">-</div>
+                                        <% } %>
+                                    </td>
+                                <% } %>
+                            <% }) %>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>

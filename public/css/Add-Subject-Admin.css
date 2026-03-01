@@ -1,0 +1,136 @@
+/* =========================================
+   Add-Subject-Admin.css 
+   (เวอร์ชันอัปเดต: รองรับช่องเลือกอาจารย์ผู้สอน)
+========================================= */
+
+body {
+    font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+}
+
+.main_content {
+    width: 100%;
+    /* ปรับให้กล่องแคบลงแบบ Figma จะได้ดูสวยขึ้น */
+    max-width: 550px; 
+    margin: 120px auto 40px auto; 
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* --- ส่วนหัว (Header) --- */
+.page_header {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* จัดหัวข้อและปุ่มกลับให้อยู่กึ่งกลาง */
+    margin-bottom: 30px;
+    gap: 20px; /* ระยะห่างระหว่างลูกศรกับตัวหนังสือ */
+}
+
+.back_btn {
+    color: #000; /* สีดำเรียบๆ ตามแบบ */
+    text-decoration: none;
+    font-size: 24px;
+    background: none; /* เอาพื้นหลังขาวและกรอบออก */
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    transition: transform 0.2s;
+}
+
+.back_btn:hover {
+    transform: translateX(-5px); /* เอาเมาส์ชี้แล้วลูกศรขยับนิดนึง */
+}
+
+.page_title {
+    font-size: 24px;
+    color: #000;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* --- กล่องฟอร์ม (Form Card) --- */
+.form_card {
+    background-color: #ffffff;
+    border-radius: 4px; /* ขอบเหลี่ยมขึ้นนิดนึงแบบ Figma */
+    padding: 40px 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.form_title {
+    margin-top: 0;
+    margin-bottom: 35px;
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center; /* จัด "ข้อมูลรายวิชา" ให้อยู่กึ่งกลาง */
+    border-bottom: none; /* เอาเส้นขีดเส้นใต้ออก */
+}
+
+/* --- ช่องกรอกข้อมูล (Inputs & Select) --- */
+.input_group {
+    margin-bottom: 20px;
+}
+
+.input_group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #000;
+    font-weight: 700; /* ตัวหนังสือ Label หนาขึ้น */
+    font-size: 14px;
+}
+
+/* เพิ่ม .input_group select เข้าไปในกลุ่มนี้ */
+.input_group input, 
+.input_group select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #9ca3af; /* สีกรอบเข้มขึ้นนิดนึง */
+    border-radius: 4px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    background-color: #fff; /* ป้องกันพื้นหลังเพี้ยนในบาง Browser */
+}
+
+/* ปรับแต่ง Dropdown เพิ่มเติม */
+.input_group select {
+    cursor: pointer;
+    appearance: none; /* ล้างรูปแบบเดิมของระบบ */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 15px) center; /* วางลูกศรไว้ขวามือ */
+}
+
+.input_group input:focus,
+.input_group select:focus {
+    outline: none;
+    border-color: #113f8c;
+    box-shadow: 0 0 0 2px rgba(17, 63, 140, 0.1);
+}
+
+/* --- ปุ่มบันทึก (Save Button) --- */
+.btn_container {
+    margin-top: 40px;
+    text-align: center; /* จัดปุ่มให้อยู่กึ่งกลาง */
+}
+
+.save_btn {
+    background-color: #113f8c;
+    color: white;
+    border: none;
+    padding: 10px 0; 
+    width: 180px; /* ล็อกความกว้างปุ่มให้ยาวๆ แบบ Figma */
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save_btn:hover {
+    background-color: #0b2e6b;
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Subject</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css"> 
+    <link rel="stylesheet" href="/css/Add-Subject-Admin.css">
+</head>
+<body>
+
+    <%- include('Menu-AS') %>
+
+    <main class="main_content">
+        <div class="page_header">
+            <a href="/admin/subject" class="back_btn">&larr;</a>
+            <h2 class="page_title">เพิ่มรายวิชาใหม่</h2>
+        </div>
+
+        <div class="form_card">
+            <h3 class="form_title">ข้อมูลรายวิชา</h3>
+            
+            <form action="/admin/subject/add" method="POST">
+                <div class="input_group">
+                    <label>ชื่อวิชา</label>
+                    <input type="text" name="subject_name" required>
+                </div>
+                
+                <div class="input_group">
+                    <label>รหัสวิชา</label>
+                    <input type="text" name="subject_id" required>
+                </div>
+                
+                <div class="input_group">
+                    <label>หน่วยกิต</label>
+                    <input type="number" name="credit" required>
+                </div>
+                
+                <div class="input_group">
+                    <label>ระดับชั้น</label>
+                    <input type="number" name="grade_level" required>
+                </div>
+                <div class="input_group">
+                    <label>รหัสอาจารย์ผู้สอน (Teacher ID)</label>
+                    <input type="number" name="teacher_id" placeholder="กรอกตัวเลขรหัสอาจารย์" required>
+                </div>
+
+                
+                <div class="btn_container">
+                    <button type="submit" class="save_btn">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>

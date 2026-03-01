@@ -1,0 +1,77 @@
+/* Student-Schedule.css */
+body {
+    font-family: 'Kanit', sans-serif;
+    background-color: #f4f6f9;
+}
+
+.main_content {
+    max-width: 1200px;
+    margin: 100px auto 40px;
+    padding: 0 20px;
+}
+
+.schedule_container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.page_title {
+    color: #113f8c;
+    margin-bottom: 20px;
+}
+
+.table_responsive {
+    overflow-x: auto;
+}
+
+.schedule_table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+/* เส้นขอบตารางสีฟ้าอ่อนๆ */
+.schedule_table th, .schedule_table td {
+    border: 2px solid #a8c5f7;
+    padding: 15px 10px;
+}
+
+.schedule_table th {
+    background-color: white;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    border-top: none;
+}
+
+/* คอลัมน์ระบุวัน (จันทร์-ศุกร์) */
+.day_col {
+    background-color: #113f8c;
+    color: white;
+    font-weight: 500;
+    width: 100px;
+}
+
+/* คอลัมน์พักกลางวัน */
+.lunch_col {
+    background-color: #f8fafc;
+    width: 60px;
+    vertical-align: middle;
+}
+
+/* ทำให้ข้อความพักกลางวันเป็นแนวตั้ง */
+.lunch_text {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    letter-spacing: 5px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 auto;
+}
+
+/* จัดสไตล์ตัวอักษรในช่องตารางเรียน */
+.subject_id { font-size: 14px; color: #555; }
+.subject_name { font-weight: 600; font-size: 15px; margin: 3px 0; color: #000; }
+.teacher_name { font-size: 13px; color: #666; }

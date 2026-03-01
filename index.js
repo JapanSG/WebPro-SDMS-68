@@ -817,6 +817,226 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
     });
 });
 
+// ==========================================
+// Muftee's Pages (Subject Management)
+// ==========================================
+
+
+app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => {
+    const searchQuery = req.query.search || ''; 
+    const currentPage = parseInt(req.query.page) || 1; 
+    const limit = 5; 
+    const offset = (currentPage - 1) * limit;
+
+    let sql = "SELECT * FROM Subjects";
+    let countSql = "SELECT COUNT(*) as count FROM Subjects";
+    let params = [];
+
+    if (searchQuery) {
+        sql += " WHERE subject_id LIKE ? OR subject_name LIKE ?";
+        countSql += " WHERE subject_id LIKE ? OR subject_name LIKE ?";
+        params.push(`%${searchQuery}%`, `%${searchQuery}%`);
+    }
+
+    sql += " LIMIT ? OFFSET ?";
+  
+    db.get(countSql, params, (err, row) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Database Error");
+        }
+        
+        const totalItems = row.count;
+        const totalPages = Math.ceil(totalItems / limit);
+        const finalParams = [...params, limit, offset];
+
+        db.all(sql, finalParams, (err, subjects) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send("Database Error");
+            }
+            
+            res.render('Manage-Subject-Admin', { 
+                user: req.user, 
+                subjects: subjects, 
+                searchQuery: searchQuery, 
+                currentPage: currentPage, 
+                totalPages: totalPages ,
+                errorMsg: req.query.error || null,
+                successMsg: req.query.success || null
+            });
+        });
+    });
+});
+
+app.get('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res) => {
+    
+    const sql = "SELECT teacher_id, first_name, last_name FROM Teacher";
+    
+    db.all(sql, [], (err, teachers) => {
+        if (err) {
+            console.error("Error fetching teachers:", err.message);
+            return res.status(500).send("Database Error");
+        }
+        // ส่งทั้ง user และ teachers ไปที่หน้า Add-Subject-Admin
+        res.render('Add-Subject-Admin', { 
+            user: req.user, 
+            teachers: teachers || [] 
+        });
+    });
+});
+app.post('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res) => {
+    
+    const { subject_id, subject_name, credit, grade_level, teacher_id } = req.body;
+    
+   
+    const sql = "INSERT INTO Subjects (subject_id, subject_name, grade_level, credit, teacher_id) VALUES (?, ?, ?, ?, ?)";
+    
+    
+    db.run(sql, [subject_id, subject_name, grade_level, credit, teacher_id || null], function(err) {
+        if (err) {
+            console.error("Error inserting subject:", err.message);
+            return res.status(500).send("เกิดข้อผิดพลาดในการบันทึกข้อมูล (รหัสวิชาอาจซ้ำ หรือข้อมูลไม่ครบ)");
+        }
+      
+        res.redirect('/admin/subject');
+    });
+});
+
+
+
+app.get('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req, res) => {
+    const subjectId = req.params.id;
+    const sql = "SELECT * FROM Subjects WHERE subject_id = ?";
+    
+    db.get(sql, [subjectId], (err, subject) => {
+        if (err) {
+            console.error("Error fetching subject:", err.message);
+            return res.status(500).send("Database Error");
+        }
+        if (!subject) {
+            return res.status(404).send("ไม่พบวิชานี้ในระบบ");
+        }
+        
+        
+        res.render('Edit-Subject-Admin', { user: req.user, subject: subject });
+    });
+});
+
+app.post('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req, res) => {
+    const old_subject_id = req.params.id; 
+    
+    const { subject_id, subject_name, credit, grade_level, teacher_id } = req.body; 
+   
+    
+    const t_id = (teacher_id && teacher_id.trim() !== "") ? teacher_id : null;
+
+    const sql = `
+        UPDATE Subjects 
+        SET subject_id = ?, subject_name = ?, grade_level = ?, credit = ?, teacher_id = ? 
+        WHERE subject_id = ?
+    `;
+    
+   
+    db.run(sql, [subject_id, subject_name, grade_level, credit, t_id, old_subject_id], function(err) {
+        if (err) {
+            console.error("Error updating subject:", err.message);
+            return res.status(500).send("เกิดข้อผิดพลาดในการอัปเดตข้อมูล (รหัสวิชาใหม่อาจไปซ้ำ หรือรหัสอาจารย์ไม่มีจริง)");
+        }
+     
+        res.redirect('/admin/subject');
+    });
+});
+
+app.get('/admin/subject/delete/:id', checkAuthenticated, checkRole('admin'), (req, res) => {
+    const subjectId = req.params.id;
+    const sql = "DELETE FROM Subjects WHERE subject_id = ?";
+
+    db.run(sql, [subjectId], function(err) {
+        if (err) {
+            console.error("Error deleting subject:", err.message);
+            
+            const errorMsg = "ไม่สามารถลบวิชานี้ได้ เนื่องจากมีการใช้งานอยู่ในตารางเรียนหรือตารางสอบ";
+            return res.redirect('/admin/subject?error=' + encodeURIComponent(errorMsg));
+        }
+        
+        
+        const successMsg = "ลบรายวิชาสำเร็จ";
+        res.redirect('/admin/subject?success=' + encodeURIComponent(successMsg));
+    });
+});
+
+app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (req, res) => {
+    const userId = req.user.user_id; 
+    const targetSemester = 1;
+    const targetYear = 2568; 
+
+    
+    const studentSql = `
+        SELECT s.room_id, r.room_name 
+        FROM Students s
+        LEFT JOIN Rooms r ON s.room_id = r.room_id
+        WHERE s.user_id = ?
+    `;
+    
+    db.get(studentSql, [userId], (err, student) => {
+        if (err) {
+            console.error("Error fetching student room:", err.message);
+            return res.status(500).send("Database Error: ไม่สามารถค้นหาข้อมูลห้องเรียนได้");
+        }
+        
+       
+        if (!student || !student.room_id) {
+            return res.send("<h2>ไม่พบข้อมูลห้องเรียนของคุณ หรือคุณยังไม่ได้ถูกจัดเข้าห้องเรียน</h2>");
+        }
+
+        const roomId = student.room_id;
+        const roomName = student.room_name || roomId; 
+
+    
+        const scheduleSql = `
+            SELECT sch.day, sch.period, sub.subject_id, sub.subject_name, t.first_name, t.last_name
+            FROM Schedule sch
+            LEFT JOIN Subjects sub ON sch.subject_id = sub.subject_id
+            LEFT JOIN Teacher t ON sub.teacher_id = t.teacher_id
+            WHERE sch."room-id" = ? AND sch.semester = ? AND sch.year = ?
+            ORDER BY sch.day, sch.period
+        `;
+
+        db.all(scheduleSql, [roomId, targetSemester, targetYear], (err, schedules) => {
+            if (err) {
+                console.error("Error fetching class schedule:", err.message);
+                return res.status(500).send("Database Error: ไม่สามารถดึงข้อมูลตารางเรียนได้");
+            }
+
+            // 3. จัดกลุ่มข้อมูลลงใน Array แบบ 2 มิติ ให้หน้าเว็บเอาไปวนลูปง่ายๆ
+            const timetable = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
+            
+            schedules.forEach(item => {
+                if (timetable[item.day]) {
+                    timetable[item.day][item.period] = item;
+                }
+            });
+
+            // 4. ส่งไปที่ไฟล์ EJS (สังเกตว่าส่ง roomName ไปแทน roomId แล้ว)
+            res.render('Schedule', { 
+                user: req.user, 
+                timetable: timetable,
+                year: targetYear,
+                semester: targetSemester,
+                roomName: roomName 
+            });
+        });
+    });
+});
+
+
+
+
+
+// ==========================================
+
+
 app.put('/admin/exam-schedule/editDate', (req, res) => {
     console.log(req.body);
     const sql = 'UPDATE Exam_Schedule SET date = ? WHERE exam_id = ?';

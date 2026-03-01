@@ -1,0 +1,221 @@
+/* =========================================
+   Manage-Subject-Admin.css
+========================================= */
+
+body {
+    font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
+    background-color: #f4f6f9; /* สีพื้นหลังเว็บอ่อนๆ สบายตา */
+    margin: 0;
+}
+
+.main_content {
+    width: 100%;
+    max-width: 1000px; /* จัดความกว้างตรงกลาง */
+    margin: 120px auto 40px ;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* --- แถบบน: ค้นหา & ปุ่มเพิ่ม --- */
+.top_action_bar {
+    display: flex;
+    justify-content: space-between; /* ดันช่องค้นหาไปซ้าย ปุ่มไปขวา */
+    align-items: center;
+    margin-bottom: 25px;
+    margin-top: 30px; /* ดันลงมานิดนึงเพื่อไม่ให้โดน Header สีน้ำเงินข้างบนทับ */
+}
+
+.search_box {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff; /* พื้นหลังสีขาว */
+    border: 1px solid #d1d5db; /* ขอบสีเทาอ่อนๆ */
+    border-radius: 6px; /* ขอบมน */
+    padding: 10px 16px;
+    width: 350px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.search_icon {
+    margin-right: 12px;
+    color: #6b7280;
+}
+
+.search_box input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-family: 'Kanit', 'Noto Sans Thai', sans-serif;
+    font-size: 15px;
+    background: transparent;
+}
+
+.add_btn {
+    background-color: #113f8c; /* สีน้ำเงินเข้มตามแบบ Figma */
+    color: #ffffff !important; /* บังคับให้ตัวหนังสือเป็นสีขาวเสมอ */
+    text-decoration: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.2s;
+}
+
+.add_btn:hover {
+    background-color: #0b2e6b; /* สีเวลาเอาเมาส์ชี้จะเข้มขึ้น */
+}
+
+/* --- ตารางรายวิชา --- */
+.table_container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    overflow: hidden; /* ทำให้ขอบมนสวย */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+th, td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    font-weight: 600;
+    color: #495057;
+}
+
+tbody tr:hover {
+    background-color: #f1f5f9; /* สีเวลาเอาเมาส์ชี้แถวตาราง */
+}
+
+/* --- ปุ่มจัดการ (แก้ไข/ลบ) --- */
+.edit_link {
+    color: #f59e0b; /* สีเหลืองส้ม */
+    text-decoration: none;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.2s;
+}
+
+.edit_link:hover {
+    background-color: #fef3c7;
+}
+
+.delete_cell {
+    text-align: center;
+    width: 60px;
+}
+
+.delete_icon {
+    color: #ef4444; /* สีแดง */
+    text-decoration: none;
+    font-size: 18px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.2s;
+}
+
+.delete_icon:hover {
+    background-color: #fee2e2;
+}
+
+/* --- แถบล่าง: ย้อนกลับ & แบ่งหน้า --- */
+.bottom_action_bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+}
+
+.back_btn {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px;
+    color: #444;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.back_btn:hover {
+    background-color: #e2e8f0;
+}
+
+/* --- การแบ่งหน้า (Pagination) --- */
+.pagination {
+    display: flex;
+    gap: 8px;
+}
+
+.page_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    color: #0d6efd;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.page_btn:hover {
+    background-color: #eff6ff;
+}
+
+.page_btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+/* =========================================
+   Alert Boxes (กล่องแจ้งเตือน)
+========================================= */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* กล่องสีแดง (ลบไม่ได้) */
+.alert-danger {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* กล่องสีเขียว (ลบสำเร็จ) */
+.alert-success {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+/* ทำให้กล่องเด้งขึ้นมาแบบนุ่มนวล */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
