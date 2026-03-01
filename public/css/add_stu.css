@@ -1,0 +1,148 @@
+#add_container {
+    display: flex;
+    padding: 30px;
+    gap: 20px;
+    background-color: #f3f6f9; /* ปรับสีพื้นหลังให้อ่อนลงนิดหน่อย ดูสบายตา */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* ให้เต็มจอ */
+}
+
+#page_header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 50px;
+    width: 500px;
+}
+
+#page_header img {
+    transition: transform 0.2s ease;
+}
+#page_header img:hover {
+    transform: translateX(-5px); /* ปุ่มย้อนกลับ ขยับซ้ายนิดๆ เวลากด */
+}
+
+#add_form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white; /* ใส่พื้นหลังสีขาวให้ตัวฟอร์ม */
+    padding: 40px;
+    border-radius: 16px; /* มุมมนใหญ่ๆ ดูทันสมัย */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* เงาฟอร์มลอยๆ */
+}
+
+#profile_img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid #093B7E; /* เปลี่ยนสีขอบเป็นสีธีม */
+    border-radius: 50%; /* ทำให้รูปโปรไฟล์เป็นวงกลม */
+    margin-bottom: 10px;
+    text-align: center;
+    transition: all 0.3s ease; /* ทำให้การเปลี่ยนแปลงสมูท */
+}
+
+#profile_upload {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* เอฟเฟกต์เวลาเอาเมาส์ชี้รูปโปรไฟล์ */
+#profile_upload label:hover #profile_img {
+    transform: scale(1.05); /* ขยายรูปนิดนึง */
+    box-shadow: 0 8px 16px rgba(9, 59, 126, 0.2); /* เพิ่มเงาสีน้ำเงิน */
+}
+#profile_upload label:hover #upload img {
+    transform: translateY(-3px); /* รูปเมฆลอยขึ้น */
+}
+#upload img {
+    transition: transform 0.3s ease;
+}
+
+#section_title {
+    text-align: center;
+    font-weight: bold;
+    color: #093B7E;
+    font-size: 18px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+#form_layout {
+    display: flex;
+    justify-content: center; 
+    gap: 40px;
+}
+
+#right_col, #left_col {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+#add_form label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    margin-top: 15px;
+    color: #333;
+}
+
+/* ตกแต่งช่อง Input และ Select ให้ดู Modern */
+#add_form input, #add_form select {
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    background-color: #f8fafc;
+    border-radius: 8px; /* ขอบมน */
+    font-size: 14px;
+    transition: all 0.3s ease; /* แอนิเมชันเวลาคลิก */
+}
+
+/* เอฟเฟกต์เวลาคลิกพิมพ์ (Focus) */
+#add_form input:focus, #add_form select:focus {
+    outline: none;
+    border-color: #093B7E;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(9, 59, 126, 0.15); /* แสงเรืองรองรอบๆ ช่องพิมพ์ */
+}
+
+#submit_area {
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* ตกแต่งปุ่มบันทึก */
+#save_btn {
+    background-color: #093B7E;
+    color: white;
+    padding: 12px 40px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(9, 59, 126, 0.2);
+    transition: all 0.3s ease;
+}
+
+#save_btn:hover {
+    background-color: #1252a8;
+    transform: translateY(-2px); /* ลอยขึ้นตอนเมาส์ชี้ */
+    box-shadow: 0 6px 12px rgba(9, 59, 126, 0.3);
+}
+
+#save_btn:active {
+    transform: translateY(0); /* ยุบลงตอนกด */
+}
+
+#upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 14px;
+}

@@ -237,6 +237,13 @@ function createEditEntryHandlerPopup(event) {
         title.textContent = "Edit Exam Entry";
         popup.appendChild(title);
 
+        console.log(event.target.parentNode.parentNode.parentNode.parentNode.children);
+        let time = event.target.parentNode.parentNode.parentNode.parentNode.children[0].textContent.split("-");
+        let start = time[0].trim();
+        let end = time[1].trim();
+        let subject_id = event.target.parentNode.parentNode.parentNode.parentNode.children[1].textContent.trim();
+        console.log(subject_id);
+
         // Create start field
         let startLabel = document.createElement("label");
         startLabel.textContent = "Start Time: ";
@@ -244,6 +251,7 @@ function createEditEntryHandlerPopup(event) {
         let startInput = document.createElement("input");
         startInput.setAttribute("type", "time");
         startInput.setAttribute("class", "startTime");
+        startInput.value = start;
         popup.appendChild(startInput);
 
         // Create end field
@@ -253,6 +261,7 @@ function createEditEntryHandlerPopup(event) {
         let endInput = document.createElement("input");
         endInput.setAttribute("type", "time");
         endInput.setAttribute("class", "endTime");
+        endInput.value = end;
         popup.appendChild(endInput);
 
         // Create subject dropdown
@@ -267,6 +276,9 @@ function createEditEntryHandlerPopup(event) {
             option.value = subject.subject_id;
             option.textContent = subject.subject_name;
             subjectSelect.appendChild(option);
+            if (subject.subject_id == subject_id) {
+                option.selected = true;
+            }
         });
         popup.appendChild(subjectSelect);
 
@@ -508,6 +520,83 @@ function deleteAllHandler() {
   });
 }
 
+function createEditDatePopup(event) {
+    const exam_id = event.target.parentNode.value;
+    console.log("Editing date for exam ID:", exam_id);
+
+    let popup = document.createElement("div");
+    popup.setAttribute("class", "editDatePopup");
+
+    let title = document.createElement("h2");
+    title.textContent = "Edit Exam Date";
+    popup.appendChild(title);
+
+    // Create date input field
+    let input = document.createElement("input");
+    input.setAttribute("type", "date");
+    input.setAttribute("class", "dateInput");
+    popup.appendChild(input);
+
+    let btnsDiv = document.createElement("div");
+    btnsDiv.setAttribute("class", "popupBtns");
+    popup.appendChild(btnsDiv);
+
+    // Create Cancel button
+    let cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.setAttribute("class", "cancelBtn");
+    cancelBtn.addEventListener("click", closeEditDatePopup);
+    btnsDiv.appendChild(cancelBtn);
+
+    // Create Confirm button
+    let confirmBtn = document.createElement("button");
+    confirmBtn.textContent = "Edit";
+    confirmBtn.setAttribute("class", "confirmBtn");
+    confirmBtn.addEventListener("click", () => editDateHandler(exam_id));
+    btnsDiv.appendChild(confirmBtn);
+
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "flex";
+    layer.appendChild(popup);
+}
+
+function closeEditDatePopup() {
+    let popup = document.querySelector(".editDatePopup");
+    if (popup) {
+        popup.remove();
+    }
+    let layer = document.getElementById("popupLayer");
+    layer.style.display = "none";
+}
+
+function editDateHandler(exam_id) {
+    let date = document.querySelector(".dateInput").value;
+    if (date) {
+        console.log("Editing date for exam ID:", exam_id, "New date:", date);
+        fetch("/admin/exam-schedule/editDate", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                exam_id: exam_id,
+                date: date
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } 
+            else {
+                console.error("Failed to update exam date");
+            }
+        })
+        .catch(error => {
+            console.error("Error updating exam date:", error);
+        });
+    }
+}
+
 function init(){
     let addExam = document.getElementById("addExam");
     addExam.addEventListener("click", createAddExamPopup);
@@ -529,6 +618,10 @@ function init(){
     let deleteExamButtons = document.querySelectorAll(".deleteExam");
     deleteExamButtons.forEach(button => {
         button.addEventListener("click", createDeleteExamWarningPopup);
+    });
+    let editDateButtons = document.querySelectorAll(".editDate");
+    editDateButtons.forEach(button => {
+        button.addEventListener("click", createEditDatePopup);
     });
 }
 

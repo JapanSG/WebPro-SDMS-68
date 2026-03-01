@@ -6,11 +6,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home-Student</title>
     <link rel="stylesheet" href="/css/global.css">
-
+    <link rel="stylesheet" href="/css/home.css">
 </head>
 
 <body>
     <%- include('Menu-Student') %>
+        <div class="home_container">
+            <div class="home_content">
+                <img id="profile-img" class="profile"
+                    src="<%= student.profilePictureBase64 || '/images/icons/User.svg' %>" alt="User-image">
+                <div class="information">
+                    <div class="title">
+                        <p>ข้อมูลนักเรียน</p>
+                        <img id="btn-edit-profile" class="edit_icon" src="/images/icons/Edit-info.svg" alt="Edit"
+                            style="cursor: pointer;">
+                    </div>
+                    <div class="info_content">
+                        <p>รหัสประจำตัว:
+                            <span id="student-id-display" data-id="<%= student.student_id %>">
+                                <%= student.student_id || '-' %>
+                            </span>
+                        </p>
+                        <p>รหัสประจำตัวประชาชน: <span>
+                                <%= student.citizen_id || '-' %>
+                            </span></p>
+                        <br>
+                        <p>ชื่อ - นามสกุล: <span>
+                                <%= student.first_name || '-' %>
+                                    <%= student.last_name || '-' %>
+                            </span></p>
+                        <p>email: <span>
+                                <%= student.email || '-' %>
+                            </span></p>
+                        <p>โทรศัพท์: <span>
+                                <%= student.phone || '-' %>
+                            </span></p>
+                        <br>
+                        <p>วัน/เดือน/ปี เกิด: <span>
+                                <%= student.dob || '-' %>
+                            </span></p>
+                        <p>สัญชาติ: <span>
+                                <%= student.nationality || '-' %>
+                            </span></p>
+                        <p>เพศ: <span>
+                                <%= student.sex || '-' %>
+                            </span></p>
+                        <p>ภาคเรียน: <span>
+                                <%= student.semester || '-' %>
+                            </span></p>
+                        <p>ปีที่เข้าศึกษา: <span>
+                                <%= student.enroll_year || '-' %>
+                            </span></p>
+                        <p>ระดับชั้น: <span>
+                                <%= student.grade_level || '-' %>
+                            </span></p>
+                        <p>ห้อง: <span>
+                                <%= student.room_id || '-' %>
+                            </span></p>
+
+                    </div>
+                </div>
+            </div>
+            <div class="home_content">
+                <div class="calendar_wrapper">
+                    <div class="calendar_header">
+                        <button id="prevMonth" class="cal_btn">&lt;</button>
+                        <h3 class="month_title" id="monthTitle">เดือน ปี</h3>
+                        <button id="nextMonth" class="cal_btn">&gt;</button>
+                    </div>
+
+                    <div class="calendar_grid" id="calendarGrid">
+                    </div>
+                    <div class="calendar_footer">
+                        <button class="today_btn" id="backToday" onclick="backToday()">Today</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home_content">
+                <div class="event_wrapper">
+                    <div class="event_header">
+                        <h3 class="event_title">กิจกรรมต่าง ๆ</h3>
+                        <img id="btn-add-event" class="edit_icon" src="/images/icons/Edit-info.svg" alt="Add Event"
+                            style="cursor: pointer;">
+                    </div>
+                    <div class="event_date" id="eventDate"></div>
+                    <div class="event_list" id="eventList">ไม่มีกิจกรรม</div>
+                </div>
+            </div>
+            <div class="home_content">
+                <div class="attendance_wrapper">
+                    <div class="attendance_header">
+                        <h3 class="attendance_title">ประวัติ ขาด/สาย</h3>
+                    </div>
+
+                    <div class="attendance_content">
+                        <div class="attendance_stats">
+                            <div class="stat_box">
+                                <span class="stat_label">มาเรียน</span>
+                                <span class="stat_value good" id="statGood">0</span>
+                            </div>
+                            <div class="stat_box">
+                                <span class="stat_label">ขาด</span>
+                                <span class="stat_value danger" id="statDanger">0</span>
+                            </div>
+                            <div class="stat_box">
+                                <span class="stat_label">สาย</span>
+                                <span class="stat_value warning" id="statWarning">0</span>
+                            </div>
+                            <div class="stat_box">
+                                <span class="stat_label">ลา</span>
+                                <span class="stat_value leave" id="statLeave">0</span>
+                            </div>
+                        </div>
+
+                        <div class="attendance_records">
+                            <h4>บันทึกล่าสุด</h4>
+                            <div class="record_list" id="recordList">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="event-overlay" class="overlay hidden">
+            <div class="overlay-box" style="min-width: 300px;">
+                <h3>เพิ่มกิจกรรม</h3>
+                <p id="event-modal-date" style="color: gray; margin-bottom: 15px;"></p>
+
+                <div style="margin: 15px 0; text-align: left;">
+                    <label style="font-weight: bold;">เวลา:</label>
+                    <input type="text" id="event-time" placeholder="เช่น 08:00 - 09:00"
+                        style="width: 100%; padding: 8px; margin: 5px 0 15px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+
+                    <label style="font-weight: bold;">รายละเอียดกิจกรรม:</label>
+                    <input type="text" id="event-title" placeholder="ชื่อกิจกรรม"
+                        style="width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+                </div>
+
+                <div class="overlay-actions">
+                    <button id="btn-cancel-event" class="btn-cancel">ยกเลิก</button>
+                    <button id="btn-save-event" class="btn-save">บันทึกกิจกรรม</button>
+                </div>
+            </div>
+        </div>
+        <div id="upload-overlay" class="overlay hidden">
+            <div class="overlay-box">
+                <h3>เปลี่ยนรูปโปรไฟล์</h3>
+                <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg">
+
+                <div style="margin: 15px 0;">
+                    <img id="preview-img" src="" style="display: none; max-width: 150px; border-radius: 50%;">
+                </div>
+
+                <div class="overlay-actions">
+                    <button id="btn-cancel" class="btn-cancel">ยกเลิก</button>
+                    <button id="btn-save" class="btn-save">บันทึกรูปภาพ</button>
+                </div>
+            </div>
+        </div>
+        <script src="/script/home-page.js"></script>
 </body>
 
 </html>

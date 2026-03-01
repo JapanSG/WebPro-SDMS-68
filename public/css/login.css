@@ -1,15 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap');
+@import "variables.css";
 
-
+* {
+    box-sizing: border-box;
+}
 
 html,
 body {
     font-family: "Noto Sans Thai", sans-serif;
-    box-sizing: border-box;
     height: 100%;
+    overflow: hidden;
     margin: 0;
     padding: 0;
-    overflow: hidden;
 }
 
 .container {
@@ -17,18 +18,11 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-}
-
-.background {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 60%;
-    height: 100%;
     background: url('/images/content/background.png') lightgray 50% / cover no-repeat;
-
+    justify-content: flex-end;
 }
+
+
 
 .login-container {
     display: flex;
@@ -38,21 +32,29 @@ body {
     width: 40%;
     height: 100vh;
     padding: 20px;
-    background: linear-gradient(270deg, rgba(0, 44, 102, 0.97) 0%, #1062D0 100%);
-
+    background: var(--primary-gradient);
+    animation: slideInRight 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
 }
 
+@keyframes slideInRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
 
 .login {
     display: flex;
-    box-sizing: border-box;
-    background-color: white;
-
+    background-color: var(--white-color);
     width: 100%;
     max-width: 500px;
     height: auto;
     min-height: 634px;
-
     padding: 30px 20px;
     flex-direction: column;
     align-items: center;
@@ -69,8 +71,8 @@ body {
 }
 
 .login-header h1 {
-    font-size: 37.01px;
-    font-weight: 700;
+    font-size: var(--h1-size);
+    font-weight: var(--weight-bold);
     font-style: normal;
     line-height: normal;
     margin: 10px;
@@ -78,7 +80,6 @@ body {
 
 .login-body {
     display: flex;
-    width: fit-content;
     width: 100%;
     height: 259px;
     flex-direction: column;
@@ -105,9 +106,17 @@ body {
     padding: 10px;
     border-radius: 10px;
     font-size: 18px;
-    border: 1px solid #AEAEAE;
-    background: #FFF;
-    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    background: var(--white-color);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--info-color);
+    box-shadow: 0 0 0 2px rgba(1, 179, 255, 0.1);
+}
+.remember-btn{
+    padding: 10px 0px;
 }
 
 .login-btn {
@@ -123,19 +132,39 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 10px;
-    background: #01B3FF;
-    color: white;
+    background: var(--info-color);
+    color: var(--white-color);
+    transition: all 0.3s ease;
+    
 }
 
-.input-field:focus {
-    outline: none;
-    border-color: #01B3FF;
-    box-shadow: 0 0 0 2px rgba(1, 179, 255, 0.1);
+.login-btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
 }
+
+
+.login-btn:hover:not(:disabled) {
+    background: #01b3ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(1, 179, 255, 0.4);
+}
+
+.input-field.error-border {
+    border: 2px solid var(--error-msg-color) !important;
+    background-color: #fff8f8;
+}
+
 
 .password-wrapper {
     position: relative;
     width: 100%;
+}
+
+.password-wrapper .input-field {
+    padding-right: 60px;
 }
 
 .toggle-icon {
@@ -149,13 +178,27 @@ body {
 
 }
 
-.password-wrapper .input-field {
-    padding-right: 60px;
+.error-messages {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    color: var(--error-msg-color);
+    font-weight: var(--weight-medium);
+    font-size: 14px;
+    text-align: center;
+    
+    animation: shake 0.5s ease-in-out, fadeIn 0.3s ease-in;
 }
 
-.error-messages{
-    width: 100%;
-    font-weight: 500;
-    font-size: 16px;
-    color: #d32f2f;
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
 }

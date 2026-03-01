@@ -1,0 +1,20 @@
+<% let dateData = exam.date.split('-'); %>
+<% let monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]; %>
+<tr>
+    <th colspan="3">วันที่ <%= dateData[2] %> <%= monthNames[parseInt(dateData[1]) - 1] %> ปี <%= dateData[0] %></th>
+</tr>
+<tr>
+    <th>รายวิชา</th>
+    <th>เวลา (น.)</th>
+    <th>นาที</th>
+</tr>
+<% entries.forEach((entry) => { %>
+    <% let start = entry.start.split(':'); %>
+    <% let end = entry.end.split(':'); %>
+    <% let minutes = (parseInt(end[0]) * 60 + parseInt(end[1])) - (parseInt(start[0]) * 60 + parseInt(start[1])); %>
+    <tr>
+        <td> (<%= entry.subject_id %>) <%= entry.subject_name %></td>
+        <td><%= entry.start %> - <%= entry.end %></td>
+        <td><%= minutes %></td>
+    </tr>
+<% }); %>

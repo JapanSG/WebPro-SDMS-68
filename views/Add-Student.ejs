@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Student</title>
+    <link rel="stylesheet" href="/css/add_stu.css">
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body>
+    <%- include('Menu-AS') %>
+
+        <div id="add_container">
+            <form action="/add/student" method="POST" id="add_form" enctype="multipart/form-data">
+                <div id="form_layout">
+                    <div id="left_col">
+
+                        <div id="page_header">
+                            <a href="/admin/record-stu">
+                                <img src="/images/icons/Back.svg" alt="ย้อนกลับ">
+                            </a>
+                            <h2>เพิ่มข้อมูลนักเรียน</h2>
+                        </div>
+
+                        <div id="profile_upload">
+                            <label for="file_input" style="cursor: pointer;">
+                                <img src="/images/icons/imgProfile.svg" alt="รูปโปรไฟล์" id="profile_img">
+                                <br>
+                                <div id="upload">
+                                    <img src="/images/icons/Upload.svg" alt="ก้อนเมฆ">
+                                    <span>คลิกเพื่ออัปโหลดรูปภาพ</span>
+                                </div>
+                            </label>
+
+                            <input type="file" name="profile_image" id="file_input" accept="images/*"
+                                style="display: none;">
+                        </div>
+                        <p id="section_title">ข้อมูลนักเรียน</p>
+
+                        <label>ชื่อจริง</label>
+                        <input type="text" name="firstname" required>
+
+                        <label>นามสกุล</label>
+                        <input type="text" name="lastname" required>
+
+                        <label>วันเกิด</label>
+                        <input type="date" name="dob">
+
+                        <label>รหัสประจำตัวประชาชน</label>
+                        <input type="text" name="citizen_id">
+                    </div>
+
+                    <div id="right_col">
+                        <label>เพศ</label>
+                        <select name="gender">
+                            <option value="Male">ชาย</option>
+                            <option value="Female">หญิง</option>
+                        </select>
+
+                        <label>สัญชาติ</label>
+                        <input type="text" name="nationality">
+
+                        <label>เบอร์โทรศัพท์</label>
+                        <input type="text" name="phone">
+
+                        <label>รหัสประจำตัวนักเรียน</label>
+                        <input type="text" name="student_id">
+
+                        <label>อีเมล</label>
+                        <input type="email" name="email">
+
+                        <label>ห้องเรียน</label>
+                        <select name="room_id" required>
+                            <option value="" disabled selected>-- เลือกห้องเรียน --</option>
+                            <% rooms.forEach((room)=> { %>
+                                <option value="<%= room.room_id %>">
+                                    <%= room.room_name %>
+                                </option>
+                                <% }); %>
+                        </select>
+
+                        <label>เทอม</label>
+                        <input type="text" name="semester">
+
+                        <label>ปี</label>
+                        <select name="year" required>
+                            <option value="" disabled selected>-- เลือกปี --</option>
+                            <% years.forEach((y)=> { %>
+                                <option value="<%= y.year %>">
+                                    <%= y.year %>
+                                </option>
+                                <% }); %>
+                        </select>
+
+                        <label>ปีที่เข้าเรียน</label>
+                        <select name="enroll_year" required>
+                            <option value="" disabled selected>-- เลือกปี --</option>
+                            <% years.forEach((y)=> { %>
+                                <option value="<%= y.year %>">
+                                    <%= y.year %>
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="submit_area">
+                    <button type="submit" id="save_btn">บันทึก</button>
+                </div>
+            </form>
+        </div>
+        <script>
+            const fileInput = document.getElementById('file_input');
+            const profileImg = document.getElementById('profile_img');
+
+            // เมื่อมีการเลือกไฟล์ใหม่
+            fileInput.addEventListener('change', function (event) {
+                // ดึงไฟล์ที่ผู้ใช้เลือกมา
+                const file = event.target.files[0];
+
+                if (file) {
+                    // สร้าง URL จำลองของรูปภาพนั้น แล้วเอาไปใส่เป็น src ของ <img>
+                    const imageUrl = URL.createObjectURL(file);
+                    profileImg.src = imageUrl;
+                }
+            });
+        </script>
+</body>
+
+</html>
