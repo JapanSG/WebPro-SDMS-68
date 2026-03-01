@@ -32,6 +32,7 @@
                 <th>สัญชาติ</th>
                 <th>เบอร์โทรศัพท์</th>
                 <th>อีเมล</th>
+                <th>ปีที่เข้า</th>
                 <th>ชื่อผู้ใช้งาน</th>
             </tr>
             <% students.forEach((student)=>{ %>
@@ -54,6 +55,9 @@
                     </td>
                     <td>
                         <%=student.email%>
+                    </td>
+                    <td>
+                        <%=student.enroll_year%>
                     </td>
                     <td>
                         <%=student.username%>
