@@ -33,6 +33,7 @@
                 <th>เบอร์โทรศัพท์</th>
                 <th>อีเมล</th>
                 <th>ปีที่เข้า</th>
+                <th>ชื่อผู้ใช้งาน</th>
             </tr>
             <% students.forEach((student)=>{ %>
                 <tr>
@@ -57,6 +58,9 @@
                     </td>
                     <td>
                         <%=student.enroll_year%>
+                    </td>
+                    <td>
+                        <%=student.username%>
                     </td>
                     <td id="S<%=student.rowid%>">
                         <a href="/delete/student/<%=student.student_id%>">

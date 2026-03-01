@@ -166,7 +166,7 @@ app.get('/teacher/home', function (req, res) {
         } else if (teacherData) {
             teacherData.profilePictureBase64 = '/images/icons/User.svg';
         }
-    
+
         res.render('Home-Teacher', {
             user: req.user,
             teacher: teacherData || {}
@@ -214,19 +214,19 @@ app.get('/ao/submit', (req, res) => {
 
     // ถ้าเปิดมาครั้งแรก (ยังไม่กด Filter) ให้แสดงหน้าเปล่าๆ รอไว้
     if (!grade || !room || !date) {
-        return res.render('Submit-Attendance', { 
-            user: req.user, 
-            students: [], 
-            filterData: { grade: '', room: '', date: '' } 
+        return res.render('Submit-Attendance', {
+            user: req.user,
+            students: [],
+            filterData: { grade: '', room: '', date: '' }
         });
     }
 
     // แปลงข้อมูลให้ตรงกับ Database
     // grade_level ใน DB เป็น Int (เช่น 1)
-    const gradeInt = parseInt(grade); 
-    
+    const gradeInt = parseInt(grade);
+
     // room_name ใน DB เป็น Text (เช่น "1/1")
-    const roomNameStr = `${grade}/${room}`; 
+    const roomNameStr = `${grade}/${room}`;
 
     // คำสั่ง SQL ดึงรายชื่อเด็กในห้อง + สถานะการมาเรียนของวันนั้น (ถ้ามี)
     const sql = `
@@ -244,10 +244,10 @@ app.get('/ao/submit', (req, res) => {
             students = [];
         }
 
-        res.render('Submit-Attendance', { 
-            user: req.user, 
+        res.render('Submit-Attendance', {
+            user: req.user,
             students: students,
-            filterData: { grade, room, date } 
+            filterData: { grade, room, date }
         });
     });
 });
@@ -290,7 +290,7 @@ app.post('/ao/submit/save', checkAuthenticated, checkRole('ao'), (req, res) => {
 
 app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (req, res) => {
     try {
-        const userId = req.user.user_id; 
+        const userId = req.user.user_id;
 
         // 1. ดึงข้อมูลนักเรียน (ใช้ db.get ของ SQLite)
         const sqlStudent = `
@@ -321,7 +321,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         // --- ระบบ FILTER (แบบไดนามิก) ---
         const today = new Date();
         let currentAcademicYear = today.getFullYear();
-        
+
         // เช็กเดือนปัจจุบัน: ถ้าเป็น ม.ค. - เม.ย. (เดือน 0-3) ถือเป็นปีการศึกษาเก่า
         if (today.getMonth() < 4) {
             currentAcademicYear--;
@@ -339,7 +339,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
         // กำหนดค่า Default หากเปิดหน้าเว็บครั้งแรก (เทอมปัจจุบัน)
         const currentTerm = (today.getMonth() >= 4 && today.getMonth() <= 9) ? '1' : '2';
-        
+
         // รับค่าที่เลือกมาจาก Dropdown
         const selectedTerm = req.query.term || currentTerm;
         const selectedYear = req.query.year || currentAcademicYear.toString();
@@ -347,11 +347,11 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         // แปลงเทอมเป็นช่วงวันที่ เพื่อเอาไป Query Database
         let startDate, endDate;
         if (selectedTerm === '1') {
-            startDate = `${selectedYear}-05-01`; 
-            endDate = `${selectedYear}-10-31`;   
+            startDate = `${selectedYear}-05-01`;
+            endDate = `${selectedYear}-10-31`;
         } else {
-            startDate = `${selectedYear}-11-01`;             
-            endDate = `${parseInt(selectedYear) + 1}-03-31`; 
+            startDate = `${selectedYear}-11-01`;
+            endDate = `${parseInt(selectedYear) + 1}-03-31`;
         }
 
         // 2. ดึงประวัติการเข้าเรียนเฉพาะช่วงวันที่ Filter ไว้
@@ -365,7 +365,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             db.all(sqlAttendance, [student.student_id, startDate, endDate], (err, rows) => {
                 if (err) reject(err);
                 // ถ้าไม่มีข้อมูลเลย ให้ส่ง Array ว่าง [] กลับไป จะได้ไม่ Error ตอน forEach
-                else resolve(rows || []); 
+                else resolve(rows || []);
             });
         });
 
@@ -376,36 +376,36 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             if (record.status === 'Present') summary.present++;
             if (record.status === 'Absent') summary.absent++;
             if (record.status === 'Late') summary.late++;
-        }); 
+        });
 
         // 4. เตรียมข้อมูลให้ Chart.js (แยกนับยอดรายเดือน)
         const chartData = { labels: [], present: [], late: [], absent: [] };
-        const months = selectedTerm === '1' 
-            ? [{m:5, l:'May'}, {m:6, l:'Jun'}, {m:7, l:'Jul'}, {m:8, l:'Aug'}, {m:9, l:'Sep'}, {m:10, l:'Oct'}]
-            : [{m:11, l:'Nov'}, {m:12, l:'Dec'}, {m:1, l:'Jan'}, {m:2, l:'Feb'}, {m:3, l:'Mar'}];
+        const months = selectedTerm === '1'
+            ? [{ m: 5, l: 'May' }, { m: 6, l: 'Jun' }, { m: 7, l: 'Jul' }, { m: 8, l: 'Aug' }, { m: 9, l: 'Sep' }, { m: 10, l: 'Oct' }]
+            : [{ m: 11, l: 'Nov' }, { m: 12, l: 'Dec' }, { m: 1, l: 'Jan' }, { m: 2, l: 'Feb' }, { m: 3, l: 'Mar' }];
 
         months.forEach(month => {
             chartData.labels.push(month.l);
             const recordsInMonth = attendanceHistory.filter(r => {
-                const rMonth = new Date(r.date).getMonth() + 1; 
+                const rMonth = new Date(r.date).getMonth() + 1;
                 return rMonth === month.m;
             });
-            
+
             chartData.present.push(recordsInMonth.filter(r => r.status === 'Present').length);
             chartData.late.push(recordsInMonth.filter(r => r.status === 'Late').length);
             chartData.absent.push(recordsInMonth.filter(r => r.status === 'Absent').length);
         });
 
         // 5. ส่งข้อมูลทั้งหมดไปที่ EJS
-        res.render('attendance', { 
-            user: req.user, 
-            student: student, 
-            attendance: attendanceHistory, 
+        res.render('attendance', {
+            user: req.user,
+            student: student,
+            attendance: attendanceHistory,
             summary: summary,
             selectedTerm: selectedTerm,
             selectedYear: selectedYear,
             availableYears: availableYears,
-            chartData: JSON.stringify(chartData) 
+            chartData: JSON.stringify(chartData)
         });
 
     } catch (error) {
@@ -466,9 +466,9 @@ app.post('/user/upload-profile', upload.single('profile_pic'), checkAuthenticate
     });
 });
 
-app.post('/event/add',checkAuthenticated, (req, res) => {
+app.post('/event/add', checkAuthenticated, (req, res) => {
     const { date, time, title } = req.body;
-    
+
     const userId = req.user.user_id;
 
     if (!date || !time || !title) {
@@ -476,8 +476,8 @@ app.post('/event/add',checkAuthenticated, (req, res) => {
     }
 
     const sql = `INSERT INTO Events (date, time, title, user_id) VALUES (?, ?, ?, ?)`;
-    
-    db.run(sql, [date, time, title, userId], function(err) {
+
+    db.run(sql, [date, time, title, userId], function (err) {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ success: false, error: 'Database error' });
@@ -488,7 +488,7 @@ app.post('/event/add',checkAuthenticated, (req, res) => {
 
 app.get('/event/list', checkAuthenticated, (req, res) => {
     const targetDate = req.query.date;
-    
+
     const userId = req.user.user_id;
 
     if (!targetDate) {
@@ -496,13 +496,13 @@ app.get('/event/list', checkAuthenticated, (req, res) => {
     }
 
     const sql = `SELECT * FROM Events WHERE date = ? AND user_id = ? ORDER BY time ASC`;
-    
+
     db.all(sql, [targetDate, userId], (err, rows) => {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ error: 'Database error' });
         }
-        res.json(rows); 
+        res.json(rows);
     });
 });
 
@@ -717,7 +717,7 @@ app.get('/admin/exam-schedule/view', (req, res) => {
 
 app.post('/admin/exam-schedule/addExam', (req, res) => {
     console.log("", req.body);
-    db.run('INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)', [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade], function  (err) {
+    db.run('INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)', [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade], function (err) {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error adding exam");
@@ -732,7 +732,7 @@ app.post('/admin/exam-schedule/addEntry', (req, res) => {
     console.log(req.body);
     const sql = 'INSERT INTO Exam_Schedule_Entries (entry_id, start, end, subject_id, exam_id) VALUES (NULL, ?, ?, ?, ?)';
     let params = [req.body.start, req.body.end, req.body.subject_id, req.body.exam_id];
-    db.run(sql, params, function  (err) {
+    db.run(sql, params, function (err) {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error adding exam entry");
@@ -824,7 +824,7 @@ app.put('/admin/exam-schedule/editDate', (req, res) => {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error editing exam date");
-        } 
+        }
         else {
             console.log("Exam Date Edited");
             res.status(200).send("Exam date edited successfully");
@@ -885,10 +885,10 @@ app.get('/teacher/grade', (req, res) => {
             return;
         }
         let selectedSubject;
-        if (req.query.subject){
+        if (req.query.subject) {
             selectedSubject = req.query.subject
         }
-        else if (subjects.length > 0){
+        else if (subjects.length > 0) {
             selectedSubject = subjects[0].subject_id
         }
         const getStudentSQL = ` SELECT *
@@ -916,13 +916,13 @@ app.get('/teacher/grade', (req, res) => {
                 result.forEach(grade => {
                     grades[`${grade.student_id}`] = grade;
                 });
-                res.render('Submit-Grades.ejs', {subjects : subjects, students : students, selected : selectedSubject, grades : grades});
+                res.render('Submit-Grades.ejs', { subjects: subjects, students: students, selected: selectedSubject, grades: grades });
             });
         });
     });
 });
 
-function updateGrade(student_id, value, subject, res){
+function updateGrade(student_id, value, subject, res) {
     const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year);`
     value = value.trim();
     db.get(checkSQL, (err, result) => {
@@ -931,7 +931,7 @@ function updateGrade(student_id, value, subject, res){
             res.status(500).send("Error getting grade entries while updating");
             return;
         }
-        if (isNaN(value) || (!value)){
+        if (isNaN(value) || (!value)) {
             return;
         }
         if (result) {
@@ -961,7 +961,7 @@ app.put("/teacher/grade/submit", (req, res) => {
     keys.forEach(key => {
         updateGrade(key, req.body.values[key], req.body.subject, res);
     })
-    
+
     res.send("Data Sent");
 });
 
@@ -975,31 +975,23 @@ app.get('/admin/record-stu', function (req, res) {
     if (search !== '') { // ดูว่ามีคำค้นหา
         whereSQL = `WHERE student_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
     }
-    const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
+    const query = `SELECT Students.rowid, * FROM Students JOIN Users ON Students.user_id = Users.user_id ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
     const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
     db.get(count, (err, count_all) => {
-        let whereSQL = '';
-        const search = req.query.search || '';
-        if (search !== '') { // ดูว่ามีคำค้นหา
-            whereSQL = `WHERE student_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
+        if (err) {
+            console.log(err.message);
         }
-        const query = `SELECT rowid, * FROM Students ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
-        const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
-        db.get(count, (err, count_all) => {
+        const totals = count_all ? count_all.total : 0;
+        const totalPages = Math.ceil(totals / limit);
+        db.all(query, (err, rows) => {
             if (err) {
                 console.log(err.message);
             }
-            const totals = count_all ? count_all.total : 0;
-            const totalPages = Math.ceil(totals / limit);
-            db.all(query, (err, rows) => {
-                if (err) {
-                    console.log(err.message);
-                }
-                res.render('Manage_Student_Records', { totalPeople: totals, students: rows, currentPage: page, totalPages: totalPages, searchKeyword: search });
-            });
+            res.render('Manage_Student_Records', { totalPeople: totals, students: rows, currentPage: page, totalPages: totalPages, searchKeyword: search });
         });
     });
 });
+
 //กด edit
 app.get('/edit/student/:id', function (req, res) {
     const query = `
@@ -1184,7 +1176,7 @@ app.get('/admin/record-teach', function (req, res) {
     if (search !== '') { // ดูว่ามีคำค้นหา
         whereSQL = `WHERE teacher_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
     }
-    const query = `SELECT rowid, * FROM Teacher ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
+    const query = `SELECT Teacher.rowid, * FROM Teacher JOIN Users ON Teacher.user_id = Users.user_id ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
     const count = `SELECT COUNT(*) AS total FROM Teacher ${whereSQL}`;
     db.get(count, (err, count_all) => {
         if (err) {
