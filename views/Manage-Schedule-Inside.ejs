@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Schedule <%= room.room_name %></title>
+    <link rel= "stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/manage-schedule-inside.css">
+</head>
+<body>
+    <%- include('Menu-AO') %>
+    <%- include('showMenu') %>
+
+    <div class = "container">
+        <div class = "header-section">
+            <div class="header-left">
+                <a href="/admin/manage-schedule?year=<%= year %>&semester=<%= semester %>" class="back-arrow">←</a>
+                <div class ="room-info">
+                    <h2>ห้อง <%= room.room_name %></h2>
+                    <p>ปีการศึกษา <%= year %> | เทอม <%= semester %></p>
+                </div>
+            </div>
+        </div>
+    
+
+        <%
+            let scheduleCount = schedules.length;
+            const MAX_PERIODS = 35;
+            let percentage = (scheduleCount / MAX_PERIODS) * 100;
+
+            let barColorClass = 'status-empty';
+            if (scheduleCount >= MAX_PERIODS){
+                barColorClass ='status-complete';
+                percentage = 100;
+            }else if (scheduleCount > 0){
+                barColorClass = 'status-incomplete';
+            }
+        %>
+
+        <div class = "progress-wrapper">
+            <span>จำนวนวิชาที่จัดแล้ว</span>
+            <div class = "progress-track">
+                <div class = "progress-fill <%= barColorClass %>" style = "width: <%= percentage %>%;"></div>
+            </div>
+            <span><%= scheduleCount %>/<%= MAX_PERIODS %> คาบ</span>
+        </div>
+
+        <table class = "schedule-table">
+            <tr>
+                <th></th>
+                <th>8.00 น.</th>
+                <th>9.00 น.</th>
+                <th>10.00 น.</th>
+                <th>11.00 น.</th>
+                <th>12.00 น.</th>
+                <th>13.00 น.</th>
+                <th>14.00 น.</th>
+                <th>15.00 น.</th>
+            </tr>
+
+            <% const days = ['วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์']; %>
+            <% days.forEach(day => { %>
+                <tr>
+                    <td class = "day-label"><%= day %></td>
+
+                    <% for(let col = 1; col <= 8; col++){ %>
+
+                        <% if (col == 5) { %>
+                            <td class = "lunch-slot"></td>
+                        <% } else {%>
+                            <% let actualPeriod = col > 5 ? col - 1 : col; %>
+
+                            <% const matchedSchedule = schedules.find(s => s.day == day && s.period == actualPeriod); %>
+                            <td>
+                                <% if (matchedSchedule) { %>
+                                    <button class = "subject-card delete-btn" data-day="<%= day %>" data-period = "<%= actualPeriod %>" data-subject="<%= matchedSchedule.subject_name %>" title="คลิกเพื่อลบ/เปลี่ยนวิชา">
+                                        <%= matchedSchedule.subject_name %>
+                                    </button>
+                                <% } else { %>
+                                    <button class = "add-btn" data-day="<%= day %>" data-period = "<%= actualPeriod %>">+</button>
+                                <% }; %>
+                            </td>
+                        <% }; %>
+                    <% }; %>
+                </tr>
+            <% }); %>
+
+        </table>
+    </div>
+
+
+    <div id = "subjectModal" class = "modal-overlay">
+        <div class = "modal-box">
+            <h3 id = "modalTitle">เพิ่มวิชาเรียน</h3>
+
+            <form action="/admin/manage-schedule/inside/add" method="POST">
+                <input type="hidden" name="room_id" value = "<%= room.room_id %>">
+                <input type="hidden" name="year" value="<%= year %>">
+                <input type="hidden" name="semester" value="<%= semester%>">
+                <input type="hidden" name="day" id = "inputDay">
+                <input type="hidden" name="period" id="inputPeriod">
+
+                <label>เลือกวิชา:</label>
+                <select name = "subject_id" class = "subject-dropdown" required <%= subjects.length === 0 ? 'disabled' : '' %>>
+                    <% if (subjects.length === 0) { %>
+                        <option value="" disabled selected>⚠️ ไม่มีวิชาระดับชั้นนี้ในระบบ</option>
+                    <% } else { %>
+                        <option value="" disabled selected>-- กรุณาเลือกวิชา --</option>
+                        <% subjects.forEach(sub => { %>
+                            <option value="<%= sub.subject_id%>"><%= sub.subject_name %></option>
+                        <% }) %>
+                    <% } %>
+                </select>
+
+                <div class = "modal-actions">
+                    <button type="button" class = "btn-cancel" onclick="closeModal()">ยกเลิก</button>
+                    <% if (subjects.length === 0) { %>
+                        <button type = "button" class="btn-save" disabled style="background-color: #ccc;">บันทึกไม่ได้</button>
+                    <% } else { %>
+                        <button type = "submit" class="btn-save">บันทึก</button>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id ="deleteModal" class = "modal-overlay">
+        <div class = "modal-box" style="text-align: center;">
+            <h3 style="color: #ef4444; border-bottom: none;">⚠️ ยืนยันการยกเลิกวิชา</h3>
+
+            <p style="margin: 10px 0 20px 0; font-size: var(--body-size);">
+                คุณต้องการยกเลิกวิชา<br>
+                <strong id="deleteSubjectName" style="color: var(--primary-color); font-size: 20px;"></strong><br>
+                ออกจาก <span id="deleteTimeText"></span> ใช่หรือไม่?
+            </p>
+
+            <form action="/admin/manage-schedule/inside/delete" method="POST">
+                <input type="hidden" name="room_id" value="<%= room.room_id %>">
+                <input type="hidden" name="year" value="<%= year %>">
+                <input type="hidden" name="semester" value="<%= semester %>">
+                <input type="hidden" name="day" id="deleteInputDay">
+                <input type="hidden" name="period" id="deleteInputPeriod">
+
+                <div class="modal-actions" style="justify-content: center; gap: 15px;">
+                    <button type="button" class="btn-cancel" onclick="closeDeleteModal()">ปิด</button>
+                    <button type="submit" class="btn-save" style="background: #ef4444;">ลบวิชานี้</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        //Modal Add
+        const modal = document.getElementById('subjectModal');
+        const inputDay = document.getElementById('inputDay');
+        const inputPeriod = document.getElementById('inputPeriod');
+        const modalTitle = document.getElementById('modalTitle');
+
+        document.querySelectorAll('.add-btn').forEach(button =>{
+            button.addEventListener('click',function(){
+                const day = this.dataset.day;
+                const period = this.dataset.period;
+                inputDay.value = day;
+                inputPeriod.value = period;
+                modalTitle.textContent = `เพิ่มวิชา - ${day} คาบที่ ${period}`;
+                modal.style.display = 'flex';
+            });
+        });
+
+        function closeModal(){
+            modal.style.display = "none";
+        }
+
+        //Modal Delete
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteInputDay = document.getElementById('deleteInputDay');
+        const deleteInputPeriod = document.getElementById('deleteInputPeriod');
+        const deleteSubjectName = document.getElementById('deleteSubjectName');
+        const deleteTimeText = document.getElementById('deleteTimeText');
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const day = this.dataset.day;
+                const period = this.dataset.period;
+                const subject = this.dataset.subject;
+
+                deleteInputDay.value = day;
+                deleteInputPeriod.value = period;
+
+                deleteSubjectName.textContent = subject;
+                deleteTimeText.textContent = `${day} คาบที่ ${period}`;
+
+                deleteModal.style.display = 'flex';
+            });
+        });
+
+        function closeDeleteModal() {
+            deleteModal.style.display = "none";
+        }
+
+        window.onclick = function(e) {
+            if (e.target === modal) {
+                closeModal();
+            } else if (e.target === deleteModal) {
+                closeDeleteModal();
+            }
+        }
+
+    </script>
+</body>
+</html>

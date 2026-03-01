@@ -1,0 +1,172 @@
+/* ==========================================
+       1. โครงสร้างหลัก
+       ========================================== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    margin-top: 130px;
+    margin-bottom: 50px;
+}
+
+/* ==========================================
+       2. แถบเครื่องมือ
+       ========================================== */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.search-box {
+    padding: 10px 15px;
+    width: 800px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    /* เรียกใช้ฟอนต์และขนาดจาก global.css */
+    font-family: inherit;
+    font-size: var(--body-size);
+    outline: none;
+}
+
+.search-box:focus {
+    border-color: var(--primary-color);
+    /* ใช้สีหลักตอนคลิกพิมพ์ */
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-weight: var(--weight-medium);
+    /* ใช้ความหนาจาก global */
+}
+
+.filters select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    font-size: var(--body-size);
+    cursor: pointer;
+}
+
+/* ==========================================
+       3. ส่วนหัวข้อระดับชั้น
+       ========================================== */
+.grade-section {
+    margin-bottom: 40px;
+}
+
+.grade-title {
+    /* ใช้ขนาด H4 และสีหลักจาก global */
+    font-size: var(--h4-size);
+    font-weight: var(--weight-bold);
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+/* ==========================================
+       4. ตารางการ์ด
+       ========================================== */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--white-color);
+    /* สีขาวจาก global */
+    border-radius: 12px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eaeaea;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    /* ยกการ์ดลอยขึ้นตอนเอาเมาส์ชี้ */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+    /* ใช้ขนาด H6 จาก global */
+    font-size: var(--h6-size);
+    font-weight: var(--weight-bold);
+    margin: 0 0 10px 0;
+    color: var(--black-color);
+}
+
+.card p {
+    /* ใช้ขนาด Caption1 จาก global */
+    font-size: var(--caption1-size);
+    color: #555;
+    margin: 5px 0;
+}
+
+/* ==========================================
+       5. หลอดความคืบหน้า
+       ========================================== */
+.progress-container {
+    background-color: #e0e0e0;
+    border-radius: 20px;
+    height: 12px;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    transition: width 0.4s ease-out;
+}
+
+/* สีสถานะของการจัดตาราง */
+.status-complete {
+    background-color: #10b981;
+}
+
+/* สีเขียว */
+.status-incomplete {
+    background-color: #fbbf24;
+}
+
+/* สีเหลือง */
+.status-empty {
+    background-color: #d1d5db;
+}
+
+/* สีเทา */
+
+/* ==========================================
+       6. ปุ่มแก้ไข/สร้างตาราง
+       ========================================== */
+.btn-edit {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 0;
+    width: 100%;
+    background-color: var(--white-color);
+    color: var(--primary-color);
+    /* สีตัวอักษรใช้สีหลัก */
+    border: 2px solid var(--primary-color);
+    /* ขอบสีหลัก */
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: var(--weight-bold);
+    font-size: var(--body-size);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    /* ตอน Hover ให้เปลี่ยนพื้นหลังเป็นสีไล่ระดับตามที่คุณตั้งไว้ใน global! */
+    background: var(--primary-gradient);
+    color: var(--white-color);
+    border-color: transparent;
+}
