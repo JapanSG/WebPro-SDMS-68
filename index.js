@@ -406,6 +406,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             selectedYear: selectedYear,
             availableYears: availableYears,
             chartData: JSON.stringify(chartData)
+            chartData: JSON.stringify(chartData)
         });
 
     } catch (error) {
