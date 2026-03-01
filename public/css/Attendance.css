@@ -7,7 +7,6 @@
     --color-present: #10b981;
     --color-late: #f59e0b;
     --color-absent: #ef4444;
-    --color-personal-leave: #17a2b8;
 }
 
 body {
@@ -114,7 +113,6 @@ body {
 .dot-green { background-color: var(--color-present); }
 .dot-yellow { background-color: var(--color-late); }
 .dot-red { background-color: var(--color-absent); }
-.dot-blue { background-color: var(--color-personal-leave);}
 
 .filter-group { 
     display: flex; 
