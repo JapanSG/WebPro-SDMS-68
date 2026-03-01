@@ -416,7 +416,6 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
 // ==========================================
 
 
-// หน้าจัดการวิชา (Manage Subject)
 app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => {
     const searchQuery = req.query.search || ''; 
     const currentPage = parseInt(req.query.page) || 1; 
@@ -465,7 +464,7 @@ app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => 
 });
 
 app.get('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res) => {
-    // ดึงรายชื่อครูจากตาราง Teacher เพื่อไปทำ Dropdown ให้เลือก
+    
     const sql = "SELECT teacher_id, first_name, last_name FROM Teacher";
     
     db.all(sql, [], (err, teachers) => {
@@ -481,13 +480,13 @@ app.get('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res)
     });
 });
 app.post('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res) => {
-    // 1. รับค่า teacher_id เพิ่มมาจากฟอร์ม
+    
     const { subject_id, subject_name, credit, grade_level, teacher_id } = req.body;
     
-    // 2. เพิ่มคอลัมน์ teacher_id ในคำสั่ง INSERT
+   
     const sql = "INSERT INTO Subjects (subject_id, subject_name, grade_level, credit, teacher_id) VALUES (?, ?, ?, ?, ?)";
     
-    // 3. ส่งค่า teacher_id เข้าไปใน array (ถ้าไม่ได้เลือก ให้เป็น null)
+    
     db.run(sql, [subject_id, subject_name, grade_level, credit, teacher_id || null], function(err) {
         if (err) {
             console.error("Error inserting subject:", err.message);
@@ -513,17 +512,17 @@ app.get('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req,
             return res.status(404).send("ไม่พบวิชานี้ในระบบ");
         }
         
-        // ส่งข้อมูล subject ไปแสดงผลที่หน้า Edit
+        
         res.render('Edit-Subject-Admin', { user: req.user, subject: subject });
     });
 });
 
 app.post('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req, res) => {
     const old_subject_id = req.params.id; 
-    // รับ teacher_id เพิ่มเข้ามาจาก req.body
+    
     const { subject_id, subject_name, credit, grade_level, teacher_id } = req.body; 
    
-    // จัดการค่า teacher_id ถ้าว่างให้เป็น null เพื่อไม่ให้ติด Foreign Key หากไม่ได้ระบุ
+    
     const t_id = (teacher_id && teacher_id.trim() !== "") ? teacher_id : null;
 
     const sql = `
@@ -532,7 +531,7 @@ app.post('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req
         WHERE subject_id = ?
     `;
     
-    // ส่งค่า t_id เข้าไปใน array ลำดับที่ 5
+   
     db.run(sql, [subject_id, subject_name, grade_level, credit, t_id, old_subject_id], function(err) {
         if (err) {
             console.error("Error updating subject:", err.message);
@@ -560,108 +559,77 @@ app.get('/admin/subject/delete/:id', checkAuthenticated, checkRole('admin'), (re
         res.redirect('/admin/subject?success=' + encodeURIComponent(successMsg));
     });
 });
-// เพิ่ม Route นี้ใน index.js
-// Route สำหรับหน้าตารางเรียนฝั่งนักเรียน
+
 app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (req, res) => {
-    
-    // ตั้งค่าตามข้อมูลที่เรา Insert ไว้: ห้อง 1, เทอม 1, ปี 2568
-    // (ในอนาคต: roomId ควรดึงมาจากตาราง Students โดยใช้ req.user.user_id ครับ)
-    const roomId = 1; 
+    const userId = req.user.user_id; 
     const targetSemester = 1;
     const targetYear = 2568; 
 
-    // คำสั่ง SQL ดึงข้อมูลตารางเรียน พร้อมชื่อวิชาและชื่ออาจารย์
-    const sql = `
-        SELECT sch.day, sch.period, sub.subject_id, sub.subject_name, t.first_name, t.last_name
-        FROM Schedule sch
-        LEFT JOIN Subjects sub ON sch.subject_id = sub.subject_id
-        LEFT JOIN Teacher t ON sub.teacher_id = t.teacher_id
-        WHERE sch."room-id" = ? AND sch.semester = ? AND sch.year = ?
-        ORDER BY sch.day, sch.period
+    
+    const studentSql = `
+        SELECT s.room_id, r.room_name 
+        FROM Students s
+        LEFT JOIN Rooms r ON s.room_id = r.room_id
+        WHERE s.user_id = ?
     `;
-
-    db.all(sql, [roomId, targetSemester, targetYear], (err, schedules) => {
+    
+    db.get(studentSql, [userId], (err, student) => {
         if (err) {
-            console.error("Error fetching class schedule:", err.message);
-            return res.status(500).send("Database Error: ไม่สามารถดึงข้อมูลตารางเรียนได้");
+            console.error("Error fetching student room:", err.message);
+            return res.status(500).send("Database Error: ไม่สามารถค้นหาข้อมูลห้องเรียนได้");
+        }
+        
+       
+        if (!student || !student.room_id) {
+            return res.send("<h2>ไม่พบข้อมูลห้องเรียนของคุณ หรือคุณยังไม่ได้ถูกจัดเข้าห้องเรียน</h2>");
         }
 
-        // จัดกลุ่มข้อมูลให้อยู่ในรูปแบบ Object เพื่อให้ฝั่ง EJS วนลูปสร้างตารางง่ายๆ
-        // 1=จันทร์, 2=อังคาร, 3=พุธ, 4=พฤหัส, 5=ศุกร์
-        const timetable = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
-        
-        schedules.forEach(item => {
-            if (timetable[item.day]) {
-                timetable[item.day][item.period] = item;
+        const roomId = student.room_id;
+        const roomName = student.room_name || roomId; 
+
+    
+        const scheduleSql = `
+            SELECT sch.day, sch.period, sub.subject_id, sub.subject_name, t.first_name, t.last_name
+            FROM Schedule sch
+            LEFT JOIN Subjects sub ON sch.subject_id = sub.subject_id
+            LEFT JOIN Teacher t ON sub.teacher_id = t.teacher_id
+            WHERE sch."room-id" = ? AND sch.semester = ? AND sch.year = ?
+            ORDER BY sch.day, sch.period
+        `;
+
+        db.all(scheduleSql, [roomId, targetSemester, targetYear], (err, schedules) => {
+            if (err) {
+                console.error("Error fetching class schedule:", err.message);
+                return res.status(500).send("Database Error: ไม่สามารถดึงข้อมูลตารางเรียนได้");
             }
-        });
 
-        // ส่งข้อมูลไปที่ไฟล์ EJS (สมมติว่าไฟล์ชื่อ Schedule.ejs ตามที่เราเคยเขียน CSS มินิมอลไว้)
-        res.render('Schedule', { 
-            user: req.user, 
-            timetable: timetable,
-            year: targetYear,
-            semester: targetSemester
-        });
-    });
-});
-
-// ==========================================
-
-
-
-// ==========================================
-app.get('/test-data', checkAuthenticated, (req, res) => {
-    const userId = req.user.user_id; // เช่น ID 1 จากตาราง Users
-
-    // ล้างข้อมูลเก่าก่อน
-    db.run(`DELETE FROM Students WHERE user_id = ?`, [userId], (err) => {
-        
-        // 1. สร้างนักเรียน (ใช้ชื่อคอลัมน์ underscore ตามที่คุยกัน)
-        const insertStudent = `
-            INSERT INTO Students (
-                student_id, first_name, last_name, phone, sex, 
-                nationality, room_id, user_id, citizen_id, dob, enroll_year
-            ) VALUES (?, 'สมชาย', 'ใจดี', '0812345678', 'Male', 'Thai', 401, ?, '1234567890123', '2010-01-01', 2026)`;
-        
-        db.run(insertStudent, [userId + 100, userId], (err) => {
-            if (err) return res.send("Error Students: " + err.message);
-
-            // 2. จัดตารางเรียน (ใช้วิชา 101 และ 102 ที่ลูกพี่มีอยู่แล้วในตาราง Subjects)
-            // และใช้ room_id เป็น 401 ให้ตรงกับนักเรียน
-            const insertSchedule = `
-                INSERT INTO Schedule (room_id, day, period, type, subject_id, semester, year) 
-                VALUES (401, 1, 1, 'ปกติ', 101, 1, 2026), 
-                       (401, 1, 2, 'ปกติ', 102, 1, 2026),
-                       (401, 2, 3, 'ปกติ', 201, 1, 2026)`;
+            // 3. จัดกลุ่มข้อมูลลงใน Array แบบ 2 มิติ ให้หน้าเว็บเอาไปวนลูปง่ายๆ
+            const timetable = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
             
-            db.run(insertSchedule, (err) => {
-                if (err) return res.send("Error Schedule: " + err.message);
-                
-                res.send(`
-                    <h2>เสกข้อมูลสำเร็จ! ✅</h2>
-                    <p>1. สร้างนักเรียนรหัส ${userId + 100} อยู่ห้อง 401 แล้ว</p>
-                    <p>2. เพิ่มวิชา 101, 102 ลงในตารางเรียนห้อง 401 แล้ว</p>
-                    <br>
-                    <a href="/student/class-schedule">👉 ไปดูตารางเรียน (ถ้ายัง Error ให้ส่งไฟล์ EJS มาครับ)</a>
-                `);
+            schedules.forEach(item => {
+                if (timetable[item.day]) {
+                    timetable[item.day][item.period] = item;
+                }
+            });
+
+            // 4. ส่งไปที่ไฟล์ EJS (สังเกตว่าส่ง roomName ไปแทน roomId แล้ว)
+            res.render('Schedule', { 
+                user: req.user, 
+                timetable: timetable,
+                year: targetYear,
+                semester: targetSemester,
+                roomName: roomName 
             });
         });
     });
 });
-app.get('/setup-admin', async (req, res) => {
-    const result = await createAccount('admin');
-    if (result.success) {
-        res.send(`สร้าง Admin สำเร็จ! Username: ${result.user.username} | Password: webPro2026`);
-    } else {
-        res.send(`พังครับ: ${result.error}`);
-    }
-});
 
-app.get('/setup-student', async (req, res) => {
-    const result = await createAccount('student');
-    res.send(`สร้างสำเร็จ! เอาไอดีนี้ไปล็อกอินได้เลย -> Username: ${result.user?.username} | Password: webPro2026`);
-});
+
+
+
+
+// ==========================================
+
 
 app.listen(port, () => {
     console.log("Server started.");
