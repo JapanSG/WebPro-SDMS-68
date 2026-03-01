@@ -1,0 +1,159 @@
+/* กำหนดตัวแปรสีหลัก */
+:root {
+    --primary-blue: #0f4c81;
+    --secondary-blue: #1e3a8a;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* --------------------
+   ส่วนของการ์ด (Card)
+-------------------- */
+.card {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03), 0 4px 10px rgba(0, 0, 0, 0.02);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --------------------
+   ส่วนโปรไฟล์ (Profile)
+-------------------- */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.avatar {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+}
+
+.profile-text h2 { margin: 0 0 0.25rem 0; font-size: 1.5rem; }
+.profile-text p { margin: 0; font-size: 1rem; color: var(--text-muted); }
+
+/* --------------------
+   ส่วน Layout ตัวกรอง & เกรดเฉลี่ย
+-------------------- */
+.summary-grid {
+    display: grid;
+    /* แบ่ง 2 คอลัมน์: กล่องฟิลเตอร์กว้าง 2 ส่วน กล่อง GPA กว้าง 1 ส่วน */
+    grid-template-columns: 2fr 1fr; 
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-group { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.8rem; 
+    font-weight: 500;
+}
+
+.semester-select {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+/* --------------------
+   กล่องเกรดเฉลี่ย (GPA Card) สีน้ำเงิน
+-------------------- */
+.gpa-card {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.gpa-card h3 { 
+    margin: 0; 
+    font-weight: normal; 
+    font-size: 1.1rem; 
+    opacity: 0.9;
+    color: white; /* บังคับสีขาวเผื่อโดน CSS อื่นทับ */
+}
+
+.gpa-score { 
+    font-size: 4rem; 
+    font-weight: bold; 
+    margin: 0.5rem 0; 
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2); /* เพิ่มเงาให้ตัวเลขดูมีมิติ */
+}
+
+/* --------------------
+   ส่วนตารางผลการเรียน (Table)
+-------------------- */
+.history-section h3 { margin-top: 0; margin-bottom: 1.5rem; }
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table th, .history-table td {
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.history-table th { 
+    color: var(--text-muted); 
+    font-weight: 600; 
+}
+
+.text-center { text-align: center; }
+
+/* --------------------
+   ป้ายสีบอกเกรด (Grade Badges)
+-------------------- */
+.grade-badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* ไล่สีตามเกรดที่ได้ */
+.grade-4 { background-color: #dcfce7; color: #166534; } /* เกรด 3.5 - 4.0 (เขียว) */
+.grade-3 { background-color: #fef08a; color: #854d0e; } /* เกรด 2.5 - 3.0 (เหลือง) */
+.grade-2 { background-color: #fed7aa; color: #9a3412; } /* เกรด 1.5 - 2.0 (ส้ม) */
+.grade-0 { background-color: #fee2e2; color: #991b1b; } /* เกรด 0 - 1.0 (แดง) */
+.grade-default { background-color: #f3f4f6; color: #1f2937; } /* สีเทาเริ่มต้น */
+
+/* --------------------
+   การแสดงผลบนมือถือ (Responsive)
+-------------------- */
+@media (max-width: 768px) {
+    .summary-grid {
+        grid-template-columns: 1fr; /* ถ้าจอมือถือ ให้เรียงกล่องลงมาด้านล่างกัน */
+    }
+}
