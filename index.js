@@ -205,7 +205,7 @@ app.get('/admin/home', async (req, res) => {
     }
 });
 
-// Submit Attendance
+//  Submit Attendance Page
 // =====================================================================
 // [GET] หน้าเว็บสำหรับเช็คชื่อนักเรียน (Submit Attendance)
 // =====================================================================
@@ -266,6 +266,10 @@ app.post('/ao/submit/save', checkAuthenticated, checkRole('ao'), (req, res) => {
         if (key.startsWith('status_')) {
             const studentId = key.replace('status_', ''); // ตัดคำว่า status_ ออก เหลือแค่รหัส
             const status = data[key]; // จะได้ค่า 'Present', 'Absent', หรือ 'Late'
+
+            console.log(studentId);
+            console.log(status);
+            console.log(attendanceDate);
 
             // คำสั่ง UPSERT: ถ้าไม่เคยเช็คชื่อวันนี่ให้เพิ่มใหม่ แต่ถ้าเคยแล้วให้อัปเดตสถานะทับ
             const sqlUpsert = `
