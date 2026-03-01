@@ -371,18 +371,19 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
         // 3. คำนวณยอดรวม (Summary)
         // คราวนี้ attendanceHistory จะเป็น Array แล้ว ใช้ forEach ได้เลยครับ!
-        const summary = { present: 0, absent: 0, late: 0 };
+        const summary = { present: 0, absent: 0, late: 0 , personal_leave: 0};
         attendanceHistory.forEach(record => {
             if (record.status === 'Present') summary.present++;
             if (record.status === 'Absent') summary.absent++;
             if (record.status === 'Late') summary.late++;
+            if (record.status === 'Personal Leave') summary.personal_leave++;
         });
 
         // 4. เตรียมข้อมูลให้ Chart.js (แยกนับยอดรายเดือน)
-        const chartData = { labels: [], present: [], late: [], absent: [] };
-        const months = selectedTerm === '1'
-            ? [{ m: 5, l: 'May' }, { m: 6, l: 'Jun' }, { m: 7, l: 'Jul' }, { m: 8, l: 'Aug' }, { m: 9, l: 'Sep' }, { m: 10, l: 'Oct' }]
-            : [{ m: 11, l: 'Nov' }, { m: 12, l: 'Dec' }, { m: 1, l: 'Jan' }, { m: 2, l: 'Feb' }, { m: 3, l: 'Mar' }];
+        const chartData = { labels: [], present: [], late: [], absent: [], personal_leave: []};
+        const months = selectedTerm === '1' 
+            ? [{m:5, l:'May'}, {m:6, l:'Jun'}, {m:7, l:'Jul'}, {m:8, l:'Aug'}, {m:9, l:'Sep'}, {m:10, l:'Oct'}]
+            : [{m:11, l:'Nov'}, {m:12, l:'Dec'}, {m:1, l:'Jan'}, {m:2, l:'Feb'}, {m:3, l:'Mar'}];
 
         months.forEach(month => {
             chartData.labels.push(month.l);
@@ -394,6 +395,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             chartData.present.push(recordsInMonth.filter(r => r.status === 'Present').length);
             chartData.late.push(recordsInMonth.filter(r => r.status === 'Late').length);
             chartData.absent.push(recordsInMonth.filter(r => r.status === 'Absent').length);
+            chartData.personal_leave.push(recordsInMonth.filter(r => r.status === 'Personal Leave').length);
         });
 
         // 5. ส่งข้อมูลทั้งหมดไปที่ EJS
@@ -405,7 +407,6 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             selectedTerm: selectedTerm,
             selectedYear: selectedYear,
             availableYears: availableYears,
-            chartData: JSON.stringify(chartData)
             chartData: JSON.stringify(chartData)
         });
 
