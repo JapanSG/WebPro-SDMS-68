@@ -30,6 +30,7 @@
                 <th>ชื่อ</th>
                 <th>เบอร์โทรศัพท์</th>
                 <th>อีเมล</th>
+                <th>ชื่อผู้ใช้งาน</th>
             </tr>
             <% teachers.forEach((teacher)=>{ %>
                 <tr>
@@ -45,6 +46,9 @@
                     </td>
                     <td>
                         <%=teacher.email%>
+                    </td>
+                    <td>
+                        <%=teacher.username%>
                     </td>
                     <td id="S<%=teacher.rowid%>">
                         <a href="/delete/teacher/<%=teacher.teacher_id%>">
