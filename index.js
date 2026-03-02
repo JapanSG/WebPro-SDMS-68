@@ -481,7 +481,7 @@ app.post('/event/add', checkAuthenticated, (req, res) => {
         return res.status(400).json({ success: false, error: 'ข้อมูลไม่ครบถ้วน' });
     }
 
-    const sql = `INSERT INTO Events (date, time, title, user_id) VALUES (?, ?, ?, ?)`;
+    const sql = `INSERT INTO Todo_List (date, time, title, user_id) VALUES (?, ?, ?, ?)`;
 
     db.run(sql, [date, time, title, userId], function (err) {
         if (err) {
@@ -501,7 +501,7 @@ app.get('/event/list', checkAuthenticated, (req, res) => {
         return res.status(400).json({ error: 'กรุณาระบุวันที่' });
     }
 
-    const sql = `SELECT * FROM Events WHERE date = ? AND user_id = ? ORDER BY time ASC`;
+    const sql = `SELECT * FROM Todo_List WHERE date = ? AND user_id = ? ORDER BY time ASC`;
 
     db.all(sql, [targetDate, userId], (err, rows) => {
         if (err) {

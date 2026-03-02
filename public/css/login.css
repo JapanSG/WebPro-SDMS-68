@@ -18,7 +18,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: url('/images/content/background.png') lightgray 50% / cover no-repeat;
+    background: url('/images/content/backgroundSchool.jpg') lightgray 50% / cover no-repeat;
     justify-content: flex-end;
 }
 
@@ -71,13 +71,15 @@ body {
 }
 
 .login-header h1 {
-    font-size: var(--h1-size);
+    font-size: 45px;
     font-weight: var(--weight-bold);
     font-style: normal;
     line-height: normal;
     margin: 10px;
 }
-
+.login-header p {
+    font-size: 18px;
+}
 .login-body {
     display: flex;
     width: 100%;
@@ -201,4 +203,72 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+.main-content {
+    width: 60%;
+    height: 100vh;
+    padding-left: 60px;
+    overflow: hidden;
+    position: relative;
+    margin-right: 150px;
+
+}
+
+
+.content-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.text-group {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box; 
+}
+
+
+.title-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+
+.main-image {
+    width: 120px;
+    height: auto;
+
+}
+.text-warpper{
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(3px);
+    padding: 20px 5px;
+    border-radius: 20px;
+}
+.text-group .title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--white-color);
+    text-align: left;
+    margin: 0;
+    line-height: 1;
+    text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+}
+.title span{
+    font-size: 3rem;
+    
+}
+
+.text-group .desc {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--white-color);
+    text-align: left;
+    margin-top: 15px;
+    padding-left: 140px;
+    text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
 }

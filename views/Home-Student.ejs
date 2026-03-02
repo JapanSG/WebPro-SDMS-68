@@ -86,12 +86,12 @@
             <div class="home_content">
                 <div class="event_wrapper">
                     <div class="event_header">
-                        <h3 class="event_title">กิจกรรมต่าง ๆ</h3>
+                        <h3 class="event_title">รายการสิ่งที่ต้องทำ</h3>
                         <img id="btn-add-event" class="edit_icon" src="/images/icons/Edit-info.svg" alt="Add Event"
                             style="cursor: pointer;">
                     </div>
                     <div class="event_date" id="eventDate"></div>
-                    <div class="event_list" id="eventList">ไม่มีกิจกรรม</div>
+                    <div class="event_list" id="eventList">ไม่มีรายการสิ่งที่ต้องทำ</div>
                 </div>
             </div>
             <div class="home_content">
@@ -131,7 +131,7 @@
         </div>
         <div id="event-overlay" class="overlay hidden">
             <div class="overlay-box" style="min-width: 300px;">
-                <h3>เพิ่มกิจกรรม</h3>
+                <h3>เพิ่มรายการสิ่งที่ต้องทำ</h3>
                 <p id="event-modal-date" style="color: gray; margin-bottom: 15px;"></p>
 
                 <div style="margin: 15px 0; text-align: left;">
@@ -139,14 +139,14 @@
                     <input type="text" id="event-time" placeholder="เช่น 08:00 - 09:00"
                         style="width: 100%; padding: 8px; margin: 5px 0 15px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
 
-                    <label style="font-weight: bold;">รายละเอียดกิจกรรม:</label>
-                    <input type="text" id="event-title" placeholder="ชื่อกิจกรรม"
+                    <label style="font-weight: bold;">รายละเอียดสิ่งที่ต้องทำ:</label>
+                    <input type="text" id="event-title" placeholder="ชื่อรายการสิ่งที่ต้องทำ"
                         style="width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
                 </div>
 
                 <div class="overlay-actions">
                     <button id="btn-cancel-event" class="btn-cancel">ยกเลิก</button>
-                    <button id="btn-save-event" class="btn-save">บันทึกกิจกรรม</button>
+                    <button id="btn-save-event" class="btn-save">บันทึกรายการสิ่งที่ต้องทำ</button>
                 </div>
             </div>
         </div>
@@ -156,7 +156,7 @@
                 <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg">
 
                 <div style="margin: 15px 0;">
-                    <img id="preview-img" src="" style="display: none; max-width: 150px; border-radius: 50%;">
+                    <img id="preview-img" src="" style="display: none; max-width: 200px; border-radius: 50%;">
                 </div>
 
                 <div class="overlay-actions">
