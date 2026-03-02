@@ -1005,7 +1005,7 @@ app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (re
             FROM Schedule sch
             LEFT JOIN Subjects sub ON sch.subject_id = sub.subject_id
             LEFT JOIN Teacher t ON sub.teacher_id = t.teacher_id
-            WHERE sch."room-id" = ? AND sch.semester = ? AND sch.year = ?
+            WHERE sch.room_id = ? AND sch.semester = ? AND sch.year = ?
             ORDER BY sch.day, sch.period
         `;
 
