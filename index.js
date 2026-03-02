@@ -18,6 +18,11 @@ let db = new sqlite3.Database('school.db', (err) => {
     if (err) {
         return console.error(err.message);
     }
+    db.run("PRAGMA foreign_keys = ON;", (err) =>{
+        if (err){
+            console.log("Failed to turn on foreign key check");
+        }
+    })
     console.log('Connected to the SQlite database.');
 });
 
@@ -687,10 +692,12 @@ app.get('/admin/exam-schedule', (req, res) => {
                 dates.push(exam.date);
             });
             const sql3 = `
-            SELECT entry_id, start, end, subject_id, exam_id
+            SELECT entry_id, start, end, subject_id, exam_id, subject_name
             FROM Exam_Schedule_Entries 
             JOIN EXAM_Schedule
             USING (exam_id)
+            JOIN Subjects
+            USING (subject_id)
             WHERE exam_id IN (${exam_ids.map(() => '?').join(',')})
             ORDER BY date;`;
             db.all(sql3, exam_ids, (err, result2) => {
@@ -1514,6 +1521,9 @@ app.get('/delete/student/:id', function (req, res) {
             if (err) {
             console.log(err.message);
         }
+        db.get("PRAGMA foreign_keys;", (err, res) => {
+            console.log(res);
+        })
          res.redirect('/admin/record-stu');
         })
     });
@@ -1727,13 +1737,14 @@ app.get('/delete/teacher/:id', function (req, res) {
             console.log(err.message);
         }
         console.log(rows);
-        const sql = `DELETE FROM Users WHERE user_id = ${rows[0].user_id}`;
-        db.run(sql,(err) => {
+        const sql = `DELETE FROM Users WHERE user_id = ${rows[0].user_id};`;
+        console.log(sql);
+        db.run(sql, (err) => {
             if (err) {
-            console.log(err.message);
-        }
-         res.redirect('/admin/record-teach');
-        })
+                console.log(err.message);
+            }
+            res.redirect('/admin/record-teach');
+        });
     });
 });
 
@@ -1886,8 +1897,9 @@ app.get('/admin/manage-schedule/inside/:id', (req, res) => {
 
 app.post('/admin/manage-schedule/inside/add', (req, res) => {
     const { room_id, day, period, subject_id, year, semester } = req.body;
+    console.log(req.body);
 
-    const sqlInsertSchedule = `INSERT INTO Schedule(room_id,day,period, subject_id,year,semester)
+    const sqlInsertSchedule = `INSERT INTO Schedule(room_id, day, period, subject_id, year, semester)
                                 VALUES(?,?,?,?,?,?)`;
 
     db.run(sqlInsertSchedule, [room_id, day, period, subject_id, year, semester], (err) => {
@@ -1916,6 +1928,8 @@ app.post('/admin/manage-schedule/inside/delete', (req, res) => {
 });
 
 app.listen(port, () => {
-
+    // db.get("PRAGMA foreign_keys = ON;", (err, res) => {
+    //     console.log(res);
+    // })
     console.log("Server started.");
 });

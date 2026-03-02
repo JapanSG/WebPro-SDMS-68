@@ -352,7 +352,7 @@ function editEntryHandler(entry_id) {
 }
 
 function createDeleteEntryWarningPopup(event) {
-    const entry_id = event.target.value;
+    const entry_id = event.target.parentNode.value;
 
     let popup = document.createElement("div");
     popup.setAttribute("class", "deleteWarningPopup");
