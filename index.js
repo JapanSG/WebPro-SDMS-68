@@ -375,7 +375,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
         // 3. คำนวณยอดรวม (Summary)
         // คราวนี้ attendanceHistory จะเป็น Array แล้ว ใช้ forEach ได้เลยครับ!
-        const summary = { present: 0, absent: 0, late: 0 , personal_leave: 0};
+        const summary = { present: 0, absent: 0, late: 0, personal_leave: 0 };
         attendanceHistory.forEach(record => {
             if (record.status === 'Present') summary.present++;
             if (record.status === 'Absent') summary.absent++;
@@ -384,10 +384,10 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         });
 
         // 4. เตรียมข้อมูลให้ Chart.js (แยกนับยอดรายเดือน)
-        const chartData = { labels: [], present: [], late: [], absent: [], personal_leave: []};
-        const months = selectedTerm === '1' 
-            ? [{m:5, l:'May'}, {m:6, l:'Jun'}, {m:7, l:'Jul'}, {m:8, l:'Aug'}, {m:9, l:'Sep'}, {m:10, l:'Oct'}]
-            : [{m:11, l:'Nov'}, {m:12, l:'Dec'}, {m:1, l:'Jan'}, {m:2, l:'Feb'}, {m:3, l:'Mar'}];
+        const chartData = { labels: [], present: [], late: [], absent: [], personal_leave: [] };
+        const months = selectedTerm === '1'
+            ? [{ m: 5, l: 'May' }, { m: 6, l: 'Jun' }, { m: 7, l: 'Jul' }, { m: 8, l: 'Aug' }, { m: 9, l: 'Sep' }, { m: 10, l: 'Oct' }]
+            : [{ m: 11, l: 'Nov' }, { m: 12, l: 'Dec' }, { m: 1, l: 'Jan' }, { m: 2, l: 'Feb' }, { m: 3, l: 'Mar' }];
 
         months.forEach(month => {
             chartData.labels.push(month.l);
@@ -829,9 +829,9 @@ app.delete('/admin/exam-schedule/deleteAll', (req, res) => {
 
 
 app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => {
-    const searchQuery = req.query.search || ''; 
-    const currentPage = parseInt(req.query.page) || 1; 
-    const limit = 5; 
+    const searchQuery = req.query.search || '';
+    const currentPage = parseInt(req.query.page) || 1;
+    const limit = 5;
     const offset = (currentPage - 1) * limit;
 
     let sql = "SELECT * FROM Subjects";
@@ -845,13 +845,13 @@ app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => 
     }
 
     sql += " LIMIT ? OFFSET ?";
-  
+
     db.get(countSql, params, (err, row) => {
         if (err) {
             console.error(err);
             return res.status(500).send("Database Error");
         }
-        
+
         const totalItems = row.count;
         const totalPages = Math.ceil(totalItems / limit);
         const finalParams = [...params, limit, offset];
@@ -861,13 +861,13 @@ app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => 
                 console.error(err);
                 return res.status(500).send("Database Error");
             }
-            
-            res.render('Manage-Subject-Admin', { 
-                user: req.user, 
-                subjects: subjects, 
-                searchQuery: searchQuery, 
-                currentPage: currentPage, 
-                totalPages: totalPages ,
+
+            res.render('Manage-Subject-Admin', {
+                user: req.user,
+                subjects: subjects,
+                searchQuery: searchQuery,
+                currentPage: currentPage,
+                totalPages: totalPages,
                 errorMsg: req.query.error || null,
                 successMsg: req.query.success || null
             });
@@ -876,35 +876,35 @@ app.get('/admin/subject', checkAuthenticated, checkRole('admin'), (req, res) => 
 });
 
 app.get('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res) => {
-    
+
     const sql = "SELECT teacher_id, first_name, last_name FROM Teacher";
-    
+
     db.all(sql, [], (err, teachers) => {
         if (err) {
             console.error("Error fetching teachers:", err.message);
             return res.status(500).send("Database Error");
         }
         // ส่งทั้ง user และ teachers ไปที่หน้า Add-Subject-Admin
-        res.render('Add-Subject-Admin', { 
-            user: req.user, 
-            teachers: teachers || [] 
+        res.render('Add-Subject-Admin', {
+            user: req.user,
+            teachers: teachers || []
         });
     });
 });
 app.post('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res) => {
-    
+
     const { subject_id, subject_name, credit, grade_level, teacher_id } = req.body;
-    
-   
+
+
     const sql = "INSERT INTO Subjects (subject_id, subject_name, grade_level, credit, teacher_id) VALUES (?, ?, ?, ?, ?)";
-    
-    
-    db.run(sql, [subject_id, subject_name, grade_level, credit, teacher_id || null], function(err) {
+
+
+    db.run(sql, [subject_id, subject_name, grade_level, credit, teacher_id || null], function (err) {
         if (err) {
             console.error("Error inserting subject:", err.message);
             return res.status(500).send("เกิดข้อผิดพลาดในการบันทึกข้อมูล (รหัสวิชาอาจซ้ำ หรือข้อมูลไม่ครบ)");
         }
-      
+
         res.redirect('/admin/subject');
     });
 });
@@ -914,7 +914,7 @@ app.post('/admin/subject/add', checkAuthenticated, checkRole('admin'), (req, res
 app.get('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req, res) => {
     const subjectId = req.params.id;
     const sql = "SELECT * FROM Subjects WHERE subject_id = ?";
-    
+
     db.get(sql, [subjectId], (err, subject) => {
         if (err) {
             console.error("Error fetching subject:", err.message);
@@ -923,18 +923,18 @@ app.get('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req,
         if (!subject) {
             return res.status(404).send("ไม่พบวิชานี้ในระบบ");
         }
-        
-        
+
+
         res.render('Edit-Subject-Admin', { user: req.user, subject: subject });
     });
 });
 
 app.post('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req, res) => {
-    const old_subject_id = req.params.id; 
-    
-    const { subject_id, subject_name, credit, grade_level, teacher_id } = req.body; 
-   
-    
+    const old_subject_id = req.params.id;
+
+    const { subject_id, subject_name, credit, grade_level, teacher_id } = req.body;
+
+
     const t_id = (teacher_id && teacher_id.trim() !== "") ? teacher_id : null;
 
     const sql = `
@@ -942,14 +942,14 @@ app.post('/admin/subject/edit/:id', checkAuthenticated, checkRole('admin'), (req
         SET subject_id = ?, subject_name = ?, grade_level = ?, credit = ?, teacher_id = ? 
         WHERE subject_id = ?
     `;
-    
-   
-    db.run(sql, [subject_id, subject_name, grade_level, credit, t_id, old_subject_id], function(err) {
+
+
+    db.run(sql, [subject_id, subject_name, grade_level, credit, t_id, old_subject_id], function (err) {
         if (err) {
             console.error("Error updating subject:", err.message);
             return res.status(500).send("เกิดข้อผิดพลาดในการอัปเดตข้อมูล (รหัสวิชาใหม่อาจไปซ้ำ หรือรหัสอาจารย์ไม่มีจริง)");
         }
-     
+
         res.redirect('/admin/subject');
     });
 });
@@ -958,48 +958,48 @@ app.get('/admin/subject/delete/:id', checkAuthenticated, checkRole('admin'), (re
     const subjectId = req.params.id;
     const sql = "DELETE FROM Subjects WHERE subject_id = ?";
 
-    db.run(sql, [subjectId], function(err) {
+    db.run(sql, [subjectId], function (err) {
         if (err) {
             console.error("Error deleting subject:", err.message);
-            
+
             const errorMsg = "ไม่สามารถลบวิชานี้ได้ เนื่องจากมีการใช้งานอยู่ในตารางเรียนหรือตารางสอบ";
             return res.redirect('/admin/subject?error=' + encodeURIComponent(errorMsg));
         }
-        
-        
+
+
         const successMsg = "ลบรายวิชาสำเร็จ";
         res.redirect('/admin/subject?success=' + encodeURIComponent(successMsg));
     });
 });
 
 app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (req, res) => {
-    const userId = req.user.user_id; 
+    const userId = req.user.user_id;
     const targetSemester = 1;
-    const targetYear = 2568; 
+    const targetYear = 2568;
 
-    
+
     const studentSql = `
         SELECT s.room_id, r.room_name 
         FROM Students s
         LEFT JOIN Rooms r ON s.room_id = r.room_id
         WHERE s.user_id = ?
     `;
-    
+
     db.get(studentSql, [userId], (err, student) => {
         if (err) {
             console.error("Error fetching student room:", err.message);
             return res.status(500).send("Database Error: ไม่สามารถค้นหาข้อมูลห้องเรียนได้");
         }
-        
-       
+
+
         if (!student || !student.room_id) {
             return res.send("<h2>ไม่พบข้อมูลห้องเรียนของคุณ หรือคุณยังไม่ได้ถูกจัดเข้าห้องเรียน</h2>");
         }
 
         const roomId = student.room_id;
-        const roomName = student.room_name || roomId; 
+        const roomName = student.room_name || roomId;
 
-    
+
         const scheduleSql = `
             SELECT sch.day, sch.period, sub.subject_id, sub.subject_name, t.first_name, t.last_name
             FROM Schedule sch
@@ -1017,7 +1017,7 @@ app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (re
 
             // 3. จัดกลุ่มข้อมูลลงใน Array แบบ 2 มิติ ให้หน้าเว็บเอาไปวนลูปง่ายๆ
             const timetable = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
-            
+
             schedules.forEach(item => {
                 if (timetable[item.day]) {
                     timetable[item.day][item.period] = item;
@@ -1025,12 +1025,12 @@ app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (re
             });
 
             // 4. ส่งไปที่ไฟล์ EJS (สังเกตว่าส่ง roomName ไปแทน roomId แล้ว)
-            res.render('Schedule', { 
-                user: req.user, 
+            res.render('Schedule', {
+                user: req.user,
                 timetable: timetable,
                 year: targetYear,
                 semester: targetSemester,
-                roomName: roomName 
+                roomName: roomName
             });
         });
     });
@@ -1194,7 +1194,7 @@ app.put("/teacher/grade/submit", (req, res) => {
 // Transcript Page
 app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), async (req, res) => {
     try {
-        const userId = req.user.user_id; 
+        const userId = req.user.user_id;
 
         // 1. ดึงข้อมูลนักเรียน (เพื่อเอาไปแสดง Header และเอา enroll_year)
         const sqlStudent = `
@@ -1223,7 +1223,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
         // ดึงปีที่เข้าเรียนมาสร้าง Dropdown
         let enrollYear = student.enroll_year || currentAcademicYear;
         if (enrollYear > 2500) enrollYear = enrollYear - 543; // ดักจับเผื่อเป็น พ.ศ.
-        
+
         const availableYears = [];
         for (let y = enrollYear; y <= currentAcademicYear; y++) {
             availableYears.push(y);
@@ -1231,7 +1231,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
 
         // กำหนดเทอมปัจจุบัน (เดือน 4-9 คือพฤษภาคม-ตุลาคม เป็นเทอม 1, นอกนั้นเทอม 2)
         const currentTerm = (today.getMonth() >= 4 && today.getMonth() <= 9) ? '1' : '2';
-        
+
         // รับค่าตัวกรองจาก URL
         const selectedTerm = req.query.term || currentTerm;
         const selectedYear = req.query.year || currentAcademicYear.toString();
@@ -1252,24 +1252,24 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
         //แปลกปี
 
         const grades = await new Promise((resolve, reject) => {
-            db.all(sqlGrades, [student.student_id, parseInt(selectedYear)+543, selectedTerm], (err, rows) => {
+            db.all(sqlGrades, [student.student_id, parseInt(selectedYear) + 543, selectedTerm], (err, rows) => {
                 if (err) reject(err);
-                else{
+                else {
                     console.log(rows);
                     resolve(rows || []);
-                } 
+                }
             });
         });
 
         // 4. คำนวณเกรดเฉลี่ย (GPA) ประจำเทอม
         let totalCredits = 0;
         let totalGradePoints = 0;
-        
+
         grades.forEach(record => {
             // เช็กว่ามีหน่วยกิตและเกรดไหม เพื่อป้องกันค่าว่าง
             const credit = parseFloat(record.credit) || 0;
             const grade = parseFloat(record.grade) || 0;
-            
+
             totalCredits += credit;
             totalGradePoints += (grade * credit);
         });
@@ -1278,10 +1278,10 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
         const termGPA = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : '0.00';
 
         // 5. ส่งข้อมูลทั้งหมดไปที่ EJS
-        res.render('Transcript', { 
-            user: req.user, 
-            student: student, 
-            grades: grades, 
+        res.render('Transcript', {
+            user: req.user,
+            student: student,
+            grades: grades,
             termGPA: termGPA,
             totalCredits: totalCredits,
             selectedTerm: selectedTerm,
@@ -1366,20 +1366,29 @@ app.post('/update/student/:id', uploads.single('profile_image'), (req, res) => {
     // 1. อัปเดตข้อมูลตัวหนังสือในตาราง Students
     const sqlUpdateStudent = `
         UPDATE Students SET 
-        first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, 
+        first_name = ?, last_name = ?, dob = ?, citizen_id = ?, sex = ?, student_id = ?,
         nationality = ?, phone = ?, email = ?, room_id = ?, 
         year = ?, semester = ?, enroll_year = ?
         WHERE rowid = ?
     `;
 
     const studentValues = [
-        data.firstname, data.lastname, data.dob, data.citizen_id, data.gender,
+        data.firstname, data.lastname, data.dob, data.citizen_id, data.gender, data.student_id,
         data.nationality, data.phone, data.email, data.room_id,
         data.year, data.semester, data.enroll_year, studentRowId
     ];
 
     db.run(sqlUpdateStudent, studentValues, function (err) {
-        if (err) return console.error(err.message);
+        if (err) {
+            console.error("Error detected:", err);
+            // ส่ง Script ไปที่หน้าจอ เพื่อให้ Alert และสั่งถอยกลับ (ข้อมูลในฟอร์มจะยังอยู่)
+            return res.send(`
+                <script>
+                    alert("เกิดข้อผิดพลาด: ${err.message}");
+                    window.history.back(); 
+                </script>
+            `);
+        }
 
         // 2. ถ้ามีการอัปโหลดรูปใหม่ ให้ไปอัปเดตที่ตาราง Users
         if (imageBuffer) {
@@ -1425,8 +1434,8 @@ app.get('/students', function (req, res) {
     });
 });
 app.post('/add/student', uploads.single('profile_image'), async (req, res) => {
+    const data = req.body;
     try {
-        const data = req.body;
         const imageBuffer = req.file ? req.file.buffer : null;
 
         // 1. สร้างบัญชีในตาราง Users
@@ -1483,8 +1492,14 @@ app.post('/add/student', uploads.single('profile_image'), async (req, res) => {
         res.redirect('/admin/record-stu');
 
     } catch (error) {
-        console.error('Unexpected Error:', error);
-        res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
+        console.error("Error detected:", error);
+        // ส่ง Script ไปที่หน้าจอ เพื่อให้ Alert และสั่งถอยกลับ (ข้อมูลในฟอร์มจะยังอยู่)
+        res.send(`
+        <script>
+            alert("เกิดข้อผิดพลาด: ${error.message}");
+            window.history.back(); 
+        </script>
+    `);
     }
 });
 app.get('/delete/student/:id', function (req, res) {
@@ -1597,8 +1612,14 @@ app.post('/add/teacher', uploads.single('profile_image'), async (req, res) => {
         res.redirect('/admin/record-teach');
 
     } catch (error) {
-        console.error('Unexpected Error:', error);
-        res.status(500).send("เกิดข้อผิดพลาด: " + error.message);
+        console.error("Error detected:", error);
+        // ส่ง Script ไปที่หน้าจอ เพื่อให้ Alert และสั่งถอยกลับ (ข้อมูลในฟอร์มจะยังอยู่)
+        res.send(`
+            <script>
+                alert("เกิดข้อผิดพลาด: ${error.message}");
+                window.history.back(); 
+            </script>
+        `);
     }
 });
 //กด edit
@@ -1610,8 +1631,17 @@ app.get('/edit/teacher/:id', function (req, res) {
         WHERE Teacher.rowid = ?`;
 
     db.get(query, [req.params.id], (err, row) => {
-        if (err) return res.send("เกิดข้อผิดพลาด: " + err.message);
-        if (!row) return res.send("ไม่พบข้อมูลนักเรียน");
+        if (err || !row) {
+            const errorMsg = err ? err.message : "ไม่พบข้อมูลที่ต้องการอัปเดต";
+            console.error("Error detected:", errorMsg);
+
+            return res.send(`
+                <script>
+                    alert("เกิดข้อผิดพลาด: ${errorMsg}");
+                    window.history.back(); 
+                </script>
+            `);
+        }
 
         let imageBase64 = null;
         if (row["profile_picture"]) {
@@ -1656,8 +1686,16 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
     ];
 
     db.run(sqlUpdateTeacher, teacherValues, function (err) {
-        if (err) return console.error(err.message);
-
+        if (err) {
+            console.error("Error detected:", error);
+            // ส่ง Script ไปที่หน้าจอ เพื่อให้ Alert และสั่งถอยกลับ (ข้อมูลในฟอร์มจะยังอยู่)
+            res.send(`
+            <script>
+                alert("เกิดข้อผิดพลาด: ${error.message}");
+                window.history.back(); 
+            </script>
+        `);
+        }
         // 2. ถ้ามีการอัปโหลดรูปใหม่ ให้ไปอัปเดตที่ตาราง Users
         if (imageBuffer) {
             // หา user_id จาก rowid ก่อน
@@ -1689,18 +1727,18 @@ app.get('/delete/teacher/:id', function (req, res) {
 
 //Manage Schedule Page
 
-app.get('/admin/manage-schedule',function(req,res){
+app.get('/admin/manage-schedule', function (req, res) {
 
     //---ส่วนจัดการตัวกรองปีและเทอม---
 
     //คำสั่งหาปีเก่าที่สุดในโรงเรียน
-    db.get(`SELECT MIN(year) as start_year FROM Year`,[],(err,row)=>{
+    db.get(`SELECT MIN(year) as start_year FROM Year`, [], (err, row) => {
 
         //เพื่อข้อมูลไม่มีใน database ใช่ค่าคงที่เอา
         let SCHOOL_START_YEAR = 2550;
 
         //เช็คว่าถ้ามีข้อมูลในdatabaseก็เอามาใช้
-        if(!err && row && row.start_year){
+        if (!err && row && row.start_year) {
             SCHOOL_START_YEAR = row.start_year;
         }
 
@@ -1710,17 +1748,17 @@ app.get('/admin/manage-schedule',function(req,res){
         const selectedSemester = parseInt(req.query.semester) || 1;
 
         //สร้างArray เก็บปีการศึกษาไว่
-        const years=[];
-        for (let y = currentYear; y >= SCHOOL_START_YEAR; y--){
+        const years = [];
+        for (let y = currentYear; y >= SCHOOL_START_YEAR; y--) {
             years.push(y);
         }
         //สร้างArray เก็บเทอม
-        const semesters = [1,2];
+        const semesters = [1, 2];
 
         //---ส่วนสร้างโครงสร้างของระดับชั้นและห้อง---
         const lockedRooms = [];
-        for (let grade = 1; grade <= 6; grade++){
-            for (let roomNum = 1; roomNum <= 3; roomNum++){
+        for (let grade = 1; grade <= 6; grade++) {
+            for (let roomNum = 1; roomNum <= 3; roomNum++) {
                 lockedRooms.push({
                     grade_level: grade,
                     room_name: `${grade}/${roomNum}`
@@ -1740,9 +1778,9 @@ app.get('/admin/manage-schedule',function(req,res){
                     LEFT JOIN Teacher t ON r.room_id = t.room_id
                     `;
 
-        db.all(sql, [selectedYear, selectedSemester], (err, dbRooms)=>{
-            if(err){
-                console.error("DB Error:",err.message);
+        db.all(sql, [selectedYear, selectedSemester], (err, dbRooms) => {
+            if (err) {
+                console.error("DB Error:", err.message);
             }
             //ถ้าดึงมาแล้วมีก็จะใช้ในข้อมูลในฐานข้อมูลและ แต่ไม่มี []
             const fetchedRooms = dbRooms || [];
@@ -1765,19 +1803,19 @@ app.get('/admin/manage-schedule',function(req,res){
                 };
             });
 
-            res.render('Manage-Schedule',{
-                rooms : displayRooms, years : years, semesters : semesters,
-                selectedYear : selectedYear, selectedSemester: selectedSemester
+            res.render('Manage-Schedule', {
+                rooms: displayRooms, years: years, semesters: semesters,
+                selectedYear: selectedYear, selectedSemester: selectedSemester
             });
         });
     });
 });
 
-app.get('/admin/manage-schedule/inside/new', function(req, res){
+app.get('/admin/manage-schedule/inside/new', function (req, res) {
     const { grade, room, year, semester } = req.query;
 
     const sqlCheck = `SELECT room_id FROM Rooms WHERE room_name = ? AND grade_level = ?`;
-    
+
     db.get(sqlCheck, [room, grade], (err, existingRoom) => {
         if (err) {
             console.error("Error checking room:", err.message);
@@ -1789,44 +1827,44 @@ app.get('/admin/manage-schedule/inside/new', function(req, res){
         }
 
         const sqlInsertRoom = `INSERT INTO Rooms (room_name, grade_level) VALUES(?, ?)`;
-        
-        db.run(sqlInsertRoom, [room, grade], function(err) {
+
+        db.run(sqlInsertRoom, [room, grade], function (err) {
             if (err) {
                 console.error("Error creating new room:", err.message);
                 return res.status(500).send("เกิดข้อผิดพลาดในการสร้างห้อง");
             }
-            
+
             const newRoomId = this.lastID;
             res.redirect(`/admin/manage-schedule/inside/${newRoomId}?year=${year}&semester=${semester}`);
         });
     });
 });
 
-app.get('/admin/manage-schedule/inside/:id',(req,res)=>{
+app.get('/admin/manage-schedule/inside/:id', (req, res) => {
     const roomId = req.params.id;
-    const {year, semester} = req.query;
+    const { year, semester } = req.query;
 
-    db.get(`SELECT * FROM Rooms WHERE room_id = ?`,[roomId], (err,room)=>{
-        if (err || !room){
+    db.get(`SELECT * FROM Rooms WHERE room_id = ?`, [roomId], (err, room) => {
+        if (err || !room) {
             return res.status(404).send("ไม่พบข้อมูลห้องเรียน");
         }
 
-        db.all(`SELECT * FROM Subjects WHERE grade_level = ?`,[room.grade_level], (err,subjects)=>{
-            if(err) subjects = []; //เพื่อยังไม่มีข้อมูล subject
+        db.all(`SELECT * FROM Subjects WHERE grade_level = ?`, [room.grade_level], (err, subjects) => {
+            if (err) subjects = []; //เพื่อยังไม่มีข้อมูล subject
 
             const sqlSchedule = `SELECT s.day, s.period, sub.subject_name
                                 FROM Schedule s
                                 JOIN Subjects sub ON s.subject_id = sub.subject_id
                                 WHERE s.room_id = ? AND s.year = ? AND s.semester = ?`;
-            
-            db.all(sqlSchedule,[roomId,year,semester],(err, schedules)=>{
+
+            db.all(sqlSchedule, [roomId, year, semester], (err, schedules) => {
                 if (err) schedules = [];
 
-                res.render('Manage-Schedule-Inside',{
+                res.render('Manage-Schedule-Inside', {
                     room: room,
                     subjects: subjects,
                     schedules: schedules,
-                    year:year,
+                    year: year,
                     semester: semester
                 });
             });
@@ -1834,31 +1872,31 @@ app.get('/admin/manage-schedule/inside/:id',(req,res)=>{
     });
 });
 
-app.post('/admin/manage-schedule/inside/add',(req,res)=>{
-    const {room_id, day, period, subject_id, year, semester} = req.body;
+app.post('/admin/manage-schedule/inside/add', (req, res) => {
+    const { room_id, day, period, subject_id, year, semester } = req.body;
 
     const sqlInsertSchedule = `INSERT INTO Schedule(room_id,day,period, subject_id,year,semester)
                                 VALUES(?,?,?,?,?,?)`;
 
-    db.run(sqlInsertSchedule,[room_id, day, period, subject_id, year, semester],(err)=>{
-        if (err){
-            console.error("Error adding schedule:",err.message);
+    db.run(sqlInsertSchedule, [room_id, day, period, subject_id, year, semester], (err) => {
+        if (err) {
+            console.error("Error adding schedule:", err.message);
             return res.status(500).send("เกิดข้อผิดพลาดในการเพิ่มวิชา");
         }
         res.redirect(`/admin/manage-schedule/inside/${room_id}?year=${year}&semester=${semester}`);
     });
 });
 
-app.post('/admin/manage-schedule/inside/delete',(req,res)=>{
-    const {room_id, day, period, year, semester} = req.body;
+app.post('/admin/manage-schedule/inside/delete', (req, res) => {
+    const { room_id, day, period, year, semester } = req.body;
 
-    const sqlDeleteSchedule =`
+    const sqlDeleteSchedule = `
         DELETE FROM Schedule
         WHERE room_id = ? AND day= ? AND period = ? AND year = ? AND semester = ?`;
 
-    db.run(sqlDeleteSchedule,[room_id, day, period, year, semester],(err)=>{
-        if (err){
-            console.error("Error deleting schedule:",err.message);
+    db.run(sqlDeleteSchedule, [room_id, day, period, year, semester], (err) => {
+        if (err) {
+            console.error("Error deleting schedule:", err.message);
             return res.status(500).send("เกิดข้อผิดพลาดในการลบวิชา");
         }
         res.redirect(`/admin/manage-schedule/inside/${room_id}?year=${year}&semester=${semester}`);
