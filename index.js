@@ -1674,13 +1674,13 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
     // 1. อัปเดตข้อมูลตัวหนังสือในตาราง Teacher
     const sqlUpdateTeacher = `
         UPDATE Teacher SET 
-        first_name = ?, last_name = ?,
+        first_name = ?, last_name = ?, teacher_id = ?
         email = ?, room_id = ? 
         WHERE rowid = ?
     `;
 
     const teacherValues = [
-        data.firstname, data.lastname,
+        data.firstname, data.lastname, data.teacher_id,
         data.email, data.room_id,
         teacherRowId
     ];
