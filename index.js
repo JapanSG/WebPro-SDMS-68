@@ -1687,11 +1687,11 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
 
     db.run(sqlUpdateTeacher, teacherValues, function (err) {
         if (err) {
-            console.error("Error detected:", error);
+            console.error("Error detected:", err);
             // ส่ง Script ไปที่หน้าจอ เพื่อให้ Alert และสั่งถอยกลับ (ข้อมูลในฟอร์มจะยังอยู่)
-            res.send(`
+            return res.send(`
             <script>
-                alert("เกิดข้อผิดพลาด: ${error.message}");
+                alert("เกิดข้อผิดพลาด: ${err.message}");
                 window.history.back(); 
             </script>
         `);
