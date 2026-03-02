@@ -1503,13 +1503,19 @@ app.post('/add/student', uploads.single('profile_image'), async (req, res) => {
     }
 });
 app.get('/delete/student/:id', function (req, res) {
-    const query = `DELETE FROM Students WHERE rowid = ${req.params.id}`;
+    const query = `SELECT user_id FROM Students WHERE student_id = ${req.params.id}`;
     db.all(query, (err, rows) => {
         if (err) {
             console.log(err.message);
         }
         console.log(rows);
-        res.redirect('/admin/record-stu');
+        const sql = `DELETE FROM Users WHERE user_id = ${rows[0].user_id}`;
+        db.run(sql,(err) => {
+            if (err) {
+            console.log(err.message);
+        }
+         res.redirect('/admin/record-stu');
+        })
     });
 });
 app.get('/admin/record-teach', function (req, res) {
@@ -1674,14 +1680,14 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
     // 1. อัปเดตข้อมูลตัวหนังสือในตาราง Teacher
     const sqlUpdateTeacher = `
         UPDATE Teacher SET 
-        first_name = ?, last_name = ?, teacher_id = ?
-        email = ?, room_id = ? 
+        first_name = ?, last_name = ?, teacher_id = ?,
+        email = ? , room_id = ? 
         WHERE rowid = ?
     `;
 
     const teacherValues = [
         data.firstname, data.lastname, data.teacher_id,
-        data.email, data.room_id,
+        data.email , data.room_id,
         teacherRowId
     ];
 
@@ -1715,13 +1721,19 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
     });
 });
 app.get('/delete/teacher/:id', function (req, res) {
-    const query = `DELETE FROM Teacher WHERE rowid = ${req.params.id}`;
+    const query = `SELECT user_id FROM Teacher WHERE teacher_id = ${req.params.id}`;
     db.all(query, (err, rows) => {
         if (err) {
             console.log(err.message);
         }
         console.log(rows);
-        res.redirect('/admin/record-teach');
+        const sql = `DELETE FROM Users WHERE user_id = ${rows[0].user_id}`;
+        db.run(sql,(err) => {
+            if (err) {
+            console.log(err.message);
+        }
+         res.redirect('/admin/record-teach');
+        })
     });
 });
 
@@ -1904,5 +1916,6 @@ app.post('/admin/manage-schedule/inside/delete', (req, res) => {
 });
 
 app.listen(port, () => {
+
     console.log("Server started.");
 });
