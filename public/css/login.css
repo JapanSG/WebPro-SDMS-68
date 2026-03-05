@@ -53,8 +53,8 @@ body {
     background-color: var(--white-color);
     width: 100%;
     max-width: 500px;
-    height: auto;
-    min-height: 634px;
+    height: 100%;
+    max-height: 680px;
     padding: 30px 20px;
     flex-direction: column;
     align-items: center;
@@ -63,12 +63,14 @@ body {
 
 .login-header {
     display: flex;
-    width: 100%;
+    width: 100%; 
+    max-width: 440px;
     padding: 10px;
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 10px;
+    text-align: center;
 }
 
 .login-header h1 {
@@ -79,11 +81,9 @@ body {
     margin: 10px;
 }
 .login-header p {
-    font-size: 16px;
+    font-size: 18px;
     width: 100%;
-    word-break: break-word;
-    line-height: 1.5;
-    margin: 0;
+    word-wrap: break-word;
 }
 .login-body {
     display: flex;
@@ -212,11 +212,10 @@ body {
 .main-content {
     width: 60%;
     height: 100vh;
-    padding-left: 60px;
+    padding-left: 5%;
     overflow: hidden;
     position: relative;
-    margin-right: 150px;
-
+    margin-right: 0;
 }
 
 
@@ -275,4 +274,88 @@ body {
     margin-top: 15px;
     padding-left: 140px;
     text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+
+@media screen and (max-width: 1280px) {
+    .main-content {
+        width: 55%;
+        padding-left: 40px;
+    }
+    .login-container {
+        width: 45%;
+    }
+    .text-group .title {
+        font-size: 3rem;
+    }
+    .title span {
+        font-size: 2.5rem;
+    }
+}
+
+
+@media screen and (max-width: 1024px) {
+    .container {
+        justify-content: center;
+    }
+    .main-content {
+        width: 50%;
+        padding-left: 30px;
+    }
+    .login-container {
+        width: 50%;
+    }
+    .text-group .title {
+        font-size: 2.5rem;
+    }
+    .title span {
+        font-size: 2.1rem;
+    }
+    .text-group .desc {
+        font-size: 1.5rem;
+        padding-left: 100px;
+    }
+    .main-image {
+        width: 100px;
+    }
+}
+
+
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        background: var(--primary-gradient);
+        overflow-y: auto;
+    }
+    
+    .main-content {
+        display: none;
+    }
+
+    .login-container {
+        width: 100%;
+        height: 100vh;
+        animation: fadeIn 1s ease-in;
+    }
+
+    .login {
+        width: 90%;
+        max-width: 400px;
+        min-height: auto;
+        padding: 40px 20px;
+        border-radius: 15px;
+    }
+
+    .login-header h1 {
+        font-size: 35px;
+    }
+
+    .login-header p {
+        font-size: 16px;
+    }
+
+    .login-btn {
+        font-size: 16px;
+    }
 }

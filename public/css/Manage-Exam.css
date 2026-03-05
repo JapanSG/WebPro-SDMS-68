@@ -1,15 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Noto+Sans+Thai:wght@100..900&display=swap');
 
+:root {
+    --primary-color: #1062D0;
+    --secondary-color: #0D4FA8;
+    --danger-color: #FF0000;
+    --background-color: #FFF;
+    --shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.25);
+    --transition: all 0.3s ease;
+}
+
 body {
     display: flex;
     flex-direction: column;
     height: 100%;
     justify-content: center;
     align-items: center;
+    font-family: "Noto Sans Thai", sans-serif;
+    background-color: #f5f5f5; /* Added subtle background */
 }
 
 select, button, input {
     font-family: "Noto Sans Thai", sans-serif;
+    transition: var(--transition); /* Added transition */
 }
 
 label {
@@ -19,12 +31,16 @@ label {
 table {
     border-collapse: collapse;
     justify-content: space-around;
+    width: 100%;
+    overflow-x: auto; /* Added for responsiveness */
+    display: block; /* Allows horizontal scroll on small screens */
 }
 
 th {
-    background-color: #1062D0;
+    background-color: var(--primary-color);
     color: white;
-
+    position: sticky; /* Keeps headers visible on scroll */
+    top: 0;
 }
 
 td {
@@ -42,20 +58,28 @@ button {
     width: fit-content;
     padding: 0.5em 1em;
     cursor: pointer;
+    border-radius: 10px;
+    transition: var(--transition); /* Added hover effect */
+}
+
+button:hover {
+    transform: scale(1.05); /* Slight zoom on hover */
 }
 
 select {
     padding: 0.25em 0.7em;
     cursor: pointer;
+    border-radius: 5px;
 }
 
 th:nth-last-child(1), td:nth-last-child(1) {
     width: 1%;
-    white-space:nowrap;
+    white-space: nowrap;
 }
 
 .addExamPopup {
     display: flex;
+    animation: fadeIn 0.5s ease; /* Added fade-in animation */
 }
 
 .exam-form {
@@ -63,8 +87,10 @@ th:nth-last-child(1), td:nth-last-child(1) {
     flex-direction: column;
     gap: 20px;
     padding: 20px;
-    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow);
     width: 100%;
+    background-color: var(--background-color);
+    border-radius: 10px; /* Added for better look */
 }
 
 .date {
@@ -74,7 +100,7 @@ th:nth-last-child(1), td:nth-last-child(1) {
     align-items: center;
     border-radius: 10px;
     border: 1px solid #000;
-    background: #FFF;
+    background: var(--background-color);
     padding: 0.2em 0.5em;
     height: 100%;
     gap: 1em;
@@ -91,6 +117,7 @@ th:nth-last-child(1), td:nth-last-child(1) {
     background-color: rgba(0, 0, 0, 0.5);
     width: 100%;
     height: 100%;
+    animation: fadeIn 0.5s ease; /* Added fade-in */
 }
 
 #normalLayer {
@@ -100,6 +127,7 @@ th:nth-last-child(1), td:nth-last-child(1) {
     align-items: center;
     gap: 20px;
     width: 85%;
+    max-width: 1200px; /* Added max-width for large screens */
 }
 
 #topForm {
@@ -107,26 +135,29 @@ th:nth-last-child(1), td:nth-last-child(1) {
     width: 100%;
     margin-top: 20px;
     padding: 11px 20px;
-    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow);
     align-items: center;
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
+    background-color: var(--background-color);
+    border-radius: 10px;
 }
 
 .top-box {
     display: flex;
     gap: 20px;
     align-items: center;
+    flex-wrap: wrap; /* Allows wrapping */
 }
 
 #addExam, #viewExam {
     display: flex;
     border-radius: 10px;
-    border: 1px solid #0D4FA8;
-    background-color: white;
+    border: 1px solid var(--secondary-color);
+    background-color: var(--background-color);
     font-weight: bold;
-    color: #0D4FA8;
+    color: var(--secondary-color);
     align-items: center;
     gap: 0.5em;
 }
@@ -139,16 +170,16 @@ th:nth-last-child(1), td:nth-last-child(1) {
 
 #deleteAll {
     border-radius: 10px;
-    border: 1px solid #FF0000;
-    background-color: white;
+    border: 1px solid var(--danger-color);
+    background-color: var(--background-color);
     font-weight: bold;
-    color: #FF0000;
+    color: var(--danger-color);
 }
 
 .deleteExam {
     border-radius: 10px;
     border: none;
-    background-color: #FF0000;
+    background-color: var(--danger-color);
     font-weight: bold;
     color: white;
     width: 100%;
@@ -171,28 +202,35 @@ th:nth-last-child(1), td:nth-last-child(1) {
 .addEntry {
     border-radius: 10px;
     border: none;
-    background-color: #1062D0;
+    background-color: var(--primary-color);
     font-weight: bold;
     color: white;
     width: fit-content;
-    padding:  1em;
+    padding: 1em;
 }
 
-.deleteEntry, .editEntry, .editDate{
+.deleteEntry, .editEntry, .editDate {
     background-color: transparent;
     border: none;
     padding: 0;
+    transition: var(--transition);
 }
+
+.deleteEntry:hover, .editEntry:hover, .editDate:hover {
+    opacity: 0.7; /* Added hover effect */
+}
+
 .addExamPopup, .addEntryPopup, .editEntryPopup, .deleteWarningPopup, .editDatePopup {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    background-color: white;
+    background-color: var(--background-color);
     padding: 1.5em;
     border-radius: 5px;
     width: 100%;
     min-width: 400px;
     max-width: fit-content;
+    box-shadow: var(--shadow);
 }
 
 .popupBtns {
@@ -213,7 +251,7 @@ th:nth-last-child(1), td:nth-last-child(1) {
     border-radius: 10px;
     max-width: 6em;
     border: none;
-    background-color: #FF0000;
+    background-color: var(--danger-color);
     color: white;
     padding: 0.5em 1em;
     cursor: pointer;
@@ -223,7 +261,7 @@ th:nth-last-child(1), td:nth-last-child(1) {
     border-radius: 10px;
     max-width: 6em;
     border: none;
-    background-color: #1062D0;
+    background-color: var(--primary-color);
     color: white;
     padding: 0.5em 1em;
     cursor: pointer;
@@ -240,3 +278,65 @@ th:nth-last-child(1), td:nth-last-child(1) {
     height: 100%;
     aspect-ratio: 1 / 1;
 }
+
+/* Keyframes for animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    #normalLayer {
+        width: 95%;
+        gap: 15px;
+    }
+    #topForm {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+    }
+    .top-box {
+        justify-content: center;
+        gap: 15px;
+    }
+    .exam-form {
+        padding: 15px;
+        gap: 15px;
+    }
+    table {
+        font-size: 0.9em;
+    }
+    .addExamPopup, .addEntryPopup, .editEntryPopup, .deleteWarningPopup, .editDatePopup {
+        min-width: 300px;
+        padding: 1em;
+    }
+    .popupBtns {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    #topForm {
+        padding: 10px;
+    }
+    .exam-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .date {
+        flex-direction: column;
+        text-align: center;
+    }
+    table {
+        font-size: 0.8em;
+    }
+    button {
+        padding: 0.4em 0.8em;
+    }
+}
+/* ...existing code... */

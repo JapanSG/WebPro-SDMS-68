@@ -18,6 +18,11 @@ let db = new sqlite3.Database('school.db', (err) => {
     if (err) {
         return console.error(err.message);
     }
+    db.run("PRAGMA foreign_keys = ON;", (err) => {
+        if (err) {
+            console.log("Failed to turn on foreign key check");
+        }
+    })
     console.log('Connected to the SQlite database.');
 });
 
@@ -426,16 +431,20 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
 
 app.get('/student/attendance_history', (req, res) => {
-    const targetYear = req.query.year;
     const studentId = req.query.student_id;
 
 
-    if (!targetYear) {
-        return res.status(400).json({ error: 'กรุณาระบุปีที่ต้องการ' });
+    if (!studentId) {
+        return res.status(400).json({ error: 'ไม่พบข้อมูลนักเรียน' });
     }
 
-    const sql = `SELECT * FROM Attendance WHERE student_id = ? AND date LIKE ?`;
-    const params = [studentId, `${targetYear}-%`];
+    const sql = `
+        SELECT * FROM Attendance 
+        WHERE student_id = ? 
+        ORDER BY date DESC 
+        LIMIT 7
+    `;
+    const params = [studentId];
 
     db.all(sql, params, (err, rows) => {
         if (err) {
@@ -687,10 +696,12 @@ app.get('/admin/exam-schedule', (req, res) => {
                 dates.push(exam.date);
             });
             const sql3 = `
-            SELECT entry_id, start, end, subject_id, exam_id
+            SELECT entry_id, start, end, subject_id, exam_id, subject_name
             FROM Exam_Schedule_Entries 
             JOIN EXAM_Schedule
             USING (exam_id)
+            JOIN Subjects
+            USING (subject_id)
             WHERE exam_id IN (${exam_ids.map(() => '?').join(',')})
             ORDER BY date;`;
             db.all(sql3, exam_ids, (err, result2) => {
@@ -1149,7 +1160,7 @@ app.get('/teacher/grade', (req, res) => {
 });
 
 function updateGrade(student_id, value, subject, res) {
-    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year);`
+    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year) AND semester = (SELECT semester FROM Students WHERE student_id = ${student_id});`
     value = value.trim();
     db.get(checkSQL, (err, result) => {
         if (err) {
@@ -1170,7 +1181,7 @@ function updateGrade(student_id, value, subject, res) {
             });
         }
         else {
-            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT max(year) FROM Year), ${subject}, ${value})`;
+            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, semester, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT semester FROM Students WHERE student_id = ${student_id}), (SELECT max(year) FROM Year), ${subject}, ${value})`;
             db.run(sql, (err) => {
                 if (err) {
                     console.error(err.message);
@@ -1433,7 +1444,17 @@ app.get('/students', function (req, res) {
         });
     });
 });
+// ฟังก์ชันช่วยรัน SQL แบบรอผล (Promise)
+const runSQL = (sql, params) => {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function (err) {
+            if (err) reject(err);
+            else resolve(this);
+        });
+    });
+};
 app.post('/add/student', uploads.single('profile_image'), async (req, res) => {
+    let newUserId = null;
     const data = req.body;
     try {
         const imageBuffer = req.file ? req.file.buffer : null;
@@ -1446,17 +1467,7 @@ app.post('/add/student', uploads.single('profile_image'), async (req, res) => {
             return res.status(500).send("ไม่สามารถสร้างบัญชีผู้ใช้ได้: " + accountResult.error);
         }
 
-        const newUserId = accountResult.user.id;
-
-        // ฟังก์ชันช่วยรัน SQL แบบรอผล (Promise)
-        const runSQL = (sql, params) => {
-            return new Promise((resolve, reject) => {
-                db.run(sql, params, function (err) {
-                    if (err) reject(err);
-                    else resolve(this);
-                });
-            });
-        };
+        newUserId = accountResult.user.id;
 
         // 2. ถ้ามีรูปภาพ ให้อัปเดตไปที่ตาราง Users และรอจนเสร็จ (ใช้ await)
         if (imageBuffer) {
@@ -1494,6 +1505,8 @@ app.post('/add/student', uploads.single('profile_image'), async (req, res) => {
     } catch (error) {
         console.error("Error detected:", error);
         // ส่ง Script ไปที่หน้าจอ เพื่อให้ Alert และสั่งถอยกลับ (ข้อมูลในฟอร์มจะยังอยู่)
+        await runSQL(`DELETE FROM Users WHERE user_id = ?`, [newUserId]);
+        console.log(`ลบนักเรียนสำเร็จ: ${newUserId}`);
         res.send(`
         <script>
             alert("เกิดข้อผิดพลาด: ${error.message}");
@@ -1503,13 +1516,22 @@ app.post('/add/student', uploads.single('profile_image'), async (req, res) => {
     }
 });
 app.get('/delete/student/:id', function (req, res) {
-    const query = `DELETE FROM Students WHERE rowid = ${req.params.id}`;
+    const query = `SELECT user_id FROM Students WHERE student_id = ${req.params.id}`;
     db.all(query, (err, rows) => {
         if (err) {
             console.log(err.message);
         }
         console.log(rows);
-        res.redirect('/admin/record-stu');
+        const sql = `DELETE FROM Users WHERE user_id = ${rows[0].user_id}`;
+        db.run(sql, (err) => {
+            if (err) {
+                console.log(err.message);
+            }
+            db.get("PRAGMA foreign_keys;", (err, res) => {
+                console.log(res);
+            })
+            res.redirect('/admin/record-stu');
+        })
     });
 });
 app.get('/admin/record-teach', function (req, res) {
@@ -1554,6 +1576,7 @@ app.get('/teachers', function (req, res) {
 });
 
 app.post('/add/teacher', uploads.single('profile_image'), async (req, res) => {
+    let newUserId = null;
     try {
         const data = req.body;
         const imageBuffer = req.file ? req.file.buffer : null;
@@ -1567,17 +1590,7 @@ app.post('/add/teacher', uploads.single('profile_image'), async (req, res) => {
             return res.status(500).send("ไม่สามารถสร้างบัญชีผู้ใช้ได้: " + accountResult.error);
         }
 
-        const newUserId = accountResult.user.id;
-
-        // ฟังก์ชันช่วยรัน SQL แบบรอผล (Promise)
-        const runSQL = (sql, params) => {
-            return new Promise((resolve, reject) => {
-                db.run(sql, params, function (err) {
-                    if (err) reject(err);
-                    else resolve(this);
-                });
-            });
-        };
+        newUserId = accountResult.user.id;
 
         // 2. ถ้ามีรูปภาพ ให้อัปเดตไปที่ตาราง Users และรอจนเสร็จ (ใช้ await)
         if (imageBuffer) {
@@ -1613,6 +1626,8 @@ app.post('/add/teacher', uploads.single('profile_image'), async (req, res) => {
 
     } catch (error) {
         console.error("Error detected:", error);
+        await runSQL(`DELETE FROM Users WHERE user_id = ?`, [newUserId]);
+        console.log(`ลบคุณครูสำเร็จ: ${newUserId}`);
         // ส่ง Script ไปที่หน้าจอ เพื่อให้ Alert และสั่งถอยกลับ (ข้อมูลในฟอร์มจะยังอยู่)
         res.send(`
             <script>
@@ -1674,8 +1689,8 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
     // 1. อัปเดตข้อมูลตัวหนังสือในตาราง Teacher
     const sqlUpdateTeacher = `
         UPDATE Teacher SET 
-        first_name = ?, last_name = ?, teacher_id = ?
-        email = ?, room_id = ? 
+        first_name = ?, last_name = ?, teacher_id = ?,
+        email = ? , room_id = ? 
         WHERE rowid = ?
     `;
 
@@ -1715,13 +1730,20 @@ app.post('/update/teacher/:id', upload.single('profile_image'), (req, res) => {
     });
 });
 app.get('/delete/teacher/:id', function (req, res) {
-    const query = `DELETE FROM Teacher WHERE rowid = ${req.params.id}`;
+    const query = `SELECT user_id FROM Teacher WHERE teacher_id = ${req.params.id}`;
     db.all(query, (err, rows) => {
         if (err) {
             console.log(err.message);
         }
         console.log(rows);
-        res.redirect('/admin/record-teach');
+        const sql = `DELETE FROM Users WHERE user_id = ${rows[0].user_id};`;
+        console.log(sql);
+        db.run(sql, (err) => {
+            if (err) {
+                console.log(err.message);
+            }
+            res.redirect('/admin/record-teach');
+        });
     });
 });
 
@@ -1874,8 +1896,9 @@ app.get('/admin/manage-schedule/inside/:id', (req, res) => {
 
 app.post('/admin/manage-schedule/inside/add', (req, res) => {
     const { room_id, day, period, subject_id, year, semester } = req.body;
+    console.log(req.body);
 
-    const sqlInsertSchedule = `INSERT INTO Schedule(room_id,day,period, subject_id,year,semester)
+    const sqlInsertSchedule = `INSERT INTO Schedule(room_id, day, period, subject_id, year, semester)
                                 VALUES(?,?,?,?,?,?)`;
 
     db.run(sqlInsertSchedule, [room_id, day, period, subject_id, year, semester], (err) => {
@@ -1902,7 +1925,34 @@ app.post('/admin/manage-schedule/inside/delete', (req, res) => {
         res.redirect(`/admin/manage-schedule/inside/${room_id}?year=${year}&semester=${semester}`);
     });
 });
-
+app.get('/teacher/record-stu', (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit; // ต้องข้ามกี่คน
+    let whereSQL = '';
+    const search = req.query.search || '';
+    if (search !== '') { // ดูว่ามีคำค้นหา
+        whereSQL = `WHERE student_id LIKE '%${search}%' OR first_name LIKE '%${search}%'`;
+    }
+    const query = `SELECT Students.rowid, * FROM Students JOIN Users ON Students.user_id = Users.user_id ${whereSQL} LIMIT ${limit} OFFSET ${offset}`;
+    const count = `SELECT COUNT(*) AS total FROM Students ${whereSQL}`;
+    db.get(count, (err, count_all) => {
+        if (err) {
+            console.log(err.message);
+        }
+        const totals = count_all ? count_all.total : 0;
+        const totalPages = Math.ceil(totals / limit);
+        db.all(query, (err, rows) => {
+            if (err) {
+                console.log(err.message);
+            }
+            res.render('View-Student', { totalPeople: totals, students: rows, currentPage: page, totalPages: totalPages, searchKeyword: search });
+        });
+    });
+});
 app.listen(port, () => {
+    // db.get("PRAGMA foreign_keys = ON;", (err, res) => {
+    //     console.log(res);
+    // })
     console.log("Server started.");
 });

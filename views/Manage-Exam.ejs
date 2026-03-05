@@ -16,7 +16,7 @@
                 <label for="year">ปีการศึกษา</label>
                 <select id="year" name="year">
                     <% year.forEach( val => {%>
-                        <option value="<%= val.year %>"><%= val.year %></option>
+                        <option value="<%= val.year %>" <% if (query.year == val.year) { %>selected<% } %>><%= val.year %></option>
                     <% }); %>
                 </select>
                 <label for="semester">ภาคเรียนที่</label>
@@ -44,7 +44,7 @@
             </div>
         </form>
         <% exam_ids.forEach( (exam_id, index) => { %>
-            <%- include('Manage-Exam-Form', {exam_id: exam_id, entries: entries[exam_id], date: dates[index] }) %>
+            <%- include('Manage-Exam-Form.ejs', {exam_id: exam_id, entries: entries[exam_id], date: dates[index]}) %>
         <% }); %>
     </div>
     <script src="/script/Manage-Exam.js"></script>
