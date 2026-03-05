@@ -14,7 +14,7 @@
         <div id="search_add">
             <div id="search">
                 <img src="/images/icons/Search.svg" alt="glass" id="search-button">
-                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อนักเรียน"
+                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อนักเรียนหรือรหัสประจำตัวนักเรียน"
                     value="<%= locals.searchKeyword || '' %>">
             </div>
             <div id="add_btn">
@@ -34,6 +34,7 @@
                 <th>อีเมล</th>
                 <th>ปีที่เข้า</th>
                 <th>ชื่อผู้ใช้งาน</th>
+                <th></th>
             </tr>
             <% students.forEach((student)=>{ %>
                 <tr>

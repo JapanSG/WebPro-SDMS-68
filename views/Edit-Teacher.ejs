@@ -44,13 +44,13 @@
                     <label>นามสกุล</label>
                     <input type="text" name="lastname" value="<%= data.last_name %>" required>
 
-                <div id="right_col">
+                
 
                     <label>เบอร์โทรศัพท์</label>
                     <input type="text" name="phone" value="<%= data.phone %>">
 
-                    <label>รหัสประจำตัวนักเรียน</label>
-                    <input type="text" name="student_id" value="<%= data.teacher_id %>">
+                    <label>รหัสประจำตัวคุณครู</label>
+                    <input type="text" name="teacher_id" value="<%= data.teacher_id %>">
                     <label>อีเมล</label>
                     <input type="email" name="email" value="<%= data.email %>">
 
@@ -64,12 +64,12 @@
                                 <% }); %>
                         </select>
                         </select>
+                <div id="submit_area">
+                    <button type="submit" id="save_btn">แก้ไข</button>
                 </div>
             </div>
 
-            <div id="submit_area">
-                <button type="submit" id="save_btn">แก้ไข</button>
-            </div>
+            
         </form>
     </div>
 
