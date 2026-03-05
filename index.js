@@ -299,7 +299,7 @@ app.post('/ao/submit/save', checkAuthenticated, checkRole('ao'), (req, res) => {
 // Attendance Page
 
 // =====================================================================
-// [GET] หน้าเว็บสำหรับดูประวัติการเข้าเรียน (Attendance)
+// [GET] หน้าเว็บสำหรับดูประวัติการเข้าเรียน (Attendance) แบบรายเดือน
 // =====================================================================
 app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (req, res) => {
     try {
@@ -326,10 +326,13 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         // ==========================================
         // 2. ระบบ FILTER (ค้นหารายเดือน แบบอิสระ)
         // ==========================================
+        // ==========================================
+        // 2. ระบบ FILTER (ค้นหารายเดือน แบบอิสระ)
+        // ==========================================
         const today = new Date();
+        const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); 
         const currentYear = today.getFullYear().toString(); // ค.ศ.
         // ทำให้เดือนเป็น 2 หลักเสมอ เช่น '03', '12'
-        const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); 
 
         // รับค่า ปี และ เดือน จาก Dropdown (ถ้าเปิดมาครั้งแรกให้โชว์เดือนปัจจุบัน)
         const selectedYear = req.query.year || currentYear;
@@ -337,6 +340,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
         // แปลงเป็นช่วงวันที่ เช่น '2026-03-01' ถึง '2026-03-31'
         const startDate = `${selectedYear}-${selectedMonth}-01`;
+        
         // ทริค: หาวันสุดท้ายของเดือนนั้นๆ อัตโนมัติ (เผื่อกุมภาพันธ์มี 28 หรือ 29 วัน)
         const lastDayOfMonth = new Date(selectedYear, parseInt(selectedMonth), 0).getDate();
         const endDate = `${selectedYear}-${selectedMonth}-${lastDayOfMonth}`;
@@ -364,7 +368,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             if (record.status === 'Personal Leave') summary.personal_leave++;
         });
 
-        // 5. เตรียมข้อมูลให้ Chart.js (โชว์กราฟรายวัน 1-31 ของเดือนนั้น)
+        // 5. เตรียมข้อมูลให้ Chart.js (โชว์กราฟรายวัน 1 ถึงวันสุดท้ายของเดือน)
         const chartData = { labels: [], present: [], late: [], absent: [], personal_leave: [] };
         
         for (let d = 1; d <= lastDayOfMonth; d++) {
@@ -374,7 +378,7 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             const dateStr = `${selectedYear}-${selectedMonth}-${d.toString().padStart(2, '0')}`;
             const record = attendanceHistory.find(r => r.date === dateStr);
 
-            // ถ้าวันนั้นมาเรียน ใส่ 1 ถ้าไม่มา ใส่ 0
+            // ถ้าวันนั้นมาเรียน ใส่ 1 ถ้าไม่มา ใส่ 0 (เพื่อตีกราฟแท่งสูงระดับ 1)
             chartData.present.push(record && record.status === 'Present' ? 1 : 0);
             chartData.late.push(record && record.status === 'Late' ? 1 : 0);
             chartData.absent.push(record && record.status === 'Absent' ? 1 : 0);
@@ -388,11 +392,13 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         }
 
         // 6. ส่งข้อมูลทั้งหมดไปที่ EJS
+        // 6. ส่งข้อมูลทั้งหมดไปที่ EJS
         res.render('attendance', {
             user: req.user,
             student: student,
             attendance: attendanceHistory,
             summary: summary,
+            selectedMonth: selectedMonth, 
             selectedMonth: selectedMonth, 
             selectedYear: selectedYear,
             availableYears: availableYears,
@@ -401,13 +407,9 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
     } catch (error) {
         console.error("Database Error:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลประวัติการเข้าเรียน");
     }
 });
-
-
-
-
 
 
 app.get('/student/attendance_history', (req, res) => {
@@ -1190,7 +1192,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
     try {
         const userId = req.user.user_id;
 
-        // 1. ดึงข้อมูลประวัตินักเรียน (เพื่อเอาไปแสดง Header)
+        // 1. ดึงข้อมูลนักเรียน
         const sqlStudent = `
             SELECT s.student_id, s.first_name, s.last_name, s.year, s.room_id, s.enroll_year, r.room_name, r.grade_level
             FROM Students s
@@ -1204,26 +1206,25 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
             });
         });
 
-        // ถ้าหาเด็กไม่เจอให้แจ้ง Error
-        if (!student) return res.status(404).send('ไม่พบข้อมูลนักเรียนในระบบ');
+        if (!student) return res.status(404).send('ไม่พบข้อมูลนักเรียน');
 
         // ==========================================
-        // 2. จัดการตัวกรองแบบอิสระ (ไม่ล็อคตามปฏิทิน)
+        // 2. จัดการตัวกรอง (ใช้ปี ค.ศ. ปกติ ไม่ล็อคตามปฏิทินการศึกษา)
         // ==========================================
-        const currentYear = new Date().getFullYear(); // ปี ค.ศ. ปัจจุบัน (เช่น 2026)
+        const currentYear = new Date().getFullYear(); // ได้ปีปัจจุบันตรงๆ เช่น 2026
 
-        // รับค่าตัวกรองจาก URL (ถ้าเพิ่งกดเข้าเมนูมาครั้งแรก ให้ Default เป็นปีปัจจุบัน และ เทอม 1)
-        const selectedTerm = req.query.term || '1';
+        // รับค่าตัวกรองจาก URL (ถ้าเข้าเว็บครั้งแรก ให้เป็นปีปัจจุบัน เทอม 1)
         const selectedYear = req.query.year || currentYear.toString();
+        const selectedTerm = req.query.term || '1'; 
 
-        // สร้าง Array ปีการศึกษาให้ Dropdown เลือกย้อนหลังได้ 5 ปี และเดินหน้า 1 ปี
+        // สร้างรายการปีให้เลือก (ย้อนหลัง 5 ปี เดินหน้า 1 ปี)
         const availableYears = [];
         for (let y = currentYear - 5; y <= currentYear + 1; y++) {
             availableYears.push(y);
         }
 
         // ==========================================
-        // 3. ดึงข้อมูลเกรดของเทอมและปีที่เลือก 
+        // 3. ดึงข้อมูลเกรด
         // ==========================================
         const sqlGrades = `
             SELECT 
@@ -1237,7 +1238,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
         `;
 
         const grades = await new Promise((resolve, reject) => {
-            // หมายเหตุ: ใน Database เราเก็บปีเป็น พ.ศ. เลยต้องเอา selectedYear (ค.ศ.) + 543 ก่อนเอาไปค้นหา
+            // ในฐานข้อมูลเป็น พ.ศ. เลยเอา selectedYear (ค.ศ.) มา + 543
             db.all(sqlGrades, [student.student_id, parseInt(selectedYear) + 543, selectedTerm], (err, rows) => {
                 if (err) reject(err);
                 else resolve(rows || []);
@@ -1245,7 +1246,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
         });
 
         // ==========================================
-        // 4. คำนวณเกรดเฉลี่ย (GPA) ประจำเทอม
+        // 4. คำนวณเกรดเฉลี่ย (GPA)
         // ==========================================
         let totalCredits = 0;
         let totalGradePoints = 0;
@@ -1258,10 +1259,9 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
             totalGradePoints += (grade * credit);
         });
 
-        // ถ้ามีการลงทะเบียนเรียน (หน่วยกิต > 0) ให้คำนวณ GPA ทศนิยม 2 ตำแหน่ง
         const termGPA = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : '0.00';
 
-        // 5. ส่งข้อมูลทั้งหมดแพ็คใส่กล่องไปให้ไฟล์ EJS
+        // 5. ส่งข้อมูลไปที่ EJS
         res.render('Transcript', {
             user: req.user,
             student: student,
