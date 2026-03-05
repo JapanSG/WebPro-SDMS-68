@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/manage_stu.css">
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body>
+    <%- include('Menu-Teacher') %>
+        <div id="search_add">
+            <div id="search">
+                <img src="/images/icons/Search.svg" alt="glass" id="search-button">
+                <input type="text" name="search" id="search_bar" placeholder="ค้นหารายชื่อนักเรียนหรือรหัสประจำตัวนักเรียน"
+                    value="<%= locals.searchKeyword || '' %>">
+            </div>
+        </div>
+        <table id="student_records">
+            <tr id="first_head">
+                <th>รหัสประจำตัวนักเรียน</th>
+                <th>ชื่อ</th>
+                <th>เพศ</th>
+                <th>สัญชาติ</th>
+                <th>เบอร์โทรศัพท์</th>
+                <th>อีเมล</th>
+                <th>ปีที่เข้า</th>
+                <th>ชื่อผู้ใช้งาน</th>
+            </tr>
+            <% students.forEach((student)=>{ %>
+                <tr>
+                    <td>
+                        <%=student.student_id%>
+                    </td>
+                    <td>
+                        <%=student.first_name%>
+                            <%=student.last_name%>
+                    </td>
+                    <td>
+                        <%=student.sex%>
+                    </td>
+                    <td>
+                        <%=student.nationality%>
+                    </td>
+                    <td>
+                        <%=student.phone%>
+                    </td>
+                    <td>
+                        <%=student.email%>
+                    </td>
+                    <td>
+                        <%=student.enroll_year%>
+                    </td>
+                    <td>
+                        <%=student.username%>
+                    </td>
+                </tr>
+
+                <% }); %>
+        </table>
+        <footer>
+            <% const rowsPerPage=10; %>
+                <% const totalPages=Math.ceil(totalPeople / rowsPerPage); %>
+                    <div id="next_page_and_back">
+                        <a href="/teacher/home">
+                            <button id="back">กลับ</button>
+                        </a>
+                        <div id="num-button">
+                            <button id="page-back">&lt;</button>
+
+                            <% for(let i=1; i <=totalPages; i++) { %>
+                                <button class="page" id="<%= i %>">
+                                    <%= i %>
+                                </button>
+                                <% } %>
+
+                                    <button id="page-next">&gt;</button>
+                        </div>
+                        <div></div>
+
+                    </div>
+        </footer>
+        <script>
+            // ดึงค่าหน้าที่กำลังเปิดอยู่ และหน้าทั้งหมดจาก EJS มาให้ JavaScript รู้จัก
+            const currentPage = parseInt("<%= currentPage %>") || 1;
+            const totalPages = parseInt("<%= totalPages %>") || 1;
+            const searchKeyword = "<%= locals.searchKeyword || '' %>";
+            const searchParam = searchKeyword ? `&search=${searchKeyword}` : "";
+
+            const img = document.getElementById('search-button');
+            img.addEventListener('click', function () {
+                const keyword = document.getElementById('search_bar').value;
+                window.location.href = `/teacher/record-stu/?search=${keyword}&page=1`;
+            });
+
+            // 1. กดเลขหน้า
+            const pageButtons = document.querySelectorAll('.page');
+            pageButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    window.location.href = `/teacher/record-stu/?${searchParam}page=${this.id}`;
+                });
+            });
+
+            // 2. กดปุ่มลูกศรซ้าย (ย้อนกลับ)
+            const prevBtn = document.getElementById('page-back');
+            if (prevBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
+                prevBtn.addEventListener('click', function () {
+                    if (currentPage > 1) {
+                        window.location.href = `/teacher/record-stu/?page=${currentPage - 1}${searchParam}`;
+                    }
+                });
+            }
+
+            // 3. กดปุ่มลูกศรขวา (ถัดไป)
+            const nextBtn = document.getElementById('page-next');
+            if (nextBtn !== null) { // เช็คก่อนว่ามีปุ่มไหม
+                nextBtn.addEventListener('click', function () {
+                    if (currentPage < totalPages) {
+                        window.location.href = `/teacher/record-stu/?page=${currentPage + 1}${searchParam}`;
+                    }
+                });
+            }
+
+            const searchBar = document.getElementById('search_bar');
+            searchBar.addEventListener('keypress', function (e) {
+                // ถ้าผู้ใช้พิมพ์เสร็จแล้วกดปุ่ม Enter (บนคีย์บอร์ด)
+                if (e.key === 'Enter') {
+                    const keyword = this.value;
+                    // บังคับเปลี่ยน URL และให้กลับไปเริ่มที่หน้า 1 เสมอ
+                    window.location.href = `/teacher/record-stu/?search=${keyword}&page=1`;
+                }
+            });
+
+        </script>
+</body>
+
+</html>
