@@ -31,7 +31,7 @@
                         <td>
                             <% let value = "" %>
                             <% if (grades[`${student.student_id}`]) {value = grades[`${student.student_id}`].grade} %>
-                            <input type="number" value="<%= value %>" name="<%= student.student_id %>" class="grade-field">
+                            <input type="number" value="<%= value %>" name="<%= student.student_id %>" class="grade-field" min="0" max="4">
                         </td>
                     </tr>
                 <% }); %>
