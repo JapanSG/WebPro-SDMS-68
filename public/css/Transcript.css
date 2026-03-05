@@ -1,4 +1,6 @@
-/* กำหนดตัวแปรสีหลัก */
+/* ==========================================
+   1. ตัวแปรสีหลัก (Variables)
+   ========================================== */
 :root {
     --primary-blue: #0f4c81;
     --secondary-blue: #1e3a8a;
@@ -17,24 +19,26 @@ body {
 
 .container {
     max-width: 1000px;
-    margin: 2rem auto;
+    margin: 6rem auto 2rem; /* ดันลงมาไม่ให้ชนเมนูด้านบน */
     padding: 0 1rem;
 }
 
-/* --------------------
-   ส่วนของการ์ด (Card)
--------------------- */
+/* ==========================================
+   2. การ์ดพื้นฐาน (Cards)
+   ========================================== */
 .card {
     background-color: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03), 0 4px 10px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
     padding: 1.5rem 2rem;
     margin-bottom: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* --------------------
-   ส่วนโปรไฟล์ (Profile)
--------------------- */
+/* ==========================================
+   3. โปรไฟล์ (Profile)
+   ========================================== */
 .profile-info {
     display: flex;
     align-items: center;
@@ -42,47 +46,85 @@ body {
 }
 
 .avatar {
-    width: 75px;
-    height: 75px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #e5e7eb;
+    border: 3px solid #e5e7eb;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-.profile-text h2 { margin: 0 0 0.25rem 0; font-size: 1.5rem; }
-.profile-text p { margin: 0; font-size: 1rem; color: var(--text-muted); }
+.profile-text h2 { 
+    margin: 0 0 0.25rem 0; 
+    font-size: 1.5rem; 
+    color: #111827;
+}
 
-/* --------------------
-   ส่วน Layout ตัวกรอง & เกรดเฉลี่ย
--------------------- */
+.profile-text p { 
+    margin: 0; 
+    font-size: 0.95rem; 
+    color: var(--text-muted); 
+}
+
+/* ==========================================
+   4. ตัวกรอง & เกรดเฉลี่ย (Filter & GPA)
+   ========================================== */
 .summary-grid {
     display: grid;
-    /* แบ่ง 2 คอลัมน์: กล่องฟิลเตอร์กว้าง 2 ส่วน กล่อง GPA กว้าง 1 ส่วน */
+    /* 🌟 ย้ายจาก Inline HTML มาไว้ตรงนี้แทน (2 ส่วน : 1 ส่วน) */
     grid-template-columns: 2fr 1fr; 
     gap: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
+.filter-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.filter-card h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 10px;
+}
+
 .filter-group { 
     display: flex; 
     align-items: center; 
-    gap: 0.8rem; 
+    gap: 1.5rem; 
+    flex-wrap: wrap; /* ยอมให้ตกบรรทัดถ้าจอแคบ */
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 500;
 }
 
 .semester-select {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     border-radius: 8px;
     border: 1px solid #d1d5db;
     outline: none;
     cursor: pointer;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    background-color: white;
+    transition: 0.2s;
 }
 
-/* --------------------
-   กล่องเกรดเฉลี่ย (GPA Card) สีน้ำเงิน
--------------------- */
+.semester-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+}
+
+/* ==========================================
+   5. กล่องเกรดเฉลี่ย สีน้ำเงิน (GPA Card)
+   ========================================== */
 .gpa-card {
     background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
     color: white;
@@ -99,41 +141,80 @@ body {
     font-weight: normal; 
     font-size: 1.1rem; 
     opacity: 0.9;
-    color: white; /* บังคับสีขาวเผื่อโดน CSS อื่นทับ */
+    color: white; 
 }
 
 .gpa-score { 
-    font-size: 4rem; 
+    font-size: 4.5rem; 
     font-weight: bold; 
     margin: 0.5rem 0; 
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2); /* เพิ่มเงาให้ตัวเลขดูมีมิติ */
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
 }
 
-/* --------------------
-   ส่วนตารางผลการเรียน (Table)
--------------------- */
-.history-section h3 { margin-top: 0; margin-bottom: 1.5rem; }
+.gpa-credit {
+    margin: 0; 
+    opacity: 0.9;
+    font-weight: bold;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
+/* ==========================================
+   6. ตารางผลการเรียน (Transcript Table)
+   ========================================== */
+.history-section h3 { 
+    margin-top: 0; 
+    margin-bottom: 1.5rem; 
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 10px;
+}
+
+/* 🌟 ทำให้ตารางเลื่อนได้ในจอมือถือ */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
 .history-table {
     width: 100%;
+    min-width: 500px; /* บังคับขนาดขั้นต่ำ ไม่ให้บีบจนน่าเกลียด */
     border-collapse: collapse;
 }
 
 .history-table th, .history-table td {
-    padding: 1rem 0.5rem;
+    padding: 1rem;
     border-bottom: 1px solid #f3f4f6;
 }
 
 .history-table th { 
     color: var(--text-muted); 
     font-weight: 600; 
+    background-color: #f8fafc;
+    text-align: left;
 }
 
-.text-center { text-align: center; }
+.history-table tbody tr:hover {
+    background-color: #f8fafc;
+}
 
-/* --------------------
-   ป้ายสีบอกเกรด (Grade Badges)
--------------------- */
+.text-center { text-align: center !important; }
+.fw-bold { font-weight: bold; color: #1e293b; }
+
+.empty-state {
+    padding: 4rem 0 !important;
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+/* ==========================================
+   7. ป้ายสีบอกเกรด (Grade Badges)
+   ========================================== */
 .grade-badge {
     display: inline-block;
     padding: 0.4rem 1.2rem;
@@ -142,18 +223,49 @@ body {
     font-size: 1.1rem;
 }
 
-/* ไล่สีตามเกรดที่ได้ */
-.grade-4 { background-color: #dcfce7; color: #166534; } /* เกรด 3.5 - 4.0 (เขียว) */
-.grade-3 { background-color: #fef08a; color: #854d0e; } /* เกรด 2.5 - 3.0 (เหลือง) */
-.grade-2 { background-color: #fed7aa; color: #9a3412; } /* เกรด 1.5 - 2.0 (ส้ม) */
-.grade-0 { background-color: #fee2e2; color: #991b1b; } /* เกรด 0 - 1.0 (แดง) */
-.grade-default { background-color: #f3f4f6; color: #1f2937; } /* สีเทาเริ่มต้น */
+.grade-4 { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } 
+.grade-3 { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; } 
+.grade-2 { background-color: #ffedd5; color: #9a3412; border: 1px solid #fdba74; } 
+.grade-0 { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; } 
+.grade-default { background-color: #f3f4f6; color: #1f2937; } 
 
-/* --------------------
-   การแสดงผลบนมือถือ (Responsive)
--------------------- */
+/* ==========================================
+   8. มือถือและแท็บเล็ต (Responsive Media Queries)
+   ========================================== */
 @media (max-width: 768px) {
+    .container { margin-top: 5rem; }
+    
+    .profile-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
     .summary-grid {
-        grid-template-columns: 1fr; /* ถ้าจอมือถือ ให้เรียงกล่องลงมาด้านล่างกัน */
+        grid-template-columns: 1fr; /* 🌟 เด้งกลับมาเป็น 1 คอลัมน์ทันทีเมื่อจอเล็ก */
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .filter-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+    
+    .semester-select {
+        width: 100%; /* ให้ Dropdown เต็มกล่องในมือถือ ควบคุมง่าย */
+    }
+    
+    .gpa-card {
+        padding: 1.5rem;
+    }
+    
+    .gpa-score {
+        font-size: 3.5rem;
     }
 }

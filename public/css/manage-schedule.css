@@ -1,17 +1,15 @@
 /* ==========================================
-       1. โครงสร้างหลัก
-       ========================================== */
+   1. โครงสร้างหลัก
+   ========================================== */
 .container {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 110px auto 50px; 
     padding: 0 20px;
-    margin-top: 130px;
-    margin-bottom: 50px;
 }
 
 /* ==========================================
-       2. แถบเครื่องมือ
-       ========================================== */
+   2. แถบเครื่องมือ (Search & Filters)
+   ========================================== */
 .toolbar {
     display: flex;
     justify-content: space-between;
@@ -19,59 +17,80 @@
     margin-bottom: 40px;
     flex-wrap: wrap;
     gap: 15px;
+    background: var(--white-color, #ffffff);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid #eaeaea;
 }
 
 .search-box {
-    padding: 10px 15px;
-    width: 800px;
-    border: 1px solid #ccc;
+    flex: 1 1 300px; 
+    width: 100%;
+    box-sizing: border-box; /* 🌟 ป้องกันกล่องล้นจอ */
+    padding: 12px 15px;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
-    /* เรียกใช้ฟอนต์และขนาดจาก global.css */
     font-family: inherit;
-    font-size: var(--body-size);
+    font-size: var(--body-size, 1rem);
     outline: none;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
 }
 
 .search-box:focus {
-    border-color: var(--primary-color);
-    /* ใช้สีหลักตอนคลิกพิมพ์ */
+    border-color: var(--primary-color, #3b82f6);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .filters {
     display: flex;
     gap: 15px;
     align-items: center;
-    font-weight: var(--weight-medium);
-    /* ใช้ความหนาจาก global */
+    font-weight: var(--weight-medium, 500);
+    flex-wrap: wrap; 
+}
+
+.filters label {
+    color: #475569;
 }
 
 .filters select {
-    padding: 8px 12px;
+    padding: 10px 15px;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #d1d5db;
     font-family: inherit;
-    font-size: var(--body-size);
+    font-size: var(--body-size, 1rem);
     cursor: pointer;
+    background-color: white;
+    outline: none;
+    transition: 0.2s;
+}
+
+.filters select:focus {
+    border-color: var(--primary-color, #3b82f6);
 }
 
 /* ==========================================
-       3. ส่วนหัวข้อระดับชั้น
-       ========================================== */
+   3. ส่วนหัวข้อระดับชั้น
+   ========================================== */
 .grade-section {
     margin-bottom: 40px;
 }
 
 .grade-title {
-    /* ใช้ขนาด H4 และสีหลักจาก global */
-    font-size: var(--h4-size);
-    font-weight: var(--weight-bold);
-    color: var(--primary-color);
+    font-size: var(--h4-size, 1.5rem);
+    font-weight: var(--weight-bold, bold);
+    color: var(--primary-color, #3b82f6);
     margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
 /* ==========================================
-       4. ตารางการ์ด
-       ========================================== */
+   4. ตารางการ์ด (Card Grid)
+   ========================================== */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -79,94 +98,134 @@
 }
 
 .card {
-    background-color: var(--white-color);
-    /* สีขาวจาก global */
+    background-color: var(--white-color, #ffffff);
     border-radius: 12px;
     padding: 25px 20px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid #eaeaea;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    /* ยกการ์ดลอยขึ้นตอนเอาเมาส์ชี้ */
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
 }
 
 .card h3 {
-    /* ใช้ขนาด H6 จาก global */
-    font-size: var(--h6-size);
-    font-weight: var(--weight-bold);
-    margin: 0 0 10px 0;
-    color: var(--black-color);
+    font-size: var(--h6-size, 1.25rem);
+    font-weight: var(--weight-bold, bold);
+    margin: 0 0 5px 0;
+    color: var(--black-color, #1e293b);
 }
 
-.card p {
-    /* ใช้ขนาด Caption1 จาก global */
-    font-size: var(--caption1-size);
-    color: #555;
-    margin: 5px 0;
+.card .teacher-name {
+    font-size: var(--caption1-size, 0.9rem);
+    color: #64748b;
+    margin: 0 0 15px 0;
+    min-height: 40px; 
 }
 
 /* ==========================================
-       5. หลอดความคืบหน้า
-       ========================================== */
+   5. หลอดความคืบหน้า
+   ========================================== */
 .progress-container {
-    background-color: #e0e0e0;
+    background-color: #f1f5f9;
     border-radius: 20px;
-    height: 12px;
-    margin: 15px 0;
+    height: 10px;
+    margin: 15px 0 10px 0;
     overflow: hidden;
 }
 
 .progress-bar {
     height: 100%;
+    border-radius: 20px;
     transition: width 0.4s ease-out;
 }
 
-/* สีสถานะของการจัดตาราง */
-.status-complete {
-    background-color: #10b981;
-}
+.status-complete { background-color: #10b981; } 
+.status-incomplete { background-color: #f59e0b; } 
+.status-empty { background-color: #cbd5e1; } 
 
-/* สีเขียว */
-.status-incomplete {
-    background-color: #fbbf24;
+.progress-text {
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: bold;
 }
-
-/* สีเหลือง */
-.status-empty {
-    background-color: #d1d5db;
-}
-
-/* สีเทา */
 
 /* ==========================================
-       6. ปุ่มแก้ไข/สร้างตาราง
-       ========================================== */
+   6. ปุ่มแก้ไข/สร้างตาราง
+   ========================================== */
 .btn-edit {
     display: inline-block;
-    margin-top: 15px;
+    margin-top: auto; 
     padding: 10px 0;
     width: 100%;
-    background-color: var(--white-color);
-    color: var(--primary-color);
-    /* สีตัวอักษรใช้สีหลัก */
-    border: 2px solid var(--primary-color);
-    /* ขอบสีหลัก */
+    box-sizing: border-box; /* 🌟 ป้องกันปุ่มล้นขอบการ์ด */
+    background-color: transparent;
+    color: var(--primary-color, #3b82f6);
+    border: 2px solid var(--primary-color, #3b82f6);
     border-radius: 8px;
     text-decoration: none;
-    font-weight: var(--weight-bold);
-    font-size: var(--body-size);
+    font-weight: var(--weight-bold, bold);
+    font-size: var(--body-size, 1rem);
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .btn-edit:hover {
-    /* ตอน Hover ให้เปลี่ยนพื้นหลังเป็นสีไล่ระดับตามที่คุณตั้งไว้ใน global! */
-    background: var(--primary-gradient);
-    color: var(--white-color);
-    border-color: transparent;
+    background: var(--primary-color, #3b82f6);
+    color: var(--white-color, #ffffff);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+/* ==========================================
+   7. Media Queries (Responsive)
+   ========================================== */
+
+/* 🌟 สำหรับแท็บเล็ตและมือถือแนวนอน */
+@media (max-width: 768px) {
+    .container {
+        margin-top: 90px;
+        padding: 0 15px;
+    }
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+        gap: 15px;
+    }
+    .search-box {
+        flex: none; 
+    }
+    .filters {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .filters label {
+        display: none; 
+    }
+    .filters select {
+        flex: 1; 
+    }
+}
+
+/* 🌟 สำหรับมือถือแนวตั้ง (จอเล็ก) */
+@media (max-width: 480px) {
+    .filters {
+        flex-direction: column; /* ดัน Dropdown ให้เรียงซ้อนกัน */
+        gap: 10px;
+    }
+    .filters select {
+        width: 100%; 
+    }
+    .card-grid {
+        grid-template-columns: 1fr; /* บังคับให้การ์ดเรียง 1 แถวเสมอ */
+    }
+    .grade-title {
+        font-size: 1.3rem;
+        text-align: center; /* จัดกึ่งกลางให้สวยขึ้นบนจอมือถือ */
+    }
 }

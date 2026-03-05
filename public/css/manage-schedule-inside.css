@@ -1,19 +1,24 @@
-body {
-    background-color: #f8fafc;
-    /* พื้นหลังสีเทาอ่อนๆ ให้กล่องสีขาวดูโดดเด่น */
-}
-
+/* ==========================================
+   1. โครงสร้างหลัก & ทั่วไป
+   ========================================== */
 .container {
     max-width: 1200px;
-    margin: 130px auto 50px;
+    margin: 110px auto 50px;
     padding: 0 20px;
 }
 
-/* ================= 2. ส่วนหัว (Header Section) ================= */
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+/* ==========================================
+   2. ส่วน Header
+   ========================================== */
 .header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 20px;
 }
 
@@ -24,205 +29,270 @@ body {
 }
 
 .back-arrow {
-    font-size: 30px;
-    color: var(--black-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: #f1f5f9;
+    color: #3b82f6;
+    border-radius: 12px;
     text-decoration: none;
-    transition: 0.2s;
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: 0.3s;
 }
 
 .back-arrow:hover {
-    transform: translateX(-5px);
+    background: #3b82f6;
+    color: white;
+    transform: translateX(-3px);
 }
 
-/* เอฟเฟกต์ถอยหลัง */
-
 .room-info h2 {
-    font-size: var(--h2-size);
-    font-weight: var(--weight-bold);
-    color: var(--black-color);
     margin: 0;
+    color: #1e293b;
+    font-size: 1.8rem;
 }
 
 .room-info p {
-    font-size: var(--h5-size);
-    color: #555;
-    margin: 0;
-    font-weight: var(--weight-medium);
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 1rem;
 }
 
-/* ================= 3. หลอด Progress Bar ================= */
+/* ==========================================
+   3. Progress Bar (สถานะการจัดตาราง)
+   ========================================== */
 .progress-wrapper {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 15px;
-    background: var(--white-color);
-    padding: 15px 20px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    font-weight: var(--weight-bold);
-    font-size: var(--body-size);
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.progress-label, .progress-count {
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
 }
 
 .progress-track {
     flex-grow: 1;
-    height: 20px;
-    background-color: #e2e8f0;
-    border-radius: 20px;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 10px;
     overflow: hidden;
+    min-width: 200px;
 }
 
 .progress-fill {
     height: 100%;
-    /* สีเขียวแบบในรูป */
-    transition: width 0.4s ease-out;
+    border-radius: 10px;
+    transition: width 0.5s ease-out;
 }
 
-.status-complete {
-    background-color: #10b981;
+.status-complete { background: #10b981; } /* เขียว */
+.status-incomplete { background: #3b82f6; } /* ฟ้า */
+.status-empty { background: #cbd5e1; } /* เทา */
+
+/* ==========================================
+   4. ตารางสอน (Responsive สุดตึง)
+   ========================================== */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* เลื่อนลื่นๆ ใน iOS */
 }
 
-/* สีเขียว */
-.status-incomplete {
-    background-color: #fbbf24;
-}
-
-/* สีเหลือง */
-.status-empty {
-    background-color: #d1d5db;
-}
-
-/* ================= 4. ตาราง 35 ช่อง (Floating Grid) ================= */
 .schedule-table {
     width: 100%;
-    border-collapse: separate;
-    /* แยกขอบตารางออกจากกัน */
-    border-spacing: 12px;
-    /* สร้างระยะห่างระหว่างกล่องแบบในรูป */
+    min-width: 900px; /* บังคับความกว้างขั้นต่ำ กันบีบเละ */
+    border-collapse: collapse;
+    background: white;
+}
+
+.schedule-table th, .schedule-table td {
+    padding: 12px 8px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .schedule-table th {
-    font-weight: var(--weight-bold);
-    font-size: var(--h6-size);
-    color: var(--black-color);
-    padding-bottom: 10px;
+    background: #f8fafc;
+    color: #1e293b;
+    font-weight: 600;
+    padding: 15px 10px;
 }
 
-/* กล่องวันจันทร์-ศุกร์ สีน้ำเงิน */
-.day-label {
-    background-color: var(--primary-color);
-    color: var(--white-color);
-    font-weight: var(--weight-bold);
-    text-align: center;
-    vertical-align: middle;
-    border-radius: 8px;
-    padding: 15px;
-    width: 120px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* 🌟 ทริคความตึง: ล็อกคอลัมน์แรกให้อยู่กับที่ตอนเลื่อนมือถือ */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: #f8fafc;
+    z-index: 2;
+    font-weight: bold;
+    color: #334155;
+    /* ใส่เงาเล็กๆ ให้ดูมีมิติว่ามันลอยอยู่ */
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1); 
 }
 
-/* ปุ่ม + เพิ่มวิชา (กล่องขาว) */
+.schedule-table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* ช่องพักเที่ยง */
+.lunch-col { background: #f1f5f9; }
+.lunch-slot { background: #f1f5f9; }
+
+/* ==========================================
+   5. ปุ่มในตาราง (วิชาเรียน & ปุ่มบวก)
+   ========================================== */
 .add-btn {
-    background-color: var(--white-color);
-    border: 1px solid #e2e8f0;
-    color: #94a3b8;
-    font-size: 24px;
-    font-weight: var(--weight-medium);
-    width: 100%;
-    height: 80px;
+    width: 40px;
+    height: 40px;
     border-radius: 8px;
+    border: 2px dashed #cbd5e1;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 1.5rem;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: 0.2s;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }
 
 .add-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background-color: #f0f9ff;
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
 }
 
-/* กล่องวิชาที่จัดแล้ว */
 .subject-card {
-    background-color: #e0f2fe;
-    color: var(--primary-color);
-    font-weight: var(--weight-bold);
-    border: 1px solid #bae6fd;
     width: 100%;
-    height: 80px;
+    min-height: 50px;
+    padding: 8px;
     border-radius: 8px;
+    border: none;
+    background: #dbeafe;
+    border-left: 4px solid #3b82f6;
+    color: #1e293b;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
     display: flex;
-    justify-content: center;
     align-items: center;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    padding: 5px;
-    font-size: var(--caption1-size);
+    justify-content: center;
 }
 
-/* ช่องพักเที่ยงสีเทา */
-.lunch-slot {
-    background-color: #cbd5e1;
-    border-radius: 8px;
-    height: 80px;
+.subject-card:hover {
+    background: #fee2e2;
+    border-left-color: #ef4444;
+    color: #b91c1c;
+}
+.subject-card:hover .sub-name::after {
+    content: " (ลบ)";
+    font-size: 0.8rem;
 }
 
-/* ================= 5. Modal (กล่อง Pop-up) ================= */
+/* ==========================================
+   6. Modals (Popup)
+   ========================================== */
 .modal-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
 }
 
 .modal-box {
     background: white;
     padding: 30px;
-    border-radius: 12px;
-    width: 400px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-box h3 {
+    margin-top: 0;
+    color: #1e293b;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .subject-dropdown {
     width: 100%;
     padding: 12px;
-    margin: 15px 0 25px 0;
-    border-radius: 8px;
     border: 1px solid #cbd5e1;
+    border-radius: 8px;
     font-family: inherit;
+    font-size: 1rem;
+    margin-top: 10px;
+    outline: none;
 }
+.subject-dropdown:focus { border-color: #3b82f6; }
 
 .modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    margin-top: 25px;
 }
 
-.btn-cancel {
+.btn-cancel, .btn-save {
     padding: 10px 20px;
-    background: #e2e8f0;
-    color: #333;
-    border: none;
     border-radius: 8px;
+    font-weight: bold;
     cursor: pointer;
+    border: none;
     font-family: inherit;
+    transition: 0.2s;
 }
 
-.btn-save {
-    padding: 10px 20px;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
+.btn-cancel { background: #f1f5f9; color: #475569; }
+.btn-cancel:hover { background: #e2e8f0; }
+
+.btn-save { background: #3b82f6; color: white; }
+.btn-save:hover { background: #2563eb; }
+
+/* ==========================================
+   7. มือถือ (Media Queries)
+   ========================================== */
+@media (max-width: 768px) {
+    .container { margin-top: 90px; }
+    
+    .header-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .progress-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .progress-track {
+        margin: 10px 0;
+    }
 }

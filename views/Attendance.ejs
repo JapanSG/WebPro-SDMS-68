@@ -16,36 +16,37 @@
         <div class="profile-header card">
             <div class="profile-info">
                 <img src="<%= user.profile_picture ? 'data:image/jpeg;base64,' + user.profile_picture.toString('base64') : '/images/icons/User.svg' %>" alt="Profile" class="avatar">
+                <div class="profile-text">
                     <h2><%= student.first_name %> <%= student.last_name %></h2>
-                    <p class="text-muted">ชั้น ม.<%= student.grade_level %> ห้อง <%= student.room_name %> | เลขประจำตัวนักเรียน: <%= student.student_id %></p>
+                    <p class="text-muted">ชั้น ม.<%= student.grade_level %> ห้อง <%= student.room_name %> | เลขประจำตัว: <%= student.student_id %></p>
                 </div>
             </div>
         </div>
 
         <div class="summary-grid">
             <div class="summary-card card">
-                <div class="card-icon present-icon">✅</div>
+                <div class="card-icon">✅</div>
                 <div class="card-details">
                     <h3>มาเรียน</h3>
                     <p class="count"><%= summary.present %></p>
                 </div>
             </div>
             <div class="summary-card card">
-                <div class="card-icon late-icon">⏱️</div>
+                <div class="card-icon">⏱️</div>
                 <div class="card-details">
                     <h3>สาย</h3>
                     <p class="count"><%= summary.late %></p>
                 </div>
             </div>
             <div class="summary-card card">
-                <div class="card-icon absent-icon">❌</div>
+                <div class="card-icon">❌</div>
                 <div class="card-details">
                     <h3>ขาด</h3>
                     <p class="count"><%= summary.absent %></p>
                 </div>
             </div>
             <div class="summary-card card">
-                <div class="card-icon personal-leave-icon">😷</div>
+                <div class="card-icon">😷</div>
                 <div class="card-details">
                     <h3>ลากิจ</h3>
                     <p class="count"><%= summary.personal_leave %></p>
@@ -59,8 +60,9 @@
                     <span class="legend-item"><span class="dot dot-green"></span> Present</span>
                     <span class="legend-item"><span class="dot dot-yellow"></span> Late</span>
                     <span class="legend-item"><span class="dot dot-red"></span> Absent</span>
-                    <span class="legend-item"><span class="dot dot-blue"></span> Personal Leave</span>
+                    <span class="legend-item"><span class="dot dot-blue"></span> Leave</span>
                 </div>
+                
                 <div class="filter-group">
                     <label for="filter-year">ปีการศึกษา:</label>
                     <select id="filter-year" class="semester-select" onchange="applyFilters()">
@@ -71,70 +73,85 @@
                         <% }); %>
                     </select>
 
-                    <label for="filter-term">ภาคเรียน:</label>
-                    <select id="filter-term" class="semester-select" onchange="applyFilters()">
-                        <option value="1" <%= selectedTerm === '1' ? 'selected' : '' %>>ภาคเรียนที่ 1</option>
-                        <option value="2" <%= selectedTerm === '2' ? 'selected' : '' %>>ภาคเรียนที่ 2</option>
+                    <label for="filter-month">เดือน:</label>
+                    <select id="filter-month" class="semester-select" onchange="applyFilters()">
+                        <option value="01" <%= selectedMonth === '01' ? 'selected' : '' %>>มกราคม</option>
+                        <option value="02" <%= selectedMonth === '02' ? 'selected' : '' %>>กุมภาพันธ์</option>
+                        <option value="03" <%= selectedMonth === '03' ? 'selected' : '' %>>มีนาคม</option>
+                        <option value="04" <%= selectedMonth === '04' ? 'selected' : '' %>>เมษายน</option>
+                        <option value="05" <%= selectedMonth === '05' ? 'selected' : '' %>>พฤษภาคม</option>
+                        <option value="06" <%= selectedMonth === '06' ? 'selected' : '' %>>มิถุนายน</option>
+                        <option value="07" <%= selectedMonth === '07' ? 'selected' : '' %>>กรกฎาคม</option>
+                        <option value="08" <%= selectedMonth === '08' ? 'selected' : '' %>>สิงหาคม</option>
+                        <option value="09" <%= selectedMonth === '09' ? 'selected' : '' %>>กันยายน</option>
+                        <option value="10" <%= selectedMonth === '10' ? 'selected' : '' %>>ตุลาคม</option>
+                        <option value="11" <%= selectedMonth === '11' ? 'selected' : '' %>>พฤศจิกายน</option>
+                        <option value="12" <%= selectedMonth === '12' ? 'selected' : '' %>>ธันวาคม</option>
                     </select>
                 </div>
             </div>
+            
             <div class="canvas-container">
                 <canvas id="attendanceChart"></canvas>
             </div>
         </div>
 
         <div class="history-section card">
-            <h3>ประวัติการเข้าแถวล่าสุด</h3>
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>วันที่</th>
-                        <th>วันในสัปดาห์</th>
-                        <th>สถานะ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (attendance && attendance.length > 0) { %>
-                        <% attendance.forEach(function(record) { 
-                            const dateObj = new Date(record.date);
-                            const dateString = dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
-                            const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' });
-                        %>
+            <h3>ประวัติการเข้าเรียน (ประจำเดือน)</h3>
+            
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>วันในสัปดาห์</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (attendance && attendance.length > 0) { %>
+                            <% attendance.forEach(function(record) { 
+                                const dateObj = new Date(record.date);
+                                const dateString = dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
+                                const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' });
+                            %>
+                                <tr>
+                                    <td><%= dateString %></td>
+                                    <td><%= dayName %></td>
+                                    <td>
+                                        <% if(record.status === 'Present') { %> 
+                                            <div class="status-wrap bg-present"><span class="dot dot-green"></span> มาเรียน</div>
+                                        <% } else if(record.status === 'Late') { %> 
+                                            <div class="status-wrap bg-late"><span class="dot dot-yellow"></span> สาย</div>
+                                        <% } else if(record.status === 'Absent') { %> 
+                                            <div class="status-wrap bg-absent"><span class="dot dot-red"></span> ขาด</div>
+                                        <% } else if (record.status === 'Personal Leave') { %>
+                                            <div class="status-wrap bg-leave"><span class="dot dot-blue"></span> ลากิจ</div>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
                             <tr>
-                                <td><%= dateString %></td>
-                                <td><%= dayName %></td>
-                                <td>
-                                    <% if(record.status === 'Present') { %> 
-                                        <div class="status-wrap"><span class="dot dot-green"></span> มาเรียน</div>
-                                    <% } else if(record.status === 'Late') { %> 
-                                        <div class="status-wrap"><span class="dot dot-yellow"></span> สาย</div>
-                                    <% } else if(record.status === 'Absent') { %> 
-                                        <div class="status-wrap"><span class="dot dot-red"></span> ขาด</div>
-                                    <% } else if (record.status === 'Personal Leave') { %>
-                                        <div class="status-wrap"><span class="dot dot-blue"></span> ลากิจ</div>
-                                    <% } %>
+                                <td colspan="3" class="text-center" style="padding: 30px;">
+                                    <div style="font-size: 2rem; margin-bottom: 10px;">📅</div>
+                                    ไม่มีประวัติการเช็คชื่อในเดือนนี้
                                 </td>
                             </tr>
-                        <% }); %>
-                    <% } else { %>
-                        <tr>
-                            <td colspan="3" class="text-center">ไม่มีข้อมูลประวัติการเช็คชื่อในภาคเรียนนี้</td>
-                        </tr>
-                    <% } %>
-                </tbody>
-            </table>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
     <script>
-        // ฟังก์ชันเมื่อเปลี่ยน Dropdown ให้รีเฟรชหน้าเว็บเพื่อดึงข้อมูลใหม่
         function applyFilters() {
-            const term = document.getElementById('filter-term').value;
+            const month = document.getElementById('filter-month').value;
             const year = document.getElementById('filter-year').value;
-            window.location.href = `/student/attendance?term=${term}&year=${year}`;
+            window.location.href = `/student/attendance?month=${month}&year=${year}`;
         }
 
-        // ดึงข้อมูลกราฟที่ Backend เตรียมไว้ให้
         const dbChartData = <%- chartData %>;
         const ctx = document.getElementById('attendanceChart').getContext('2d');
         
@@ -143,26 +160,10 @@
             data: {
                 labels: dbChartData.labels, 
                 datasets: [
-                    {
-                        label: 'Present',
-                        data: dbChartData.present, 
-                        backgroundColor: '#10b981',
-                    },
-                    {
-                        label: 'Late',
-                        data: dbChartData.late,
-                        backgroundColor: '#f59e0b',
-                    },
-                    {
-                        label: 'Absent',
-                        data: dbChartData.absent,
-                        backgroundColor: '#ef4444',
-                    },
-                    {
-                        label: 'Personal Leave',
-                        data: dbChartData.personal_leave,
-                        backgroundColor: '#17a2b8',
-                    }
+                    { label: 'Present', data: dbChartData.present, backgroundColor: '#10b981', borderRadius: 4 },
+                    { label: 'Late', data: dbChartData.late, backgroundColor: '#f59e0b', borderRadius: 4 },
+                    { label: 'Absent', data: dbChartData.absent, backgroundColor: '#ef4444', borderRadius: 4 },
+                    { label: 'Personal Leave', data: dbChartData.personal_leave, backgroundColor: '#17a2b8', borderRadius: 4 }
                 ]
             },
             options: {
@@ -173,8 +174,8 @@
                     y: { 
                         stacked: true, 
                         beginAtZero: true, 
-                        title: { display: true, text: 'จำนวนวัน' },
-                        ticks: { stepSize: 5 } 
+                        max: 1, 
+                        ticks: { stepSize: 1, precision: 0 } 
                     }
                 },
                 plugins: { legend: { display: false } }
@@ -182,4 +183,5 @@
         });
     </script>
 </body>
+</html>
 </html>

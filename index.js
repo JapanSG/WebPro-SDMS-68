@@ -1207,7 +1207,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
     try {
         const userId = req.user.user_id;
 
-        // 1. ดึงข้อมูลนักเรียน (เพื่อเอาไปแสดง Header และเอา enroll_year)
+        // 1. ดึงข้อมูลนักเรียน
         const sqlStudent = `
             SELECT s.student_id, s.first_name, s.last_name, s.year, s.room_id, s.enroll_year, r.room_name, r.grade_level
             FROM Students s
@@ -1223,33 +1223,24 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
 
         if (!student) return res.status(404).send('ไม่พบข้อมูลนักเรียน');
 
-        // 2. จัดการตัวกรอง ปีการศึกษา และ ภาคเรียน
-        const today = new Date();
-        let currentAcademicYear = today.getFullYear();
-        // ถ้าเป็น ม.ค. - เม.ย. (เดือน 0-3) ถือเป็นปีการศึกษาเก่า
-        if (today.getMonth() < 4) {
-            currentAcademicYear--;
-        }
+        // ==========================================
+        // 2. จัดการตัวกรอง (ใช้ปี ค.ศ. ปกติ ไม่ล็อคตามปฏิทินการศึกษา)
+        // ==========================================
+        const currentYear = new Date().getFullYear(); // ได้ปีปัจจุบันตรงๆ เช่น 2026
 
-        // ดึงปีที่เข้าเรียนมาสร้าง Dropdown
-        let enrollYear = student.enroll_year || currentAcademicYear;
-        if (enrollYear > 2500) enrollYear = enrollYear - 543; // ดักจับเผื่อเป็น พ.ศ.
+        // รับค่าตัวกรองจาก URL (ถ้าเข้าเว็บครั้งแรก ให้เป็นปีปัจจุบัน เทอม 1)
+        const selectedYear = req.query.year || currentYear.toString();
+        const selectedTerm = req.query.term || '1'; 
 
+        // สร้างรายการปีให้เลือก (ย้อนหลัง 5 ปี เดินหน้า 1 ปี)
         const availableYears = [];
-        for (let y = enrollYear; y <= currentAcademicYear; y++) {
+        for (let y = currentYear - 5; y <= currentYear + 1; y++) {
             availableYears.push(y);
         }
 
-        // กำหนดเทอมปัจจุบัน (เดือน 4-9 คือพฤษภาคม-ตุลาคม เป็นเทอม 1, นอกนั้นเทอม 2)
-        const currentTerm = (today.getMonth() >= 4 && today.getMonth() <= 9) ? '1' : '2';
-
-        // รับค่าตัวกรองจาก URL
-        const selectedTerm = req.query.term || currentTerm;
-        const selectedYear = req.query.year || currentAcademicYear.toString();
-
-        // 3. ดึงข้อมูลเกรดของเทอมและปีที่เลือก 
-        // *สมมติฐาน: คุณมีตาราง Subjects ที่เก็บ subject_name และ credit (หน่วยกิต) ด้วย
-        // ถ้าชื่อตารางหรือคอลัมน์ของคุณต่างไปจากนี้ ให้แก้ให้ตรงกับ Database ของคุณนะครับ
+        // ==========================================
+        // 3. ดึงข้อมูลเกรด
+        // ==========================================
         const sqlGrades = `
             SELECT 
                 g.subject_id, 
@@ -1260,24 +1251,22 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
             LEFT JOIN Subjects s ON g.subject_id = s.subject_id
             WHERE g.student_id = ? AND g.year = ? AND g.semester = ?
         `;
-        //แปลกปี
 
         const grades = await new Promise((resolve, reject) => {
+            // ในฐานข้อมูลเป็น พ.ศ. เลยเอา selectedYear (ค.ศ.) มา + 543
             db.all(sqlGrades, [student.student_id, parseInt(selectedYear) + 543, selectedTerm], (err, rows) => {
                 if (err) reject(err);
-                else {
-                    console.log(rows);
-                    resolve(rows || []);
-                }
+                else resolve(rows || []);
             });
         });
 
-        // 4. คำนวณเกรดเฉลี่ย (GPA) ประจำเทอม
+        // ==========================================
+        // 4. คำนวณเกรดเฉลี่ย (GPA)
+        // ==========================================
         let totalCredits = 0;
         let totalGradePoints = 0;
 
         grades.forEach(record => {
-            // เช็กว่ามีหน่วยกิตและเกรดไหม เพื่อป้องกันค่าว่าง
             const credit = parseFloat(record.credit) || 0;
             const grade = parseFloat(record.grade) || 0;
 
@@ -1285,10 +1274,9 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
             totalGradePoints += (grade * credit);
         });
 
-        // ถ้ามีการลงทะเบียนเรียน ให้คำนวณ หารด้วยหน่วยกิตรวม (ทศนิยม 2 ตำแหน่ง)
         const termGPA = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : '0.00';
 
-        // 5. ส่งข้อมูลทั้งหมดไปที่ EJS
+        // 5. ส่งข้อมูลไปที่ EJS
         res.render('Transcript', {
             user: req.user,
             student: student,

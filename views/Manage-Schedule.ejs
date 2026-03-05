@@ -6,7 +6,6 @@
     <title>Manage Schedule</title>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/manage-schedule.css">
-    
 </head>
 <body>
 
@@ -16,20 +15,20 @@
     <div class="container">
 
         <div class="toolbar">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหาห้องเรียน หรือ ชื่อครู">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหาห้องเรียน หรือ ชื่อครูประจำชั้น...">
 
             <form action="/admin/manage-schedule" method="GET" class="filters" id="filterForm">
                 <label>ปีการศึกษา</label>
                 <select name="year" onchange="document.getElementById('filterForm').submit();">
                     <% years.forEach(y => { %>
-                        <option value = "<%= y %>" <%= y === selectedYear ? 'selected' : '' %>><%= y %></option>
+                        <option value="<%= y %>" <%= y === selectedYear ? 'selected' : '' %>>ปี <%= y %></option>
                     <% }) %>
                 </select> 
 
-                <label>เทอม</label>
+                <label>ภาคเรียน</label>
                 <select name="semester" onchange="document.getElementById('filterForm').submit();">
                     <% semesters.forEach(s => { %>
-                        <option value = "<%= s %>" <%= s === selectedSemester ? 'selected' : '' %>><%= s %></option>
+                        <option value="<%= s %>" <%= s === selectedSemester ? 'selected' : '' %>>เทอม <%= s %></option>
                     <% }) %>
                 </select>
             </form>
@@ -40,7 +39,7 @@
                 let currentGrade = '';
                 const MAX_PERIODS = 35;
 
-                rooms.forEach(room =>{
+                rooms.forEach(room => {
                     if (room.grade_level !== currentGrade){
                         if (currentGrade !== ''){
             %>
@@ -48,14 +47,14 @@
                         }
                         currentGrade = room.grade_level;
             %>
-                        <div class ="grade-section" data-grade="ประถมศึกษาปีที่ <%= currentGrade %>">
-                            <div class = "grade-title">ระดับชั้นประถมศึกษาปีที่ <%= currentGrade %></div>
-                            <div class = "card-grid">
+                        <div class="grade-section" data-grade="ประถมศึกษาปีที่ <%= currentGrade %>">
+                            <div class="grade-title">ระดับชั้นประถมศึกษาปีที่ <%= currentGrade %></div>
+                            <div class="card-grid">
             <%
                     }
 
                     let scheduleCount = room.schedule_count || 0;
-                    let percentage = (scheduleCount/ MAX_PERIODS) * 100;
+                    let percentage = (scheduleCount / MAX_PERIODS) * 100;
                     let statusText = 'ว่าง';
                     let barColorClass = 'status-empty';
 
@@ -68,26 +67,27 @@
                         barColorClass = 'status-incomplete';
                     }
             %>
-                            <div class ="card room-card">
-                                <h3 class="room-name">ห้อง <%= room.room_name %></h3>
-                                <p class="teacher-name">
-                                    คุณครู: <%= room.first_name ? room.first_name + ' ' + room.last_name : 'ยังไม่มีในระบบ' %>
-                                </p>
-                                <p>สถานะ: <strong><%= statusText %></strong></p>
+                                <div class="card room-card">
+                                    <h3 class="room-name">ห้อง <%= room.room_name %></h3>
+                                    <p class="teacher-name">
+                                        ครูประจำชั้น: <br>
+                                        <strong style="color: #334155;"><%= room.first_name ? room.first_name + ' ' + room.last_name : 'ยังไม่มีในระบบ' %></strong>
+                                    </p>
+                                    
+                                    <p style="font-size: 0.9rem; margin: 0;">สถานะ: <span style="color: var(--primary-color); font-weight: bold;"><%= statusText %></span></p>
 
-                                <div class="progress-container">
-                                    <div class="progress-bar <%= barColorClass %>" style="width: <%= percentage %>%;"></div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar <%= barColorClass %>" style="width: <%= percentage %>%;"></div>
+                                    </div>
+
+                                    <span class="progress-text"><%= scheduleCount %> / <%= MAX_PERIODS %> คาบ</span>
+                                    <br>
+
+                                    <% if (room.room_id !== 0) { %> <a href="/admin/manage-schedule/inside/<%= room.room_id %>?year=<%= selectedYear %>&semester=<%= selectedSemester %>" class="btn-edit">✎ จัดการตารางเรียน</a>
+                                    <% } else { %>
+                                        <a href="/admin/manage-schedule/inside/new?grade=<%= room.grade_level %>&room=<%= encodeURIComponent(room.room_name) %>&year=<%= selectedYear %>&semester=<%= selectedSemester %>" class="btn-edit">✎ สร้างตารางใหม่</a>
+                                    <% } %>
                                 </div>
-
-                                <strong><%= scheduleCount %>/<%= MAX_PERIODS %> คาบ</strong>
-                                <br>
-
-                                <% if (room.room_id !== 0) { %>
-                                    <a href="/admin/manage-schedule/inside/<%=room.room_id %>?year=<%= selectedYear %>&semester=<%= selectedSemester %>" class = "btn-edit">✎ แก้ไขตาราง</a>
-                                <% } else { %>
-                                    <a href="/admin/manage-schedule/inside/new?grade=<%= room.grade_level %>&room=<%= encodeURIComponent(room.room_name)%>&year=<%= selectedYear %>&semester=<%= selectedSemester %>" class="btn-edit">✎ สร้างและจัดตาราง</a>
-                                <% } %>
-                            </div>
             <%
                 });
                 if (rooms.length > 0){
@@ -97,35 +97,30 @@
     </div>
 
     <script>
-        // search
+        // ระบบค้นหาห้องและชื่อครู (Client-side Search)
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const gradeSections = document.querySelectorAll('.grade-section');
 
-        //รับเหตุการณ์ด้วย addeventlistener id = input พวกคำพิ้มคือ e
-        document.getElementById('searchInput').addEventListener('input',function(e){
-            const seacrhTerm = e.target.value.toLowerCase().trim(); // text in input
-            const gradeSections = document.querySelectorAll('.grade-section'); //เอาส่วนgrade levelมาหมด
+            gradeSections.forEach(section => {
+                let hasVisibleCard = false;
+                const cards = section.querySelectorAll('.room-card');
 
-            gradeSections.forEach(section=>{
-                let hasVisibleCard = false; //เป็นตัวกำหนด grade level จะให้โชว์
-                const cards = section.querySelectorAll('.room-card'); // เอาส่วนห้องแต่ละ grade level มาหมด
+                cards.forEach(card => {
+                    const roomName = card.querySelector('.room-name').textContent.toLowerCase();
+                    const teacherName = card.querySelector('.teacher-name').textContent.toLowerCase();
 
-                cards.forEach(card=>{
-                    const roomName = card.querySelector('.room-name').textContent.toLocaleLowerCase();
-                    const teacherName = card.querySelector('.teacher-name').textContent.toLocaleLowerCase();
-
-                    //ข้อความที่เรา serach ตรงกับห้องไหน กับ ชื่อครูคนไหนมั้ย
-                    if (roomName.includes(seacrhTerm) || teacherName.includes(seacrhTerm)){
-                        card.style.display = 'block';
+                    if (roomName.includes(searchTerm) || teacherName.includes(searchTerm)){
+                        card.style.display = 'flex'; // สำคัญ: ใช้ flex แทน block เพื่อให้โครงสร้างการ์ดไม่พัง
                         hasVisibleCard = true;
-                    }
-                    else{
+                    } else {
                         card.style.display = 'none';
                     }
                 });
 
-                if (hasVisibleCard){
+                if (hasVisibleCard) {
                     section.style.display = 'block';
-                }
-                else{
+                } else {
                     section.style.display = 'none';
                 }
             });
@@ -133,4 +128,3 @@
     </script>
 </body>
 </html>
-

@@ -2,8 +2,6 @@
     --card-bg: #ffffff;
     --text-main: #1f2937;
     --text-muted: #6b7280;
-    
-    /* สีสถานะ */
     --color-present: #10b981;
     --color-late: #f59e0b;
     --color-absent: #ef4444;
@@ -23,13 +21,14 @@ body {
     padding: 0 1rem;
 }
 
-/* Card Style พื้นฐาน */
+/* Card Style */
 .card {
     background-color: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03), 0 4px 10px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     padding: 1.5rem 2rem;
     margin-bottom: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 /* Profile Section */
@@ -40,50 +39,63 @@ body {
 }
 
 .avatar {
-    width: 75px;
-    height: 75px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #e5e7eb;
+    border: 3px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.profile-text h2 { 
-    margin: 0 0 0.25rem 0; 
-    font-size: 1.5rem; 
+.profile-text h2 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+    color: #111827;
 }
-.profile-text p { 
-    margin: 0; 
-    font-size: 1rem; 
+
+.profile-text p {
+    margin: 0;
+    font-size: 0.95rem;
     color: var(--text-muted);
 }
 
-/* Summary Grid */
+/* Summary Grid - Responsive Auto-fit */
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    /* ปรับอัตโนมัติ: จอใหญ่ 4 จอเล็ก 2 หรือ 1 */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
     margin-bottom: 1.5rem;
 }
 
 .summary-card {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    padding: 1.5rem;
+    gap: 1.25rem;
+    padding: 1.25rem;
     margin-bottom: 0;
 }
 
-.card-icon { font-size: 2.5rem; }
-.card-details h3 { 
-    margin: 0; 
-    font-size: 1rem; 
-    color: var(--text-muted); 
-    font-weight: normal; 
+.card-icon {
+    font-size: 2.5rem;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 12px;
 }
-.card-details .count { 
-    margin: 0; 
-    font-size: 2rem; 
-    font-weight: bold; 
+
+.card-details h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.card-details .count {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #111827;
 }
 
 /* Chart & Filter Section */
@@ -91,45 +103,69 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    /* ยอมให้ตกบรรทัดในจอมือถือ */
+    gap: 1rem;
     margin-bottom: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #f3f4f6;
 }
 
-.legend-item { 
-    margin-right: 1.5rem; 
-    display: inline-flex; 
-    align-items: center; 
-    font-weight: 500;
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
-/* จุดสีสถานะ */
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
 .dot {
     display: inline-block;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    margin-right: 8px;
+    margin-right: 6px;
 }
-.dot-green { background-color: var(--color-present); }
-.dot-yellow { background-color: var(--color-late); }
-.dot-red { background-color: var(--color-absent); }
-.dot-blue { background-color: var(--color-personal-leave);}
 
-.filter-group { 
-    display: flex; 
-    align-items: center; 
-    gap: 0.5rem; 
+.dot-green {
+    background-color: var(--color-present);
+}
+
+.dot-yellow {
+    background-color: var(--color-late);
+}
+
+.dot-red {
+    background-color: var(--color-absent);
+}
+
+.dot-blue {
+    background-color: var(--color-personal-leave);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 500;
+    flex-wrap: wrap;
+    /* ยอมให้ตกบรรทัดในจอมือถือ */
 }
 
 .semester-select {
-    padding: 0.5rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 8px;
     border: 1px solid #d1d5db;
     outline: none;
     cursor: pointer;
     font-family: inherit;
+    background-color: white;
+    font-size: 0.9rem;
 }
 
 .canvas-container {
@@ -139,34 +175,98 @@ body {
 }
 
 /* History Table */
-.history-section h3 { 
-    margin-top: 0; 
-    margin-bottom: 1.5rem; 
+.history-section h3 {
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    color: #111827;
+}
+
+/* ป้องกันตารางล้นจอ */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .history-table {
     width: 100%;
+    min-width: 500px;
+    /* บังคับความกว้างขั้นต่ำไม่ให้เบียดกันเกินไป */
     border-collapse: collapse;
 }
 
-.history-table th, .history-table td {
-    padding: 1rem 0.5rem;
+.history-table th,
+.history-table td {
+    padding: 1rem;
     text-align: left;
     border-bottom: 1px solid #f3f4f6;
 }
 
-.history-table th { 
-    color: var(--text-muted); 
-    font-weight: 600; 
+.history-table th {
+    color: var(--text-muted);
+    font-weight: 600;
+    background-color: #f8fafc;
 }
 
-.status-wrap { 
-    display: flex; 
-    align-items: center; 
+.status-wrap {
+    display: inline-flex;
+    align-items: center;
     font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* ตกแต่งพื้นหลังป้ายสถานะ */
+.bg-present {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.bg-late {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.bg-absent {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.bg-leave {
+    background-color: #cffafe;
+    color: #164e63;
 }
 
 .text-center {
     text-align: center;
     color: var(--text-muted);
+}
+
+/* ================= Media Queries (สำหรับมือถือ) ================= */
+@media (max-width: 768px) {
+    .container {
+        margin: 1rem auto;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+
+    .profile-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-group {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
 }
