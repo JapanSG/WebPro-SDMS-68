@@ -29,7 +29,7 @@ function initialize(passport,db) {
     passport.deserializeUser((id, done) => {
         db.get(`SELECT * FROM Users WHERE user_id = ?`, [id], (err,user) => {
             if (err) return done(err);
-
+            if (!user) return done(null, false);
             return done(null, user);
         })
     });
