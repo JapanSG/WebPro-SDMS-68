@@ -20,12 +20,14 @@
                 <tr>
                     <th>Student ID</th>
                     <th>Name</th>
+                    <th>Room</th>
                     <th>Grade</th>
                 </tr>
                 <% students.forEach(student => { %>
                     <tr>
                         <td><%= student.student_id %></th>
                         <td><%= student.first_name %> <%= student.last_name %></th>
+                        <td><%= student.room_name %></td>
                         <td>
                             <% let value = "" %>
                             <% if (grades[`${student.student_id}`]) {value = grades[`${student.student_id}`].grade} %>

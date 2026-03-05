@@ -1135,7 +1135,8 @@ app.get('/teacher/grade', (req, res) => {
                                 WHERE Rooms.grade_level = (SELECT grade_level 
                                                             FROM Subjects
                                                             WHERE subject_id = ${selectedSubject}
-                                                            );`
+                                                            )
+                                ORDER BY room_id, student_id;`
         db.all(getStudentSQL, (err, students) => {
             if (err) {
                 console.error(err.message);
