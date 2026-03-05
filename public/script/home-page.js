@@ -21,7 +21,7 @@ async function showEvents(day, month, year) {
 
     eventListEl.innerHTML = '<div class="no_event">กำลังโหลดข้อมูล...</div>';
     try {
-        
+
         const response = await fetch(`/event/list?date=${dateKey}`);
         const events = await response.json();
         eventListEl.innerHTML = '';
@@ -80,7 +80,7 @@ function renderCalendar(month, year) {
         dayDiv.addEventListener('click', () => {
 
             selectedDateForEvent = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            
+
             document.querySelectorAll('.day').forEach(d => d.classList.remove('active_day'));
 
             dayDiv.classList.add('active_day');
@@ -133,12 +133,12 @@ async function createAtdRecord() {
         console.log("ไม่พบรหัสนักเรียน ไม่สามารถดึงข้อมูล API ได้");
         return;
     }
-    const api = `/student/attendance_history?year=${currentYear}&student_id=${studentId}`;
+    const api = `/student/attendance_history?student_id=${studentId}`;
 
     try {
         const response = await fetch(api);
         const data = await response.json()
-        console.log(`ข้อมูล API ของนักเรียนรหัส ${studentId}:`, data);
+        console.log(`ข้อมูลการเข้าเรียนของรหัส ${studentId}:`, data);
 
         const container = document.getElementById('recordList');
 
@@ -147,7 +147,10 @@ async function createAtdRecord() {
         if (data.length === 0) {
             const messages = document.createElement('p');
             messages.textContent = 'ไม่มีประวัติการเช็คชื่อ';
-            container.appendChild(messages);;
+            messages.className = "no_event";
+            container.appendChild(messages);
+            updateStats(0, 0, 0, 0);
+            return;
         }
 
 
@@ -164,21 +167,19 @@ async function createAtdRecord() {
             div.classList.add('record_item');
 
             if (item.status === "Absent") {
-                div.classList.add('record_item', 'danger');
+                div.classList.add('danger');
                 countAbsent++;
-            }
-            else if (item.status === "Personal Leave") {
-                div.classList.add('record_item', 'leave');
+            } else if (item.status === "Personal Leave" || item.status === "Sick Leave") {
+                div.classList.add('leave');
                 countLeave++;
-            }
-            else if (item.status === "Late") {
-                div.classList.add('record_item', 'warning');
+            } else if (item.status === "Late") {
+                div.classList.add('warning');
                 countLate++;
+            } else if (item.status === "Present") {
+                div.classList.add('good');
+                countPresent++;
             }
-            else{
-                return;
-            }
-            
+
             const spanDate = document.createElement('span');
             spanDate.className = "record_date";
             spanDate.textContent = item.date;
@@ -186,30 +187,45 @@ async function createAtdRecord() {
 
             const spanStatus = document.createElement('span');
             spanStatus.className = "record_status";
-            spanStatus.textContent = item.status;
+            spanStatus.textContent = translateStatus(item.status);;
 
 
             div.append(spanDate, spanStatus);
             container.appendChild(div);
         });
 
-        
+
         countPresent = totalDays - countAbsent - countLeave - countLate;
 
-        
+
         let presentPercentage = totalDays > 0 ? ((countPresent / totalDays) * 100).toFixed(0) : 0;
 
-        
-        document.getElementById('statDanger').textContent = countAbsent;
-        document.getElementById('statWarning').textContent = countLate;
-        document.getElementById('statLeave').textContent = countLeave;
-        document.getElementById('statGood').textContent = `${presentPercentage}%`;
+
+        updateStats(countAbsent, countLate, countLeave, presentPercentage);
     }
     catch (error) {
         console.error('Error:', error);
     }
 }
 
+function translateStatus(status) {
+    const statuses = {
+        'Present': 'มาเรียน',
+        'Absent': 'ขาดเรียน',
+        'Late': 'มาสาย',
+        'Personal Leave': 'ลากิจ',
+        'Sick Leave': 'ลาป่วย'
+    };
+    return statuses[status] || status;
+}
+
+
+function updateStats(absent, late, leave, percent) {
+    document.getElementById('statDanger').textContent = absent;
+    document.getElementById('statWarning').textContent = late;
+    document.getElementById('statLeave').textContent = leave;
+    document.getElementById('statGood').textContent = `${percent}%`;
+}
 createAtdRecord();
 
 // ---------- upload profile image ---------- //
@@ -255,11 +271,11 @@ saveBtn.addEventListener('click', async () => {
             method: 'POST',
             body: formData
         });
-        
+
         const result = await response.json();
         if (result.success) {
             alert('เปลี่ยนรูปโปรไฟล์สำเร็จ!');
-            profileImg.src = previewImg.src; 
+            profileImg.src = previewImg.src;
             overlay.classList.add('hidden');
         } else {
             alert('เกิดข้อผิดพลาด: ' + result.error);
@@ -306,20 +322,20 @@ saveEventBtn.addEventListener('click', async () => {
         const response = await fetch('/event/add', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                date: selectedDateForEvent, 
-                time: time, 
-                title: title 
+            body: JSON.stringify({
+                date: selectedDateForEvent,
+                time: time,
+                title: title
             })
         });
-        
+
         const result = await response.json();
         if (result.success) {
             alert('เพิ่มกิจกรรมสำเร็จ!');
             eventOverlay.classList.add('hidden');
             eventTimeInput.value = '';
             eventTitleInput.value = '';
-            
+
             const [y, m, d] = selectedDateForEvent.split('-');
             showEvents(parseInt(d), parseInt(m) - 1, parseInt(y));
         } else {

@@ -431,16 +431,20 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
 
 app.get('/student/attendance_history', (req, res) => {
-    const targetYear = req.query.year;
     const studentId = req.query.student_id;
 
 
-    if (!targetYear) {
-        return res.status(400).json({ error: 'กรุณาระบุปีที่ต้องการ' });
+    if (!studentId) {
+        return res.status(400).json({ error: 'ไม่พบข้อมูลนักเรียน' });
     }
 
-    const sql = `SELECT * FROM Attendance WHERE student_id = ? AND date LIKE ?`;
-    const params = [studentId, `${targetYear}-%`];
+    const sql = `
+        SELECT * FROM Attendance 
+        WHERE student_id = ? 
+        ORDER BY date DESC 
+        LIMIT 7
+    `;
+    const params = [studentId];
 
     db.all(sql, params, (err, rows) => {
         if (err) {

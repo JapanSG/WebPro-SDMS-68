@@ -20,7 +20,7 @@ body {
     align-items: flex-start;
     width: 100%;
     min-height: calc(100vh - 100px);
-    padding: 30px 40px;
+    padding: 30px 2%;
     gap: 30px;
     background-color: var(--white-color);
 }
@@ -28,19 +28,18 @@ body {
 
 .home_content {
     display: flex;
-    height: 420px;
+    height: auto;
+    min-height: 420px;
     background-color: var(--white-color);
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
-    padding: 0;
     overflow: hidden;
 }
 
 .home_content:has(.profile) {
-    width: 780px;
-    padding: 0;
-    gap: 0;
-    align-items: stretch;
+    width: 100%;
+    max-width: 780px;
+    flex: 1 1 700px;
 }
 
 .home_content:has(.calendar_wrapper) {
@@ -479,6 +478,7 @@ body {
 .record_item.danger { border-left-color: #dc3545; }
 .record_item.warning { border-left-color: #ff9800; }
 .record_item.leave { border-left-color: #17a2b8; }
+.record_item.good { border-left-color: #28a745; }
 
 .record_date {
     font-weight: var(--weight-bold);
@@ -614,4 +614,75 @@ body {
 .admin_card.summary:hover .stat_num {
     transform: scale(1.1);
     color: #0d47a1;
+}
+
+/* --- xl (Extra Large): 1280px (จอ Desktop ปกติ) --- */
+@media screen and (max-width: 1280px) {
+    .home_container {
+        gap: 20px;
+        padding: 20px;
+    }
+    /* ปรับ Admin Grid ให้การ์ดเรียงตัวสวยงาม */
+    .admin_grid {
+        gap: 20px;
+        justify-content: center;
+    }
+}
+
+/* --- lg (Large): 1024px (Laptop เล็ก หรือ Tablet แนวนอน) --- */
+@media screen and (max-width: 1024px) {
+    .home_content:has(.profile) {
+        flex: 1 1 100%; /* ให้ Profile ขยายเต็มความกว้าง */
+        max-width: 100%;
+    }
+    
+    .home_content:has(.calendar_wrapper) {
+        flex: 1 1 100%; /* ให้ปฏิทินขยายเต็มความกว้าง */
+        max-width: 100%;
+    }
+
+    .admin_grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* ปรับ Grid ให้ยืดหยุ่นตามพื้นที่ */
+        width: 100%;
+    }
+}
+
+/* --- md (Medium): 768px (Tablet แนวตั้ง) --- */
+@media screen and (max-width: 768px) {
+    .home_container {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    /* ปรับส่วนโปรไฟล์ (Student/Teacher) ให้เป็นแนวตั้ง */
+    .home_content:has(.profile) {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .home_content .profile {
+        width: 150px; /* ปรับขนาดรูปโปรไฟล์ให้เล็กลง */
+        height: 150px;
+        margin-bottom: 20px;
+    }
+
+    .information {
+        padding: 0 !important;
+        width: 100%;
+    }
+
+    .info_content p {
+        font-size: 0.95rem; /* ลดขนาดตัวอักษรลงเล็กน้อย */
+    }
+
+    /* ปรับ Admin Card ให้แสดงผลเน้นการอ่านง่าย */
+    .admin_card {
+        padding: 20px;
+    }
+
+    .stat_num {
+        font-size: 2.5rem; /* ลดขนาดตัวเลขสถิติ */
+    }
 }
