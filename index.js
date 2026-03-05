@@ -196,7 +196,6 @@ app.get('/admin/home', async (req, res) => {
             getCount("SELECT COUNT(*) as count FROM Teacher"),
             getCount("SELECT COUNT(*) as count FROM Subjects"),
             getCount("SELECT COUNT(*) as count FROM Rooms WHERE status = 'Active'")
-            getCount("SELECT COUNT(*) as count FROM Rooms WHERE status = 'Active'")
         ]);
 
         res.render('Home-Admin', {
@@ -331,16 +330,10 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         // 2. ระบบ FILTER (ค้นหารายเดือน แบบอิสระ)
         // ==========================================
         const today = new Date();
-        const currentYear = today.getFullYear().toString(); // ค.ศ.
-        // ทำให้เดือนเป็น 2 หลักเสมอ เช่น '03', '12'
         const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); 
         const currentYear = today.getFullYear().toString(); // ค.ศ.
         // ทำให้เดือนเป็น 2 หลักเสมอ เช่น '03', '12'
-        const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); 
 
-        // รับค่า ปี และ เดือน จาก Dropdown (ถ้าเปิดมาครั้งแรกให้โชว์เดือนปัจจุบัน)
-        const selectedYear = req.query.year || currentYear;
-        const selectedMonth = req.query.month || currentMonth;
         // รับค่า ปี และ เดือน จาก Dropdown (ถ้าเปิดมาครั้งแรกให้โชว์เดือนปัจจุบัน)
         const selectedYear = req.query.year || currentYear;
         const selectedMonth = req.query.month || currentMonth;
@@ -1227,7 +1220,6 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
         // สร้างรายการปีให้เลือก (ย้อนหลัง 5 ปี เดินหน้า 1 ปี)
         const availableYears = [];
         for (let y = currentYear - 5; y <= currentYear + 1; y++) {
-        for (let y = currentYear - 5; y <= currentYear + 1; y++) {
             availableYears.push(y);
         }
 
@@ -1249,7 +1241,6 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
             // ในฐานข้อมูลเป็น พ.ศ. เลยเอา selectedYear (ค.ศ.) มา + 543
             db.all(sqlGrades, [student.student_id, parseInt(selectedYear) + 543, selectedTerm], (err, rows) => {
                 if (err) reject(err);
-                else resolve(rows || []);
                 else resolve(rows || []);
             });
         });
