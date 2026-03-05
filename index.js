@@ -297,25 +297,20 @@ app.post('/ao/submit/save', checkAuthenticated, checkRole('ao'), (req, res) => {
 
 // Attendance Page
 
+// =====================================================================
+// [GET] หน้าเว็บสำหรับดูประวัติการเข้าเรียน (Attendance) แบบรายเดือน
+// =====================================================================
 app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (req, res) => {
     try {
         const userId = req.user.user_id;
 
-        // 1. ดึงข้อมูลนักเรียน (ใช้ db.get ของ SQLite)
+        // 1. ดึงข้อมูลนักเรียน
         const sqlStudent = `
-    SELECT 
-        s.student_id, 
-        s.first_name, 
-        s.last_name, 
-        s.year, 
-        s.room_id, 
-        s.enroll_year, 
-        r.room_name, 
-        r.grade_level
-    FROM Students s
-    LEFT JOIN Rooms r ON r.room_id = s.room_id
-    WHERE s.user_id = ?
-`;
+            SELECT s.student_id, s.first_name, s.last_name, s.year, s.room_id, s.enroll_year, r.room_name, r.grade_level
+            FROM Students s
+            LEFT JOIN Rooms r ON r.room_id = s.room_id
+            WHERE s.user_id = ?
+        `;
         const student = await new Promise((resolve, reject) => {
             db.get(sqlStudent, [userId], (err, row) => {
                 if (err) reject(err);
@@ -327,43 +322,26 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             return res.status(404).send('ไม่พบข้อมูลนักเรียนในระบบ');
         }
 
-        // --- ระบบ FILTER (แบบไดนามิก) ---
+        // ==========================================
+        // 2. ระบบ FILTER (ค้นหารายเดือน แบบอิสระ)
+        // ==========================================
         const today = new Date();
-        let currentAcademicYear = today.getFullYear();
+        const currentYear = today.getFullYear().toString(); // ค.ศ.
+        // ทำให้เดือนเป็น 2 หลักเสมอ เช่น '03', '12'
+        const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); 
 
-        // เช็กเดือนปัจจุบัน: ถ้าเป็น ม.ค. - เม.ย. (เดือน 0-3) ถือเป็นปีการศึกษาเก่า
-        if (today.getMonth() < 4) {
-            currentAcademicYear--;
-        }
+        // รับค่า ปี และ เดือน จาก Dropdown (ถ้าเปิดมาครั้งแรกให้โชว์เดือนปัจจุบัน)
+        const selectedYear = req.query.year || currentYear;
+        const selectedMonth = req.query.month || currentMonth;
 
-        // สร้างรายการปีการศึกษาทั้งหมดที่เลือกได้ (ดึงค่า enroll_year ถ้าไม่มีใช้ปีปัจจุบัน)
-        let enrollYear = student.enroll_year || currentAcademicYear;
-        if (enrollYear > 2500) {
-            enrollYear = enrollYear - 543;
-        }
-        const availableYears = [];
-        for (let y = enrollYear; y <= currentAcademicYear; y++) {
-            availableYears.push(y);
-        }
+        // แปลงเป็นช่วงวันที่ เช่น '2026-03-01' ถึง '2026-03-31'
+        const startDate = `${selectedYear}-${selectedMonth}-01`;
+        
+        // ทริค: หาวันสุดท้ายของเดือนนั้นๆ อัตโนมัติ (เผื่อกุมภาพันธ์มี 28 หรือ 29 วัน)
+        const lastDayOfMonth = new Date(selectedYear, parseInt(selectedMonth), 0).getDate();
+        const endDate = `${selectedYear}-${selectedMonth}-${lastDayOfMonth}`;
 
-        // กำหนดค่า Default หากเปิดหน้าเว็บครั้งแรก (เทอมปัจจุบัน)
-        const currentTerm = (today.getMonth() >= 4 && today.getMonth() <= 9) ? '1' : '2';
-
-        // รับค่าที่เลือกมาจาก Dropdown
-        const selectedTerm = req.query.term || currentTerm;
-        const selectedYear = req.query.year || currentAcademicYear.toString();
-
-        // แปลงเทอมเป็นช่วงวันที่ เพื่อเอาไป Query Database
-        let startDate, endDate;
-        if (selectedTerm === '1') {
-            startDate = `${selectedYear}-05-01`;
-            endDate = `${selectedYear}-10-31`;
-        } else {
-            startDate = `${selectedYear}-11-01`;
-            endDate = `${parseInt(selectedYear) + 1}-03-31`;
-        }
-
-        // 2. ดึงประวัติการเข้าเรียนเฉพาะช่วงวันที่ Filter ไว้
+        // 3. ดึงประวัติการเข้าเรียนเฉพาะในเดือนที่เลือก
         const sqlAttendance = `
             SELECT date, status 
             FROM Attendance 
@@ -373,13 +351,11 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         const attendanceHistory = await new Promise((resolve, reject) => {
             db.all(sqlAttendance, [student.student_id, startDate, endDate], (err, rows) => {
                 if (err) reject(err);
-                // ถ้าไม่มีข้อมูลเลย ให้ส่ง Array ว่าง [] กลับไป จะได้ไม่ Error ตอน forEach
                 else resolve(rows || []);
             });
         });
 
-        // 3. คำนวณยอดรวม (Summary)
-        // คราวนี้ attendanceHistory จะเป็น Array แล้ว ใช้ forEach ได้เลยครับ!
+        // 4. คำนวณยอดรวม (Summary) ประจำเดือน
         const summary = { present: 0, absent: 0, late: 0, personal_leave: 0 };
         attendanceHistory.forEach(record => {
             if (record.status === 'Present') summary.present++;
@@ -388,32 +364,36 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
             if (record.status === 'Personal Leave') summary.personal_leave++;
         });
 
-        // 4. เตรียมข้อมูลให้ Chart.js (แยกนับยอดรายเดือน)
+        // 5. เตรียมข้อมูลให้ Chart.js (โชว์กราฟรายวัน 1 ถึงวันสุดท้ายของเดือน)
         const chartData = { labels: [], present: [], late: [], absent: [], personal_leave: [] };
-        const months = selectedTerm === '1'
-            ? [{ m: 5, l: 'May' }, { m: 6, l: 'Jun' }, { m: 7, l: 'Jul' }, { m: 8, l: 'Aug' }, { m: 9, l: 'Sep' }, { m: 10, l: 'Oct' }]
-            : [{ m: 11, l: 'Nov' }, { m: 12, l: 'Dec' }, { m: 1, l: 'Jan' }, { m: 2, l: 'Feb' }, { m: 3, l: 'Mar' }];
+        
+        for (let d = 1; d <= lastDayOfMonth; d++) {
+            chartData.labels.push(d.toString()); // แกน X เป็นวันที่ 1, 2, 3...
+            
+            // หาวันที่ตรงกับลูป (เช่น '2026-03-05')
+            const dateStr = `${selectedYear}-${selectedMonth}-${d.toString().padStart(2, '0')}`;
+            const record = attendanceHistory.find(r => r.date === dateStr);
 
-        months.forEach(month => {
-            chartData.labels.push(month.l);
-            const recordsInMonth = attendanceHistory.filter(r => {
-                const rMonth = new Date(r.date).getMonth() + 1;
-                return rMonth === month.m;
-            });
+            // ถ้าวันนั้นมาเรียน ใส่ 1 ถ้าไม่มา ใส่ 0 (เพื่อตีกราฟแท่งสูงระดับ 1)
+            chartData.present.push(record && record.status === 'Present' ? 1 : 0);
+            chartData.late.push(record && record.status === 'Late' ? 1 : 0);
+            chartData.absent.push(record && record.status === 'Absent' ? 1 : 0);
+            chartData.personal_leave.push(record && record.status === 'Personal Leave' ? 1 : 0);
+        }
 
-            chartData.present.push(recordsInMonth.filter(r => r.status === 'Present').length);
-            chartData.late.push(recordsInMonth.filter(r => r.status === 'Late').length);
-            chartData.absent.push(recordsInMonth.filter(r => r.status === 'Absent').length);
-            chartData.personal_leave.push(recordsInMonth.filter(r => r.status === 'Personal Leave').length);
-        });
+        // สร้างรายการปีให้ Dropdown (ย้อนหลัง 5 ปี)
+        const availableYears = [];
+        for (let y = parseInt(currentYear) - 5; y <= parseInt(currentYear); y++) {
+            availableYears.push(y);
+        }
 
-        // 5. ส่งข้อมูลทั้งหมดไปที่ EJS
+        // 6. ส่งข้อมูลทั้งหมดไปที่ EJS
         res.render('attendance', {
             user: req.user,
             student: student,
             attendance: attendanceHistory,
             summary: summary,
-            selectedTerm: selectedTerm,
+            selectedMonth: selectedMonth, 
             selectedYear: selectedYear,
             availableYears: availableYears,
             chartData: JSON.stringify(chartData)
@@ -421,13 +401,9 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
 
     } catch (error) {
         console.error("Database Error:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลประวัติการเข้าเรียน");
     }
 });
-
-
-
-
 
 
 app.get('/student/attendance_history', (req, res) => {

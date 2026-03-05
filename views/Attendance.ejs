@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance</title>
+    <title>Attendance History</title>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/Attendance.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -18,7 +18,7 @@
                 <img src="<%= user.profile_picture ? 'data:image/jpeg;base64,' + user.profile_picture.toString('base64') : '/images/icons/User.svg' %>" alt="Profile" class="avatar">
                 <div class="profile-text">
                     <h2><%= student.first_name %> <%= student.last_name %></h2>
-                    <p class="text-muted">ชั้น ม.<%= student.grade_level %> ห้อง <%= student.room_name %> | เลขประจำตัว: <%= student.student_id %></p>
+                    <p class="text-muted">ชั้น ม.<%= student.grade_level %> ห้อง <%= student.room_name %> | เลขประจำตัวนักเรียน: <%= student.student_id %></p>
                 </div>
             </div>
         </div>
@@ -28,28 +28,28 @@
                 <div class="card-icon">✅</div>
                 <div class="card-details">
                     <h3>มาเรียน</h3>
-                    <p class="count"><%= summary.present %></p>
+                    <p class="count text-present"><%= summary.present %></p>
                 </div>
             </div>
             <div class="summary-card card">
                 <div class="card-icon">⏱️</div>
                 <div class="card-details">
                     <h3>สาย</h3>
-                    <p class="count"><%= summary.late %></p>
+                    <p class="count text-late"><%= summary.late %></p>
                 </div>
             </div>
             <div class="summary-card card">
                 <div class="card-icon">❌</div>
                 <div class="card-details">
                     <h3>ขาด</h3>
-                    <p class="count"><%= summary.absent %></p>
+                    <p class="count text-absent"><%= summary.absent %></p>
                 </div>
             </div>
             <div class="summary-card card">
                 <div class="card-icon">😷</div>
                 <div class="card-details">
                     <h3>ลากิจ</h3>
-                    <p class="count"><%= summary.personal_leave %></p>
+                    <p class="count text-leave"><%= summary.personal_leave %></p>
                 </div>
             </div>
         </div>
@@ -57,10 +57,10 @@
         <div class="chart-section card">
             <div class="chart-header">
                 <div class="legend">
-                    <span class="legend-item"><span class="dot dot-green"></span> Present</span>
-                    <span class="legend-item"><span class="dot dot-yellow"></span> Late</span>
-                    <span class="legend-item"><span class="dot dot-red"></span> Absent</span>
-                    <span class="legend-item"><span class="dot dot-blue"></span> Leave</span>
+                    <span class="legend-item"><span class="dot dot-green"></span> มาเรียน (Present)</span>
+                    <span class="legend-item"><span class="dot dot-yellow"></span> สาย (Late)</span>
+                    <span class="legend-item"><span class="dot dot-red"></span> ขาด (Absent)</span>
+                    <span class="legend-item"><span class="dot dot-blue"></span> ลากิจ (Leave)</span>
                 </div>
                 
                 <div class="filter-group">
@@ -103,9 +103,9 @@
                 <table class="history-table">
                     <thead>
                         <tr>
-                            <th>วันที่</th>
-                            <th>วันในสัปดาห์</th>
-                            <th>สถานะ</th>
+                            <th style="text-align: left;">วันที่</th>
+                            <th style="text-align: left;">วันในสัปดาห์</th>
+                            <th style="text-align: center;">สถานะ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,7 +118,7 @@
                                 <tr>
                                     <td><%= dateString %></td>
                                     <td><%= dayName %></td>
-                                    <td>
+                                    <td class="text-center">
                                         <% if(record.status === 'Present') { %> 
                                             <div class="status-wrap bg-present"><span class="dot dot-green"></span> มาเรียน</div>
                                         <% } else if(record.status === 'Late') { %> 
@@ -133,8 +133,8 @@
                             <% }); %>
                         <% } else { %>
                             <tr>
-                                <td colspan="3" class="text-center" style="padding: 30px;">
-                                    <div style="font-size: 2rem; margin-bottom: 10px;">📅</div>
+                                <td colspan="3" class="text-center empty-state" style="padding: 40px;">
+                                    <div style="font-size: 3rem; margin-bottom: 10px;">📅</div>
                                     ไม่มีประวัติการเช็คชื่อในเดือนนี้
                                 </td>
                             </tr>
@@ -174,7 +174,7 @@
                     y: { 
                         stacked: true, 
                         beginAtZero: true, 
-                        max: 1, 
+                        max: 1, // เพราะ 1 วันมาได้แค่ 1 ครั้ง
                         ticks: { stepSize: 1, precision: 0 } 
                     }
                 },
@@ -183,5 +183,4 @@
         });
     </script>
 </body>
-</html>
 </html>
