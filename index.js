@@ -194,7 +194,7 @@ app.get('/admin/home', async (req, res) => {
             getCount("SELECT COUNT(*) as count FROM Students"),
             getCount("SELECT COUNT(*) as count FROM Teacher"),
             getCount("SELECT COUNT(*) as count FROM Subjects"),
-            getCount("SELECT COUNT(*) as count FROM Rooms WHERE status = 'In-used'")
+            getCount("SELECT COUNT(*) as count FROM Rooms WHERE status = 'Active'")
         ]);
 
         res.render('Home-Admin', {
