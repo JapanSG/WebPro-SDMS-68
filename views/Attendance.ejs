@@ -148,7 +148,9 @@
     <script>
         function applyFilters() {
             const month = document.getElementById('filter-month').value;
+            const month = document.getElementById('filter-month').value;
             const year = document.getElementById('filter-year').value;
+            window.location.href = `/student/attendance?month=${month}&year=${year}`;
             window.location.href = `/student/attendance?month=${month}&year=${year}`;
         }
 
@@ -174,6 +176,8 @@
                     y: { 
                         stacked: true, 
                         beginAtZero: true, 
+                        max: 1, // เพราะ 1 วันมาได้แค่ 1 ครั้ง
+                        ticks: { stepSize: 1, precision: 0 } 
                         max: 1, // เพราะ 1 วันมาได้แค่ 1 ครั้ง
                         ticks: { stepSize: 1, precision: 0 } 
                     }

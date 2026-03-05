@@ -29,6 +29,7 @@ let db = new sqlite3.Database('school.db', (err) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const initializePassport = require('./passport-config');
+const { create } = require("domain");
 initializePassport(passport, db);
 
 app.use(express.static('public'));
@@ -195,6 +196,7 @@ app.get('/admin/home', async (req, res) => {
             getCount("SELECT COUNT(*) as count FROM Teacher"),
             getCount("SELECT COUNT(*) as count FROM Subjects"),
             getCount("SELECT COUNT(*) as count FROM Rooms WHERE status = 'Active'")
+            getCount("SELECT COUNT(*) as count FROM Rooms WHERE status = 'Active'")
         ]);
 
         res.render('Home-Admin', {
@@ -325,11 +327,20 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         // ==========================================
         // 2. ระบบ FILTER (ค้นหารายเดือน แบบอิสระ)
         // ==========================================
+        // ==========================================
+        // 2. ระบบ FILTER (ค้นหารายเดือน แบบอิสระ)
+        // ==========================================
         const today = new Date();
         const currentYear = today.getFullYear().toString(); // ค.ศ.
         // ทำให้เดือนเป็น 2 หลักเสมอ เช่น '03', '12'
         const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); 
+        const currentYear = today.getFullYear().toString(); // ค.ศ.
+        // ทำให้เดือนเป็น 2 หลักเสมอ เช่น '03', '12'
+        const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); 
 
+        // รับค่า ปี และ เดือน จาก Dropdown (ถ้าเปิดมาครั้งแรกให้โชว์เดือนปัจจุบัน)
+        const selectedYear = req.query.year || currentYear;
+        const selectedMonth = req.query.month || currentMonth;
         // รับค่า ปี และ เดือน จาก Dropdown (ถ้าเปิดมาครั้งแรกให้โชว์เดือนปัจจุบัน)
         const selectedYear = req.query.year || currentYear;
         const selectedMonth = req.query.month || currentMonth;
@@ -388,11 +399,13 @@ app.get('/student/attendance', checkAuthenticated, checkRole('student'), async (
         }
 
         // 6. ส่งข้อมูลทั้งหมดไปที่ EJS
+        // 6. ส่งข้อมูลทั้งหมดไปที่ EJS
         res.render('attendance', {
             user: req.user,
             student: student,
             attendance: attendanceHistory,
             summary: summary,
+            selectedMonth: selectedMonth, 
             selectedMonth: selectedMonth, 
             selectedYear: selectedYear,
             availableYears: availableYears,
@@ -962,7 +975,7 @@ app.get('/admin/subject/delete/:id', checkAuthenticated, checkRole('admin'), (re
 app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (req, res) => {
     const userId = req.user.user_id;
     const targetSemester = 1;
-    const targetYear = 2568;
+    const targetYear = 2569;
 
 
     const studentSql = `
@@ -1003,7 +1016,7 @@ app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (re
             }
 
             // 3. จัดกลุ่มข้อมูลลงใน Array แบบ 2 มิติ ให้หน้าเว็บเอาไปวนลูปง่ายๆ
-            const timetable = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
+            const timetable = { 'วันจันทร์': {}, 'วันอังคาร': {}, 'วันพุธ': {}, 'วันพฤหัสบดี': {}, 'วันศุกร์': {} };
 
             schedules.forEach(item => {
                 if (timetable[item.day]) {
@@ -1012,6 +1025,7 @@ app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (re
             });
 
             // 4. ส่งไปที่ไฟล์ EJS (สังเกตว่าส่ง roomName ไปแทน roomId แล้ว)
+            console.log(schedules);
             res.render('Schedule', {
                 user: req.user,
                 timetable: timetable,
@@ -1028,8 +1042,6 @@ app.get('/student/class-schedule', checkAuthenticated, checkRole('student'), (re
 
 
 // ==========================================
-
-
 app.put('/admin/exam-schedule/editDate', (req, res) => {
     console.log(req.body);
     const sql = 'UPDATE Exam_Schedule SET date = ? WHERE exam_id = ?';
@@ -1111,7 +1123,8 @@ app.get('/teacher/grade', (req, res) => {
                                 WHERE Rooms.grade_level = (SELECT grade_level 
                                                             FROM Subjects
                                                             WHERE subject_id = ${selectedSubject}
-                                                            );`
+                                                            )
+                                ORDER BY room_id, student_id;`
         db.all(getStudentSQL, (err, students) => {
             if (err) {
                 console.error(err.message);
@@ -1136,7 +1149,7 @@ app.get('/teacher/grade', (req, res) => {
 });
 
 function updateGrade(student_id, value, subject, res) {
-    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year) AND semester = (SELECT semester FROM Students WHERE student_id = ${student_id});`
+    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year);`
     value = value.trim();
     db.get(checkSQL, (err, result) => {
         if (err) {
@@ -1157,7 +1170,7 @@ function updateGrade(student_id, value, subject, res) {
             });
         }
         else {
-            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, semester, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT semester FROM Students WHERE student_id = ${student_id}), (SELECT max(year) FROM Year), ${subject}, ${value})`;
+            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT max(year) FROM Year), ${subject}, ${value})`;
             db.run(sql, (err) => {
                 if (err) {
                     console.error(err.message);
@@ -1179,6 +1192,9 @@ app.put("/teacher/grade/submit", (req, res) => {
 });
 
 // Transcript Page
+// =====================================================================
+// [GET] หน้าเว็บสำหรับดูผลการเรียน (Transcript) ของนักเรียน
+// =====================================================================
 app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), async (req, res) => {
     try {
         const userId = req.user.user_id;
@@ -1211,6 +1227,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
         // สร้างรายการปีให้เลือก (ย้อนหลัง 5 ปี เดินหน้า 1 ปี)
         const availableYears = [];
         for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+        for (let y = currentYear - 5; y <= currentYear + 1; y++) {
             availableYears.push(y);
         }
 
@@ -1232,6 +1249,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
             // ในฐานข้อมูลเป็น พ.ศ. เลยเอา selectedYear (ค.ศ.) มา + 543
             db.all(sqlGrades, [student.student_id, parseInt(selectedYear) + 543, selectedTerm], (err, rows) => {
                 if (err) reject(err);
+                else resolve(rows || []);
                 else resolve(rows || []);
             });
         });
@@ -1266,7 +1284,7 @@ app.get('/student/transcript-grade', checkAuthenticated, checkRole('student'), a
 
     } catch (error) {
         console.error("Database Error:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลผลการเรียน");
     }
 });
 
@@ -1919,4 +1937,5 @@ app.listen(port, () => {
     //     console.log(res);
     // })
     console.log("Server started.");
-});
+    
+}); 
