@@ -1160,7 +1160,7 @@ app.get('/teacher/grade', (req, res) => {
 });
 
 function updateGrade(student_id, value, subject, res) {
-    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year);`
+    const checkSQL = `SELECT * FROM Grade_Entries WHERE student_id = ${student_id} AND subject_id = ${subject} AND year = (SELECT max(year) FROM Year) AND semester = (SELECT semester FROM Students WHERE student_id = ${student_id});`
     value = value.trim();
     db.get(checkSQL, (err, result) => {
         if (err) {
