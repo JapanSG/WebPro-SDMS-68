@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Student</title>
+    <title>Add New Teacher</title>
     <link rel="stylesheet" href="/css/add_stu.css">
     <link rel="stylesheet" href="/css/global.css">
 </head>
@@ -56,8 +56,6 @@
 
                         <label for="room_id">ห้องเรียน</label>
                         <select name="room_id">
-                            <option value="" selected>-- ไม่ระบุห้องเรียน / ไม่มีห้องประจำชั้น --</option>
-
                             <% rooms.forEach((room)=> { %>
                                 <option value="<%= room.room_id %>">
                                     <%= room.room_name %>
