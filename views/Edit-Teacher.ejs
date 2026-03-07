@@ -56,7 +56,6 @@
 
                     <label>ห้องเรียน</label>
                     <select name="room_id">
-                            <option value="">-- ไม่ระบุห้องเรียน / ไม่มีห้องประจำชั้น --</option>
                              <% rooms.forEach((room)=> { %>
                                 <option value="<%= room.room_id %>" <%=data.room_id==room.room_id ? 'selected' : '' %>>
                                     <%= room.room_name %>
