@@ -163,7 +163,7 @@ app.get('/teacher/home', function (req, res) {
     db.get(sql, [userId], (err, teacherData) => {
         if (err) {
             console.error(err.message);
-            return res.render('Home-Teacher', { user: req.user, student: {} });
+            return res.render('Home-Teacher', { user: req.user, teacher: {} });
         }
 
         if (teacherData && teacherData.profile_picture) {
