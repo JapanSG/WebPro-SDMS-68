@@ -46,6 +46,7 @@ function createAddExamPopup() {
     let layer = document.getElementById("popupLayer");
     layer.style.display = "flex";
     layer.appendChild(popup);
+    document.body.style.overflow = 'hidden';
 }
 
 function closeAddExamPopup() {
@@ -55,6 +56,7 @@ function closeAddExamPopup() {
     }
     let layer = document.getElementById("popupLayer");
     layer.style.display = "none";
+    document.body.style.overflow = '';
 }
 
 function addExamHandler() {
@@ -175,6 +177,7 @@ function createAddEntryHandlerPopup(event) {
         let layer = document.getElementById("popupLayer");
         layer.style.display = "flex";
         layer.appendChild(popup);
+        document.body.style.overflow = 'hidden';
     }
 
     fetch("/admin/exam-schedule/get-subjects?grade=" + event.target.value)
@@ -194,6 +197,7 @@ function closeAddEntryPopup() {
     }
     let layer = document.getElementById("popupLayer");
     layer.style.display = "none";
+    document.body.style.overflow = '';
 }
 
 function addEntryHandler(exam_id) {
@@ -303,6 +307,7 @@ function createEditEntryHandlerPopup(event) {
         let layer = document.getElementById("popupLayer");
         layer.style.display = "flex";
         layer.appendChild(popup);
+        document.body.style.overflow = 'hidden';
     }
     fetch("/admin/exam-schedule/get-subjects-entry?entry_id=" + event.target.parentNode.value)
     .then(response => response.json())
@@ -321,6 +326,7 @@ function closeEditEntryPopup() {
     }
     let layer = document.getElementById("popupLayer");
     layer.style.display = "none";
+    document.body.style.overflow = '';
 }
 
 function editEntryHandler(entry_id) {
@@ -380,6 +386,7 @@ function createDeleteEntryWarningPopup(event) {
     let layer = document.getElementById("popupLayer");
     layer.style.display = "flex";
     layer.appendChild(popup);
+    document.body.style.overflow = 'hidden';
 }
 
 function closeDeleteEntryWarningPopup() {
@@ -389,6 +396,7 @@ function closeDeleteEntryWarningPopup() {
     }
     let layer = document.getElementById("popupLayer");
     layer.style.display = "none";
+    document.body.style.overflow = '';
 }
 
 function deleteEntryHandler(entry_id) {
@@ -438,6 +446,7 @@ function createDeleteExamWarningPopup(event) {
     let layer = document.getElementById("popupLayer");
     layer.style.display = "flex";
     layer.appendChild(popup);
+    document.body.style.overflow = 'hidden';
 }
 
 function closeDeleteExamWarningPopup() {
@@ -447,6 +456,7 @@ function closeDeleteExamWarningPopup() {
     }
     let layer = document.getElementById("popupLayer");
     layer.style.display = "none";
+    document.body.style.overflow = '';
 }
 
 function deleteExamHandler(exam_id) {
@@ -494,6 +504,7 @@ function createDeleteAllWarningPopup() {
     let layer = document.getElementById("popupLayer");
     layer.style.display = "flex";
     layer.appendChild(popup);
+    document.body.style.overflow = 'hidden';
 }
 
 function closeDeleteAllWarningPopup() {
@@ -503,6 +514,7 @@ function closeDeleteAllWarningPopup() {
     }
     let layer = document.getElementById("popupLayer");
     layer.style.display = "none";
+    document.body.style.overflow = '';
 }
 
 function deleteAllHandler() {
@@ -558,6 +570,7 @@ function createEditDatePopup(event) {
     let layer = document.getElementById("popupLayer");
     layer.style.display = "flex";
     layer.appendChild(popup);
+    document.body.style.overflow = 'hidden';
 }
 
 function closeEditDatePopup() {
@@ -567,6 +580,7 @@ function closeEditDatePopup() {
     }
     let layer = document.getElementById("popupLayer");
     layer.style.display = "none";
+    document.body.style.overflow = '';
 }
 
 function editDateHandler(exam_id) {
