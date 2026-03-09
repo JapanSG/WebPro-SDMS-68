@@ -1,7 +1,7 @@
 <% let dateData = exam.date.split('-'); %>
 <% let monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]; %>
 <tr>
-    <th colspan="3">วันที่ <%= dateData[2] %> <%= monthNames[parseInt(dateData[1]) - 1] %> ปี <%= dateData[0] %></th>
+    <th colspan="3">วันที่ <%= dateData[2] %> <%= monthNames[parseInt(dateData[1]) - 1] %> ปี <%= parseInt(dateData[0]) + 543 %></th>
 </tr>
 <tr>
     <th>รายวิชา</th>

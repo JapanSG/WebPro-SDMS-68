@@ -700,23 +700,11 @@ app.get('/admin/exam-schedule', (req, res) => {
     });
 });
 
-app.get('/admin/exam-schedule/view', (req, res) => {
-    console.log(req.query);
-    const sql = 'SELECT * FROM Exam_Schedule WHERE year = ? AND semester = ? AND grade_level = ? AND type = ?';
-    db.all(sql, [req.query.year, req.query.semester, req.query.grade, req.query.type], (err, result) => {
-        if (err) {
-            console.error(err.message);
-            res.status(500).send("Error retrieving exam schedule");
-            return;
-        }
-        console.log(result);
-        res.render('View-Exam', { exam: result });
-    });
-});
-
 app.post('/admin/exam-schedule/addExam', (req, res) => {
     console.log("", req.body);
-    db.run('INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)', [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade], function (err) {
+    const sql = 'INSERT INTO Exam_Schedule (exam_id, date, semester, year, type, grade_level) VALUES (NULL, ?, ?, ?, ?, ?)';
+    const param = [req.body.date, req.body.semester, req.body.year, req.body.type, req.body.grade];
+    db.run(sql , param , function (err) {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error adding exam");
@@ -1053,7 +1041,7 @@ app.put('/admin/exam-schedule/editDate', (req, res) => {
 // Student view exam schedule
 app.get('/student/exam-schedule', (req, res) => {
     const sqlGetStudent = 'SELECT *  FROM Users JOIN Students USING(user_id) JOIN Rooms USING(room_id) WHERE user_id = ?';
-    const sqlGetExamSchedule = 'SELECT * FROM Exam_Schedule WHERE grade_level = ? AND semester = ? AND year = ? AND type = ?';
+    const sqlGetExamSchedule = 'SELECT * FROM Exam_Schedule WHERE grade_level = ? AND semester = ? AND year = ? AND type = ? ORDER BY date';
     db.get(sqlGetStudent, [req.user.user_id], (err, student) => {
         if (err) {
             console.error(err.message);
@@ -1085,7 +1073,6 @@ app.get('/student/exam-schedule', (req, res) => {
                 result.forEach(entry => {
                     entries[`${entry.exam_id}`].push(entry);
                 });
-                // console.log(entries);
                 console.log(student);
                 res.render('View-Exam.ejs', { examSchedule: examSchedule, entries: entries, student: student, type: type });
             });
