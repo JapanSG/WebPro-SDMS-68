@@ -1914,7 +1914,6 @@ app.listen(port, () => {
     // db.get("PRAGMA foreign_keys = ON;", (err, res) => {
     //     console.log(res);
     // })
-    
     console.log("Server started.");
     
 }); 
