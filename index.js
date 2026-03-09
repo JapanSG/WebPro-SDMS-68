@@ -1150,7 +1150,7 @@ function updateGrade(student_id, value, subject, res) {
             });
         }
         else {
-            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT max(year) FROM Year), ${subject}, ${value})`;
+            let sql = `INSERT INTO Grade_Entries (grade_id, student_id, semester, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT semester FROM Students WHERE student_id = ${student_id}),(SELECT max(year) FROM Year), ${subject}, ${value})`;
             db.run(sql, (err) => {
                 if (err) {
                     console.error(err.message);
