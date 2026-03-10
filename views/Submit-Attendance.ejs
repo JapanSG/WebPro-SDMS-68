@@ -116,6 +116,29 @@
     </div>
 
     <script>
+        document.getElementById('searchInput').addEventListener('input', function() {
+            // 1. รับข้อความที่พิมพ์ ค้นหา (แปลงเป็นพิมพ์เล็กเพื่อไม่ให้ติดปัญหาตัวพิมพ์เล็ก/ใหญ่)
+            const searchValue = this.value.toLowerCase();
+            
+            // 2. ดึงแถวข้อมูล (tr) ทั้งหมดที่อยู่ใน tbody ของตาราง
+            const tableRows = document.querySelectorAll('.attendance-table tbody tr');
+
+            tableRows.forEach(row => {
+                // ข้ามการค้นหาแถวที่เป็นข้อความแจ้งเตือน "กรุณาเลือกระดับชั้น..."
+                if (row.querySelector('td[colspan="4"]')) return;
+
+                // 3. ดึงข้อความจากคอลัมน์รหัสนักเรียน (ช่อง 1) และ ชื่อ (ช่อง 2)
+                const studentId = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
+                const fullName = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+
+                // 4. ถ้าข้อความที่พิมพ์ ตรงกับรหัส หรือ ตรงกับชื่อ ให้แสดงแถวนั้นไว้ ถ้าไม่ตรงให้ซ่อน
+                if (studentId.includes(searchValue) || fullName.includes(searchValue)) {
+                    row.style.display = ''; // แสดงแถว
+                } else {
+                    row.style.display = 'none'; // ซ่อนแถว
+                }
+            });
+        });
         // ฟังก์ชันช่วยกดปุ่ม "มาเรียน" ให้ทุกคน
         function markAllPresent() {
             const presentRadios = document.querySelectorAll('input[type="radio"][value="Present"]');
