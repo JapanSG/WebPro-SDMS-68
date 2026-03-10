@@ -23,11 +23,13 @@
                 <option value="ปลายภาค" <% if(type === 'ปลายภาค') { %>selected<% } %>>ปลายภาค</option>
             </select>
         </div>
-        <table>
-            <% examSchedule.forEach((exam) => { %>
-                <%- include('Exam-Table', { exam: exam, entries: entries[`${exam.exam_id}`]}) %>
-            <% }) %>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <% examSchedule.forEach((exam) => { %>
+                    <%- include('Exam-Table', { exam: exam, entries: entries[`${exam.exam_id}`]}) %>
+                <% }) %>
+            </table>
+        </div>
     </div>
     <script>
         document.querySelector('select').addEventListener('change', function(event) {
