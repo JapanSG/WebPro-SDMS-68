@@ -20,6 +20,10 @@ body {
 
 }
 
+input, textarea, option , button{
+    font-family: "Noto Sans Thai", sans-serif;
+}
+
 
 /* ========== HEADER LAYOUT (ส่วนหัวเว็บที่ติดด้านบน) ========== */
 header {
