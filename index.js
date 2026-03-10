@@ -1112,7 +1112,7 @@ app.get('/teacher/grade', (req, res) => {
                 return;
             }
             let grades = {};
-            const getGradesSQL = `SELECT student_id, grade FROM Grade_Entries JOIN Subjects USING (subject_id) WHERE subject_id = ${selectedSubject} AND year = (SELECT max(year) FROM Year);`;
+            const getGradesSQL = `SELECT student_id, grade, Grade_Entries.semester FROM Grade_Entries JOIN Subjects USING (subject_id) JOIN Students USING (student_id) WHERE subject_id = ${selectedSubject} AND Grade_Entries.semester = Students.semester;`;
             db.all(getGradesSQL, (err, result) => {
                 if (err) {
                     console.error(err.message);
@@ -1122,6 +1122,8 @@ app.get('/teacher/grade', (req, res) => {
                 result.forEach(grade => {
                     grades[`${grade.student_id}`] = grade;
                 });
+                console.log(result);
+                console.log(grades);
                 res.render('Submit-Grades.ejs', { subjects: subjects, students: students, selected: selectedSubject, grades: grades });
             });
         });
@@ -1141,6 +1143,7 @@ function updateGrade(student_id, value, subject, res) {
             return;
         }
         if (result) {
+            console.log(`UPDATE Grade_Entries SET grade = ${value} WHERE grade_id = ${result.grade_id};`);
             db.run(`UPDATE Grade_Entries SET grade = ${value} WHERE grade_id = ${result.grade_id};`, (err) => {
                 if (err) {
                     console.error(err.message);
@@ -1151,6 +1154,7 @@ function updateGrade(student_id, value, subject, res) {
         }
         else {
             let sql = `INSERT INTO Grade_Entries (grade_id, student_id, semester, year, subject_id, grade) VALUES (NULL, ${student_id}, (SELECT semester FROM Students WHERE student_id = ${student_id}),(SELECT max(year) FROM Year), ${subject}, ${value})`;
+            console.log(sql);
             db.run(sql, (err) => {
                 if (err) {
                     console.error(err.message);
